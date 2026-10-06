@@ -1,0 +1,9 @@
+# Bỏ qua thư mục biên dịch bytecode của Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Bỏ qua môi trường ảo (nếu có)
+venv/
+.venv/
+env/
