@@ -1,0 +1,18 @@
+.navbar-container {
+  position: absolute;
+  top: 70px;
+  right: 20px;
+
+  width: 280px;
+
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+
+  display: none;
+  z-index: 1000;
+}
+
+.navbar-container.show {
+  display: block;
+}

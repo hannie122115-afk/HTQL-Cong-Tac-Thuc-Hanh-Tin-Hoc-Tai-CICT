@@ -19,7 +19,7 @@ def login(request: Request, username: str = Form(""), password: str = Form("")):
 
     cursor.execute(
         """
-        SELECT MaTaiKhoan, TenTaiKhoan, MatKhau, VaiTro
+        SELECT MaTaiKhoan, TenTaiKhoan, MatKhau, VaiTro, AnhDaiDien
         FROM TAI_KHOAN_DANG_NHAP
         WHERE TenTaiKhoan = %s
     """,
@@ -52,8 +52,9 @@ def login(request: Request, username: str = Form(""), password: str = Form("")):
         )
 
     request.session["accountId"] = account[0]
-    request.session["username"] = account[1]
+    request.session["accountName"] = account[1]
     request.session["role"] = account[3]
+    request.session["avt"] = account[4]
 
     role = account[3]
     if role == 0:

@@ -3,8 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Trang chủ | Giảng viên</title>
-
+    <title>Cấu hình | Quản trị viên</title>
     <link rel="stylesheet" href="/static/css/Nhap.css" />
     <link
       rel="stylesheet"
@@ -30,7 +29,9 @@
           <i class="fa-solid fa-bell"></i>
         </div>
         <div class="header-user" id="headerUser">
-          <div class="header-avt">hinh cho nay</div>
+          <div class="header-avt">
+            <img src="{{avt}}" alt="" />
+          </div>
           <div class="navbar-arrow">
             <i class="fa-solid fa-caret-down"></i>
           </div>
@@ -41,10 +42,12 @@
     <div class="navbar-container" id="navbarContainer">
       <div class="navbar-user-container">
         <a href="">
-          <div class="navbar-user-avt">{{avt}}</div>
+          <div class="navbar-user-avt">
+            <img src="{{avt}}" alt="" />
+          </div>
           <div class="navbar-user-name">
-            <p>Ten</p>
-            <p>Vai tro</p>
+            <p>{{ user[1] }}</p>
+            <p>Quản trị viên</p>
           </div>
         </a>
       </div>
@@ -59,6 +62,19 @@
             </div>
             <div class="navbar-item-arrow">
               <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Phần mềm</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-download"></i>
             </div>
           </a>
         </div>
@@ -153,44 +169,90 @@
 
     <!-- body -->
 
-    <div class="grid-dashboard">
-      <a href="">
-        <div class="dashboard-item-icon">
-          <i class="fa-solid fa-display"></i>
+    <div class="config-container">
+      <div class="direction">
+        <a href="/admin">Trang chủ</a>
+        <i class="fa-solid fa-angle-right"></i>
+        <a href="/admin/config">Cấu hình máy</a>
+      </div>
+
+      <!-- search -->
+      <div class="config-box">
+        <div class="config-search-box">
+          <span><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input type="text" name="" id="" />
         </div>
-        <div class="dashboard-item-title">Cấu hình máy</div>
-      </a>
-      <a href="">
-        <div class="dashboard-item-icon">
-          <i class="fa-solid fa-user-gear"></i>
+        <div class="config-add-act">
+          <i class="fa-solid fa-plus"></i>
+          Thêm cấu hình
         </div>
-        <div class="dashboard-item-title">Tài khoản</div>
-      </a>
-      <a href="">
-        <div class="dashboard-item-icon">
-          <i class="fa-solid fa-users"></i>
+      </div>
+
+      <!-- config-list -->
+      <div class="config-table">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Tên cấu hình</th>
+              <th>CPU</th>
+              <th>RAM</th>
+              <th>Ổ cứng</th>
+              <th>Card màn hình</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% set start_index = (page - 1) * 5 %} {%for config in configs%}
+            <tr>
+              <td>{{ start_index + loop.index }}</td>
+              <td>{{ config[1] }}</td>
+              <td>{{ config[2] }}</td>
+              <td>{{ config[3] }}</td>
+              <td>{{ config[4] }}</td>
+              <td>{{ config[5] }}</td>
+              <td>
+                <div class="see-detail-act">
+                  <i class="fa-solid fa-eye"></i>
+                  Xem chi tiết
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- config-page -->
+      <div class="config-page">
+        {% set page_number = (page - 1) * 5 %}
+        <span
+          >Hiển thị {{ page_number + 1 }} - {{ page_number + 5 }} của tổng {{
+          amount }} cấu hình</span
+        >
+        <div class="pagination">
+          <div class="config-previous-page">
+            {% if (page - 1) > 0 %}
+            <a href="/admin/config?page={{ page - 1 }}"
+              ><i class="fa-solid fa-chevron-left"></i
+            ></a>
+            {% else %}
+            <span><i class="fa-solid fa-chevron-left"></i></span>
+            {% endif %}
+          </div>
+          <div class="config-number-page">{{ page }}</div>
+          {% if amount > (page * 5) %}
+          <div class="config-next-page">
+            <a href="/admin/config?page={{ page + 1 }}"
+              ><i class="fa-solid fa-chevron-right"></i
+            ></a>
+            {% else %}
+            <span><i class="fa-solid fa-chevron-right"></i></span>
+            {% endif %}
+          </div>
         </div>
-        <div class="dashboard-item-title">Cán bộ</div>
-      </a>
-      <a href="">
-        <div class="dashboard-item-icon">
-          <i class="fa-solid fa-chalkboard-user"></i>
-        </div>
-        <div class="dashboard-item-title">Giảng viên</div>
-      </a>
-      <a href="">
-        <div class="dashboard-item-icon">
-          <i class="fa-solid fa-file-lines"></i>
-        </div>
-        <div class="dashboard-item-title">Duyệt yêu cầu</div>
-      </a>
-      <a href="">
-        <div class="dashboard-item-icon">
-          <i class="fa-regular fa-calendar-days"></i>
-        </div>
-        <div class="dashboard-item-title">Lịch thực hành</div>
-      </a>
+      </div>
     </div>
-    <script src="/static/js/auth/navbar.js"></script>
   </body>
 </html>
