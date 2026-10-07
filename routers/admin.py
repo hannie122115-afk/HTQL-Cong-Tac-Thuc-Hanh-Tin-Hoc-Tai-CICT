@@ -47,7 +47,7 @@ def show_admin(request: Request):
 
 
 # Cau hinh may
-def get_config(per_page, offset):
+def get_config(per_page, offset, keyword):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -55,9 +55,19 @@ def get_config(per_page, offset):
         """
             SELECT *
             FROM CAU_HINH
+            WHERE 
+                Cpu LIKE %s
+                OR Ram LIKE %s
+                OR OCung LIKE %s
             LIMIT %s OFFSET %s
         """,
-        (per_page, offset),
+        (
+            f"%{keyword}%",
+            f"%{keyword}%",
+            f"%{keyword}%",
+            per_page,
+            offset,
+        ),
     )
 
     configs = cursor.fetchall()
@@ -68,14 +78,25 @@ def get_config(per_page, offset):
     return configs
 
 
-def get_sum_config():
+def get_sum_config(keyword):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
             SELECT COUNT(MaCauHinh)
             FROM CAU_HINH
-        """)
+            WHERE 
+                Cpu LIKE %s
+                OR Ram LIKE %s
+                OR OCung LIKE %s
+        """,
+        (
+            f"%{keyword}%",
+            f"%{keyword}%",
+            f"%{keyword}%",
+        ),
+    )
 
     config = cursor.fetchone()[0]
 
@@ -86,7 +107,7 @@ def get_sum_config():
 
 
 @router.get("/admin/config")
-def show_admin_config(request: Request, page: int = 1):
+def show_admin_config(request: Request, page: int = 1, keyword: str = ""):
     role = request.session.get("role")
     if role != 0:
         return RedirectResponse(url="/login", status_code=303)
@@ -96,8 +117,8 @@ def show_admin_config(request: Request, page: int = 1):
 
     per_page = 5  # moi bang hien 5 dong
     offset = (page - 1) * per_page
-    configs = get_config(per_page, offset)
-    amount = get_sum_config()
+    configs = get_config(per_page, offset, keyword)
+    amount = get_sum_config(keyword)
 
     return templates.TemplateResponse(
         request=request,
@@ -108,5 +129,7 @@ def show_admin_config(request: Request, page: int = 1):
             "user": user,
             "avt": avt,
             "amount": amount,
+            "per_page": per_page,
+            "keyword": keyword,
         },
     )

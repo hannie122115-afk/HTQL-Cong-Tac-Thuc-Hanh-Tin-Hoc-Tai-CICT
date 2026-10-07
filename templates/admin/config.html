@@ -177,16 +177,27 @@
       </div>
 
       <!-- search -->
-      <div class="config-box">
+      <form method="get" action="/admin/config">
         <div class="config-search-box">
-          <span><i class="fa-solid fa-magnifying-glass"></i></span>
-          <input type="text" name="" id="" />
+          <input
+            type="text"
+            name="keyword"
+            id=""
+            placeholder="Tìm kiếm theo CPU, RAM, ..."
+            value="{{ keyword or '' }}"
+          />
+          <button type="submit" class="submit-config-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
         </div>
         <div class="config-add-act">
           <i class="fa-solid fa-plus"></i>
           Thêm cấu hình
         </div>
-      </div>
+      </form>
+
+      <!-- add config -->
+      <div class="config-add-container"></div>
 
       <!-- config-list -->
       <div class="config-table">
@@ -194,7 +205,7 @@
           <thead>
             <tr>
               <th>#</th>
-              <th>Tên cấu hình</th>
+              <th>Mã cấu hình</th>
               <th>CPU</th>
               <th>RAM</th>
               <th>Ổ cứng</th>
@@ -204,14 +215,15 @@
           </thead>
 
           <tbody>
-            {% set start_index = (page - 1) * 5 %} {%for config in configs%}
+            {% set start_index = (page - 1) * per_page %} {%for config in
+            configs%}
             <tr>
               <td>{{ start_index + loop.index }}</td>
+              <td>CH{{ config[0] }}</td>
               <td>{{ config[1] }}</td>
               <td>{{ config[2] }}</td>
               <td>{{ config[3] }}</td>
               <td>{{ config[4] }}</td>
-              <td>{{ config[5] }}</td>
               <td>
                 <div class="see-detail-act">
                   <i class="fa-solid fa-eye"></i>
@@ -226,15 +238,16 @@
 
       <!-- config-page -->
       <div class="config-page">
-        {% set page_number = (page - 1) * 5 %}
+        {% set page_number = (page - 1) * per_page %}
         <span
-          >Hiển thị {{ page_number + 1 }} - {{ page_number + 5 }} của tổng {{
-          amount }} cấu hình</span
+          >Hiển thị {{ page_number + 1 }} - {% if page_number + per_page >
+          amount %} {{ amount }} {% else %} {{ page_number + per_page }} {%
+          endif %}của tổng {{ amount }} cấu hình</span
         >
         <div class="pagination">
           <div class="config-previous-page">
             {% if (page - 1) > 0 %}
-            <a href="/admin/config?page={{ page - 1 }}"
+            <a href="/admin/config?page={{ page - 1 }}&keyword={{ keyword }}"
               ><i class="fa-solid fa-chevron-left"></i
             ></a>
             {% else %}
@@ -242,9 +255,9 @@
             {% endif %}
           </div>
           <div class="config-number-page">{{ page }}</div>
-          {% if amount > (page * 5) %}
+          {% if amount > (page * per_page) %}
           <div class="config-next-page">
-            <a href="/admin/config?page={{ page + 1 }}"
+            <a href="/admin/config?page={{ page + 1 }}&keyword={{ keyword }}"
               ><i class="fa-solid fa-chevron-right"></i
             ></a>
             {% else %}
