@@ -16,3 +16,95 @@
 .navbar-container.show {
   display: block;
 }
+
+/* config add */
+.config-add-act {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 16px;
+  background: #1e40af;
+  color: white;
+
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.config-add-act:hover {
+  background: #1d4ed8;
+}
+
+/* Mặc định ẩn */
+.config-add-container {
+  display: none;
+
+  margin-top: 15px;
+  padding: 20px;
+
+  width: 500px;
+  min-height: 200px;
+
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Khi JS thêm class show thì hiện */
+.config-add-container.show {
+  display: block;
+}
+
+/* room */
+.config-room-box {
+  display: none;
+}
+
+.config-room-box.show {
+  display: flex;
+  flex-direction: column;
+}
+
+/* pop up CONFIG */
+
+.popup-error {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.popup-error.show {
+  display: flex;
+}
+
+.popup {
+  width: 350px;
+  padding: 25px;
+  background: white;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.popup-icon {
+  font-size: 40px;
+  margin-bottom: 15px;
+}
+
+.popup-error-message {
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+#popup-error-close {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}

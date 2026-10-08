@@ -190,14 +190,90 @@
             <i class="fa-solid fa-magnifying-glass"></i>
           </button>
         </div>
-        <div class="config-add-act">
+        <div class="config-add-act" id="config-add-act">
           <i class="fa-solid fa-plus"></i>
           Thêm cấu hình
         </div>
       </form>
 
       <!-- add config -->
-      <div class="config-add-container"></div>
+      <div class="config-add-container" id="config-add-container">
+        <form action="/admin/config" method="post">
+          <div class="config-add-item">
+            <span class="config-add-title"> CPU </span>
+            <input type="text" name="cpu" id="" placeholder="Nhập tên CPU..." />
+          </div>
+          <div class="config-add-item">
+            <span class="config-add-title"> RAM </span>
+            <input
+              type="text"
+              name="ram"
+              id=""
+              placeholder="Nhập dung lượng RAM..."
+            />
+          </div>
+          <div class="config-add-item">
+            <span class="config-add-title"> Ổ cứng </span>
+            <input
+              type="text"
+              name="hard_drive"
+              id=""
+              placeholder="Nhập dung lượng ổ cứng..."
+            />
+          </div>
+          <div class="config-add-item">
+            <span class="config-add-title"> Card màn hình </span>
+            <input
+              type="text"
+              name="screen_card"
+              id=""
+              placeholder="Nhập tên card màn hình..."
+            />
+          </div>
+          <div class="config-add-item" id="config-room">
+            <span class="config-add-title"
+              >Phòng sử dụng
+              <span><i class="fa-solid fa-chevron-down"></i></span>
+            </span>
+            <div class="config-room-box" id="config-room-box">
+              {% for room in rooms %} {% if room[3] == null %}
+              <label>
+                <input
+                  type="checkbox"
+                  name="rooms"
+                  id=""
+                  value="{{ room[0] }}"
+                />
+                {{room[1]}}
+              </label>
+              {% else %}
+              <label>
+                <input
+                  type="checkbox"
+                  name="rooms"
+                  id=""
+                  value="{{ room[0] }}"
+                  checked
+                />
+                {{room[1]}}
+              </label>
+              {% endif %} {% endfor %}
+            </div>
+          </div>
+          <div class="add-config-btn">
+            <div class="cancel-add-config-btn" id="cancel-add-config-btn">
+              Hủy
+            </div>
+            <button
+              type="submit"
+              class="submit-add-config-btn"
+              id="submit-add-config-btn"
+            >
+              Thêm
+            </button>
+          </div>
+        </form>
+      </div>
 
       <!-- config-list -->
       <div class="config-table">
@@ -267,5 +343,19 @@
         </div>
       </div>
     </div>
+
+    <div class="popup-error" id="popup-error">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="popup-error-message" id="popup-error-message">
+          Vui lòng nhập đầy đủ thông tin!
+        </div>
+        <button type="button" id="popup-error-close">Đóng</button>
+      </div>
+    </div>
+
+    <script src="/static/js/admin/config.js"></script>
   </body>
 </html>
