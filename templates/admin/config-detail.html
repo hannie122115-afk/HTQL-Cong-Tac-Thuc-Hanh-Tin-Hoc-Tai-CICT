@@ -168,7 +168,7 @@
       </div>
     </div>
 
-    <div class="config-container">
+    <div class="config-detail-container container-web">
       <div class="direction">
         <a href="/admin">Trang chủ</a>
         <i class="fa-solid fa-angle-right"></i>
@@ -176,142 +176,318 @@
         <i class="fa-solid fa-angle-right"></i>
         <a href="/admin/config/{{ config[0] }}">Chi tiết cấu hình</a>
       </div>
-    </div>
 
-    <div class="config-detail-info-container">
-      <div class="config-detail-info-title">
-        <span>Thông tin cấu hình</span>
-        <div class="config-detail-actions">
-          <button type="button" id="config-edit-btn">
-            <i class="fa-solid fa-pen"></i>
-            Chỉnh sửa
-          </button>
-          <button type="button" id="config-cancel-btn" style="display: none">
-            <i class="fa-solid fa-xmark"></i>
-            Hủy
-          </button>
-          <button
-            type="submit"
-            form="config-edit-form"
-            id="config-save-btn"
-            style="display: none"
-          >
-            <i class="fa-solid fa-check"></i>
-            Lưu
-          </button>
+      <!-- config info -->
+      <div class="config-detail-info-container">
+        <div class="config-detail-info-title">
+          <span>Thông tin cấu hình</span>
+          <div class="config-detail-actions">
+            <button type="button" id="config-edit-btn">
+              <i class="fa-solid fa-pen"></i>
+              Chỉnh sửa
+            </button>
+            <button type="button" id="config-cancel-btn" style="display: none">
+              <i class="fa-solid fa-xmark"></i>
+              Hủy
+            </button>
+            <button
+              type="submit"
+              form="config-edit-form"
+              id="config-save-btn"
+              style="display: none"
+            >
+              <i class="fa-solid fa-check"></i>
+              Lưu
+            </button>
+          </div>
         </div>
+
+        <form
+          id="config-edit-form"
+          action="/admin/config/{{ config[0] }}"
+          method="post"
+        >
+          <div class="config-detail-info">
+            <div class="config-detail-item">
+              <div class="config-detail-item-logo">
+                <i class="fa-solid fa-microchip"></i>
+              </div>
+              <div class="config-detail-item-info">
+                <span>CPU</span>
+                <span class="config-value"> {{ config[1] }} </span>
+                <input
+                  type="text"
+                  name="cpu"
+                  class="config-input"
+                  value="{{ config[1] }}"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="config-detail-info">
+            <div class="config-detail-item">
+              <div class="config-detail-item-logo">
+                <i class="fa-solid fa-memory"></i>
+              </div>
+              <div class="config-detail-item-info">
+                <span>RAM</span>
+                <span class="config-value"> {{ config[2] }} </span>
+                <input
+                  type="text"
+                  name="ram"
+                  class="config-input"
+                  value="{{ config[2] }}"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="config-detail-info">
+            <div class="config-detail-item">
+              <div class="config-detail-item-logo">
+                <i class="fa-solid fa-hard-drive"></i>
+              </div>
+              <div class="config-detail-item-info">
+                <span>Ổ cứng</span>
+                <span class="config-value"> {{ config[3] }} </span>
+                <input
+                  type="text"
+                  name="hard_drive"
+                  class="config-input"
+                  value="{{ config[3] }}"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="config-detail-info">
+            <div class="config-detail-item">
+              <div class="config-detail-item-logo">
+                <i class="fa-solid fa-sim-card"></i>
+              </div>
+              <div class="config-detail-item-info">
+                <span>Card màn hình</span>
+                <span class="config-value"> {{ config[4] }} </span>
+                <input
+                  type="text"
+                  name="screen_card"
+                  class="config-input"
+                  value="{{ config[4] }}"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="config-detail-info">
+            <div class="config-detail-item">
+              <div class="config-detail-item-logo">
+                <i class="fa-solid fa-hotel"></i>
+              </div>
+              <div class="config-detail-item-info">
+                <span>Phòng sử dụng</span>
+                <div class="config-value room-value">
+                  {% for room in rooms %} {% if room[2] == config[0] %}
+                  <span>{{ room[1] }}</span>
+                  {% endif %} {% endfor %}
+                </div>
+
+                <div class="config-room-box" id="config-room-box">
+                  {% for room in select_rooms %}
+                  <label>
+                    {% if room[2] == config[0] %}
+                    <input
+                      type="checkbox"
+                      name="rooms"
+                      value="{{ room[0] }}"
+                      checked
+                    />
+                    {% else %}
+                    <input type="checkbox" name="rooms" value="{{ room[0] }}" />
+                    {% endif %} {{ room[1] }}
+                  </label>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
       </div>
 
-      <form
-        id="config-edit-form"
-        action="/admin/config/{{ config[0] }}"
-        method="post"
-      >
-        <div class="config-detail-info">
-          <div class="config-detail-item">
-            <div class="config-detail-item-logo">
-              <i class="fa-solid fa-microchip"></i>
-            </div>
-            <div class="config-detail-item-info">
-              <span>CPU</span>
-              <span class="config-value"> {{ config[1] }} </span>
+      <!-- program list -->
+      <div class="config-detail-program">
+        <!-- search -->
+        <form method="get" action="/admin/config/{{ config[0] }}">
+          <div class="config-detail-search-box">
+            <input
+              type="text"
+              name="keyword"
+              id=""
+              placeholder="Tìm kiếm phần mềm tương thích..."
+              value="{{ keyword or '' }}"
+            />
+            <button type="submit" class="submit-config-detail-search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+          </div>
+          <div class="config-detail-add-act" id="config-detail-add-act">
+            <i class="fa-solid fa-plus"></i>
+            Thêm phần mềm
+          </div>
+          <button
+            type="submit"
+            form="program-form"
+            class="config-detail-save-act"
+            id="config-detail-save-act"
+          >
+            <i class="fa-solid fa-floppy-disk"></i>
+            Lưu
+          </button>
+        </form>
+        <!-- add program -->
+        <div class="config-add-program" id="program-form-container">
+          <!-- search program -->
+          <form method="get" action="/admin/config/{{ config[0] }}">
+            <div class="config-program-search-box">
               <input
                 type="text"
-                name="cpu"
-                class="config-input"
-                value="{{ config[1] }}"
+                name="keyword"
+                id=""
+                placeholder="Tìm kiếm phần mềm ..."
+                value="{{ keyword or '' }}"
               />
+              <button type="submit" class="submit-config-prgram-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+              </button>
+            </div>
+          </form>
+
+          <!-- program full list -->
+          <form
+            method="post"
+            action="/admin/config/{{ config[0] }}/program/save"
+            id="program-form"
+          >
+            <div class="program-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Mã phần mềm</th>
+                    <th>Tên phần mềm</th>
+                    <th>Phiên bản</th>
+                    <th>Nhà phát hành</th>
+                    <th>Đã thêm</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {% for program in programs %}
+                  <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>PM{{ program[0] }}</td>
+                    <td>{{ program[1] }}</td>
+                    <td>{{ program[2] }}</td>
+                    <td>{{ program[3] }}</td>
+                    <td>{{ program[4] }}</td>
+                    <td>
+                      {% if program[0] in selected_program_ids %}
+                      <label for="">
+                        <input
+                          type="checkbox"
+                          name="program_ids"
+                          id=""
+                          value="{{ program[0] }}"
+                          checked
+                        />
+                      </label>
+                      {% else %}
+                      <label for="">
+                        <input
+                          type="checkbox"
+                          name="program_ids"
+                          value="{{ program[0] }}"
+                          id=""
+                        />
+                      </label>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </form>
+        </div>
+
+        <!-- program config table -->
+        <div class="program-config-table">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Mã phần mềm</th>
+                <th>Tên phần mềm</th>
+                <th>Phiên bản</th>
+                <th>Nhà phát hành</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% set start_index = (page - 1) * per_page %} {% for cf_pg in
+              config_programs %}
+              <tr>
+                <td>{{ start_index + loop.index }}</td>
+                <td>PM{{ cf_pg[0] }}</td>
+                <td>{{ cf_pg[1] }}</td>
+                <td>{{ cf_pg[2] }}</td>
+                <td>{{ cf_pg[3] }}</td>
+                <td>{{ cf_pg[4] }}</td>
+                <td>
+                  <a
+                    href="/admin/config/{{ config[0] }}/program/{{ cf_pg[0] }}/delete"
+                    class="config-detail-delete-program"
+                  >
+                    <i class="fa-solid fa-trash"></i>
+                    Xóa
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="config-page">
+          {% set page_number = (page - 1) * per_page %}
+          <span
+            >Hiển thị {{ page_number + 1 }} - {% if page_number + per_page >
+            amount %} {{ amount }} {% else %} {{ page_number + per_page }} {%
+            endif %}của tổng {{ amount }} cấu hình</span
+          >
+          <div class="pagination">
+            <div class="config-previous-page">
+              {% if (page - 1) > 0 %}
+              <a href="/admin/config?page={{ page - 1 }}&keyword={{ keyword }}"
+                ><i class="fa-solid fa-chevron-left"></i
+              ></a>
+              {% else %}
+              <span><i class="fa-solid fa-chevron-left"></i></span>
+              {% endif %}
+            </div>
+            <div class="config-number-page">{{ page }}</div>
+            {% if amount > (page * per_page) %}
+            <div class="config-next-page">
+              <a href="/admin/config?page={{ page + 1 }}&keyword={{ keyword }}"
+                ><i class="fa-solid fa-chevron-right"></i
+              ></a>
+              {% else %}
+              <span><i class="fa-solid fa-chevron-right"></i></span>
+              {% endif %}
             </div>
           </div>
         </div>
-
-        <div class="config-detail-info">
-          <div class="config-detail-item">
-            <div class="config-detail-item-logo">
-              <i class="fa-solid fa-memory"></i>
-            </div>
-            <div class="config-detail-item-info">
-              <span>RAM</span>
-              <span class="config-value"> {{ config[2] }} </span>
-              <input
-                type="text"
-                name="ram"
-                class="config-input"
-                value="{{ config[2] }}"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="config-detail-info">
-          <div class="config-detail-item">
-            <div class="config-detail-item-logo">
-              <i class="fa-solid fa-hard-drive"></i>
-            </div>
-            <div class="config-detail-item-info">
-              <span>Ổ cứng</span>
-              <span class="config-value"> {{ config[3] }} </span>
-              <input
-                type="text"
-                name="hard_drive"
-                class="config-input"
-                value="{{ config[3] }}"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="config-detail-info">
-          <div class="config-detail-item">
-            <div class="config-detail-item-logo">
-              <i class="fa-solid fa-sim-card"></i>
-            </div>
-            <div class="config-detail-item-info">
-              <span>Card màn hình</span>
-              <span class="config-value"> {{ config[4] }} </span>
-              <input
-                type="text"
-                name="screen_card"
-                class="config-input"
-                value="{{ config[4] }}"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="config-detail-info">
-          <div class="config-detail-item">
-            <div class="config-detail-item-logo">
-              <i class="fa-solid fa-hotel"></i>
-            </div>
-            <div class="config-detail-item-info">
-              <span>Phòng sử dụng</span>
-              <div class="config-value room-value">
-                {% for room in rooms %} {% if room[2] == config[0] %}
-                <span>{{ room[1] }}</span>
-                {% endif %} {% endfor %}
-              </div>
-
-              <div class="config-room-box" id="config-room-box">
-                {% for room in rooms %}
-                <label>
-                  {% if room[2] == config[0] %}
-                  <input
-                    type="checkbox"
-                    name="rooms"
-                    value="{{ room[0] }}"
-                    checked
-                  />
-                  {% else %}
-                  <input type="checkbox" name="rooms" value="{{ room[0] }}" />
-                  {% endif %} {{ room[1] }}
-                </label>
-                {% endfor %}
-              </div>
-            </div>
-          </div>
-        </div>
-      </form>
+      </div>
     </div>
 
     <div class="popup-confirm" id="popup-confirm">
@@ -336,8 +512,28 @@
         <div class="popup-icon">
           <i class="fa-solid fa-circle-check"></i>
         </div>
-        <div class="popup-success-message">Đã lưu thay đổi thành công!</div>
+        <div class="popup-success-message" id="popup-success-message">
+          {{ success }}
+        </div>
+        <div id="config-page" data-success="{{ success or '' }}"></div>
         <button type="button" id="popup-success-close">Đóng</button>
+      </div>
+    </div>
+
+    <div class="popup-confirm" id="popup-delete-confirm">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div class="popup-message">
+          Bạn có chắc chắn muốn xóa phần mềm này?
+          <br />
+          Phần mềm sẽ bị xóa khỏi cấu hình.
+        </div>
+        <div class="popup-actions">
+          <button type="button" id="popup-delete-no">Không</button>
+          <button type="button" id="popup-delete-yes">Xóa</button>
+        </div>
       </div>
     </div>
 

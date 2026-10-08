@@ -419,3 +419,170 @@
 #popup-success-close:hover {
   background: #1d4ed8;
 }
+
+/* Bảng 1: mặc định ẩn */
+.config-add-program {
+  display: none;
+}
+
+/* Khi bấm Thêm phần mềm */
+.config-add-program.show {
+  display: block;
+}
+
+/* Nút Lưu: mặc định ẩn */
+.config-detail-save-act {
+  display: none;
+}
+
+/* =========================
+   POPUP CHUNG
+========================= */
+
+.popup-confirm,
+.popup-success {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Hiện popup */
+.popup-confirm.show,
+.popup-success.show {
+  display: flex;
+}
+
+/* Hộp popup */
+.popup {
+  width: 400px;
+  max-width: 90%;
+  padding: 25px;
+
+  background: #fff;
+  border-radius: 12px;
+
+  text-align: center;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Icon */
+.popup-icon {
+  margin-bottom: 15px;
+  font-size: 40px;
+}
+
+/* Nội dung */
+.popup-message,
+.popup-success-message {
+  margin-bottom: 20px;
+
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Hai nút Không / Có */
+.popup-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Nút trong popup */
+.popup button {
+  padding: 9px 18px;
+
+  border: none;
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  font-size: 14px;
+}
+
+.program-config-table {
+  width: 100%;
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+.program-config-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.program-config-table th,
+.program-config-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  font-size: 14px;
+}
+
+/* Header */
+.program-config-table thead th {
+  background: #f5f7fa;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Các dòng */
+.program-config-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.program-config-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* Cột STT */
+.program-config-table th:first-child,
+.program-config-table td:first-child {
+  width: 60px;
+  text-align: center;
+}
+
+/* Cột mã phần mềm */
+.program-config-table th:nth-child(2),
+.program-config-table td:nth-child(2) {
+  width: 120px;
+}
+
+/* Cột thao tác */
+.program-config-table th:last-child,
+.program-config-table td:last-child {
+  width: 100px;
+  text-align: center;
+}
+
+/* Nút Xóa */
+.config-detail-delete-program {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  padding: 7px 12px;
+
+  border-radius: 6px;
+
+  color: #dc2626;
+  background: #fef2f2;
+
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+
+  transition: 0.2s ease;
+}
+
+.config-detail-delete-program:hover {
+  background: #fee2e2;
+}
