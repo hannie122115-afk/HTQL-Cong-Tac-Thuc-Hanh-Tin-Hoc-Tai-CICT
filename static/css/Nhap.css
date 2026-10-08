@@ -69,7 +69,8 @@
 
 /* pop up CONFIG */
 
-.popup-error {
+.popup-error,
+.popup-success {
   display: none;
   position: fixed;
   inset: 0;
@@ -79,7 +80,8 @@
   z-index: 9999;
 }
 
-.popup-error.show {
+.popup-error.show,
+.popup-success.show {
   display: flex;
 }
 
@@ -97,14 +99,323 @@
   margin-bottom: 15px;
 }
 
-.popup-error-message {
+.popup-error-message,
+.popup-success-message {
   margin-bottom: 20px;
   font-size: 16px;
 }
 
-#popup-error-close {
+#popup-error-close,
+#popup-success-close {
   padding: 8px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+
+/* edit config */
+
+.config-input {
+  display: none;
+}
+
+.config-room-box {
+  display: none;
+}
+
+.config-detail-actions button {
+  border: none;
+  cursor: pointer;
+}
+/* =========================
+   NÚT CHỈNH SỬA / HỦY / LƯU
+   ========================= */
+
+.config-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.config-detail-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  padding: 8px 14px;
+
+  border: none;
+  border-radius: 6px;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+/* Chỉnh sửa */
+#config-edit-btn {
+  background: #2563eb;
+  color: white;
+}
+
+#config-edit-btn:hover {
+  background: #1d4ed8;
+}
+
+/* Hủy */
+#config-cancel-btn {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+#config-cancel-btn:hover {
+  background: #d1d5db;
+}
+
+/* Lưu */
+#config-save-btn {
+  background: #16a34a;
+  color: white;
+}
+
+#config-save-btn:hover {
+  background: #15803d;
+}
+
+/* =========================
+   INPUT KHI CHỈNH SỬA
+   ========================= */
+
+.config-input {
+  display: none;
+
+  width: 300px;
+  padding: 8px 10px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+
+  outline: none;
+  font-size: 14px;
+
+  box-sizing: border-box;
+}
+
+.config-input:focus {
+  border-color: #2563eb;
+}
+
+/* =========================
+   DANH SÁCH PHÒNG
+   ========================= */
+
+.config-room-box {
+  display: none;
+
+  flex-direction: column;
+  gap: 4px;
+
+  width: 300px;
+  max-height: 200px;
+
+  overflow-y: auto;
+
+  padding: 8px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+
+  background: white;
+
+  box-sizing: border-box;
+}
+
+.config-room-box label {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 7px 8px;
+
+  border-radius: 5px;
+
+  cursor: pointer;
+}
+
+.config-room-box label:hover {
+  background: #f3f4f6;
+}
+
+.config-room-box input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+
+  cursor: pointer;
+}
+
+/* =========================
+   PHÒNG Ở CHẾ ĐỘ XEM
+   ========================= */
+
+.room-value {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.room-value span {
+  padding: 5px 9px;
+
+  background: #eff6ff;
+  color: #2563eb;
+
+  border-radius: 5px;
+
+  font-size: 13px;
+}
+
+/* =========================
+   POPUP HỦY
+   ========================= */
+
+#popup-confirm,
+#popup-success {
+  display: none;
+
+  position: fixed;
+  inset: 0;
+
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.45);
+
+  z-index: 9999;
+}
+
+#popup-confirm.show,
+#popup-success.show {
+  display: flex;
+}
+
+/* Hộp popup */
+
+#popup-confirm .popup,
+#popup-success .popup {
+  width: 400px;
+  max-width: calc(100% - 40px);
+
+  padding: 25px;
+
+  background: white;
+
+  border-radius: 10px;
+
+  text-align: center;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Icon */
+
+#popup-confirm .popup-icon,
+#popup-success .popup-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 50px;
+  height: 50px;
+
+  margin: 0 auto 15px;
+
+  border-radius: 50%;
+
+  font-size: 20px;
+}
+
+#popup-confirm .popup-icon {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+#popup-success .popup-icon {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+/* Nội dung popup */
+
+.popup-message,
+.popup-success-message {
+  margin-bottom: 20px;
+
+  color: #374151;
+
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* =========================
+   NÚT TRONG POPUP HỦY
+   ========================= */
+
+.popup-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.popup-actions button {
+  padding: 8px 16px;
+
+  border: none;
+  border-radius: 6px;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+#popup-cancel-no {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+#popup-cancel-no:hover {
+  background: #d1d5db;
+}
+
+#popup-cancel-yes {
+  background: #dc2626;
+  color: white;
+}
+
+#popup-cancel-yes:hover {
+  background: #b91c1c;
+}
+
+/* =========================
+   NÚT ĐÓNG POPUP THÀNH CÔNG
+   ========================= */
+
+#popup-success-close {
+  padding: 8px 18px;
+
+  border: none;
+  border-radius: 6px;
+
+  background: #2563eb;
+  color: white;
+
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#popup-success-close:hover {
+  background: #1d4ed8;
 }

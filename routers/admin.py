@@ -139,6 +139,7 @@ def show_admin_config(
     user = get_user_by_id(request.session.get("accountId"))
     avt = request.session.get("avt")
     rooms = get_all_room()
+    success = request.session.pop("success", None)
 
     per_page = 5  # moi bang hien 5 dong
     offset = (page - 1) * per_page
@@ -157,6 +158,7 @@ def show_admin_config(
             "per_page": per_page,
             "keyword": keyword,
             "rooms": rooms,
+            "success": success,
         },
     )
 
@@ -169,6 +171,7 @@ def add_config(
     hard_drive: str = Form(""),
     screen_card: str = Form(""),
     rooms: List[int] = Form([]),
+    success: int = 1,
 ):
     role = request.session.get("role")
     if role != 0:
@@ -208,11 +211,131 @@ def add_config(
             )
 
     conn.commit()
+    cursor.close()
+    conn.close()
+
+    request.session["success"] = "Thêm cấu hình thành công!"
+
+    return RedirectResponse(
+        url="config",
+        status_code=303,
+    )
+
+
+@router.get("/admin/config/{config_id}")
+def show_config_detail(
+    request: Request,
+    config_id: int,
+):
+    role = request.session.get("role")
+    if role != 0:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+            SELECT *
+            FROM CAU_HINH
+            WHERE MaCauHinh = %s
+        """,
+        (config_id,),
+    )
+    config = cursor.fetchone()
+
+    cursor.execute(
+        """
+                SELECT MaPhong, TenPhong, MaCauHinh
+                FROM PHONG
+                ORDER BY TenPhong
+            """,
+    )
+    rooms = cursor.fetchall()
+
+    user = get_user_by_id(request.session.get("accountId"))
+    avt = request.session.get("avt")
+
+    success = request.session.pop("success", None)
 
     cursor.close()
     conn.close()
 
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/config-detail.html",
+        context={
+            "config": config,
+            "user": user,
+            "avt": avt,
+            "rooms": rooms,
+            "success": success,
+        },
+    )
+
+@router.post("/admin/config/{config_id}")
+def update_config(
+    request: Request,
+    config_id: int,
+    cpu: str = Form(""),
+    ram: str = Form(""),
+    hard_drive: str = Form(""),
+    screen_card: str = Form(""),
+    rooms: List[int] = Form([]),
+):
+    role = request.session.get("role")
+    if role != 0:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE CAU_HINH
+        SET Cpu = %s,
+            Ram = %s,
+            OCung = %s,
+            CardManHinh = %s
+        WHERE MaCauHinh = %s
+        """,
+        (
+            cpu,
+            ram,
+            hard_drive,
+            screen_card,
+            config_id,
+        ),
+    )
+
+    cursor.execute(
+        """
+        UPDATE PHONG
+        SET MaCauHinh = NULL
+        WHERE MaCauHinh = %s
+        """,
+        (config_id,),
+    )
+
+    if rooms:
+        for room_id in rooms:
+            cursor.execute(
+                """
+                UPDATE PHONG
+                SET MaCauHinh = %s
+                WHERE MaPhong = %s
+                """,
+                (
+                    config_id,
+                    room_id,
+                ),
+            )
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    request.session["success"] = "Cập nhật cấu hình thành công!"
+
     return RedirectResponse(
-        url="config",
+        url=f"/admin/config/{config_id}",
         status_code=303,
     )

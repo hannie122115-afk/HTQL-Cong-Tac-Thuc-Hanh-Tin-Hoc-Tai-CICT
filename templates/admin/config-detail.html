@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cấu hình | Quản trị viên</title>
+    <title>Admin | Chi tiết cấu hình</title>
+
     <link rel="stylesheet" href="/static/css/Nhap.css" />
     <link
       rel="stylesheet"
@@ -167,196 +168,179 @@
       </div>
     </div>
 
-    <!-- body -->
-
     <div class="config-container">
       <div class="direction">
         <a href="/admin">Trang chủ</a>
         <i class="fa-solid fa-angle-right"></i>
         <a href="/admin/config">Cấu hình máy</a>
-      </div>
-
-      <!-- search -->
-      <form method="get" action="/admin/config">
-        <div class="config-search-box">
-          <input
-            type="text"
-            name="keyword"
-            id=""
-            placeholder="Tìm kiếm theo CPU, RAM, ..."
-            value="{{ keyword or '' }}"
-          />
-          <button type="submit" class="submit-config-search">
-            <i class="fa-solid fa-magnifying-glass"></i>
-          </button>
-        </div>
-        <div class="config-add-act" id="config-add-act">
-          <i class="fa-solid fa-plus"></i>
-          Thêm cấu hình
-        </div>
-      </form>
-
-      <!-- add config -->
-      <div class="config-add-container" id="config-add-container">
-        <form action="/admin/config" method="post">
-          <div class="config-add-item">
-            <span class="config-add-title"> CPU </span>
-            <input type="text" name="cpu" id="" placeholder="Nhập tên CPU..." />
-          </div>
-          <div class="config-add-item">
-            <span class="config-add-title"> RAM </span>
-            <input
-              type="text"
-              name="ram"
-              id=""
-              placeholder="Nhập dung lượng RAM..."
-            />
-          </div>
-          <div class="config-add-item">
-            <span class="config-add-title"> Ổ cứng </span>
-            <input
-              type="text"
-              name="hard_drive"
-              id=""
-              placeholder="Nhập dung lượng ổ cứng..."
-            />
-          </div>
-          <div class="config-add-item">
-            <span class="config-add-title"> Card màn hình </span>
-            <input
-              type="text"
-              name="screen_card"
-              id=""
-              placeholder="Nhập tên card màn hình..."
-            />
-          </div>
-          <div class="config-add-item" id="config-room">
-            <span class="config-add-title" id="config-room-title"
-              >Phòng sử dụng
-              <span><i class="fa-solid fa-chevron-down"></i></span>
-            </span>
-            <div class="config-room-box" id="config-room-box">
-              {% for room in rooms %} {% if room[3] is none %}
-              <label>
-                <input
-                  type="checkbox"
-                  name="rooms"
-                  id=""
-                  value="{{ room[0] }}"
-                />
-                {{room[1]}}
-              </label>
-              {% endif %} {% endfor %}
-            </div>
-          </div>
-          <div class="add-config-btn">
-            <div class="cancel-add-config-btn" id="cancel-add-config-btn">
-              Hủy
-            </div>
-            <button
-              type="submit"
-              class="submit-add-config-btn"
-              id="submit-add-config-btn"
-            >
-              Thêm
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <!-- config-list -->
-      <div class="config-table">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Mã cấu hình</th>
-              <th>CPU</th>
-              <th>RAM</th>
-              <th>Ổ cứng</th>
-              <th>Card màn hình</th>
-              <th>Thao tác</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {% set start_index = (page - 1) * per_page %} {%for config in
-            configs%}
-            <tr>
-              <td>{{ start_index + loop.index }}</td>
-              <td>CH{{ config[0] }}</td>
-              <td>{{ config[1] }}</td>
-              <td>{{ config[2] }}</td>
-              <td>{{ config[3] }}</td>
-              <td>{{ config[4] }}</td>
-              <td>
-                <a href="/admin/config/{{ config[0] }}" class="see-detail-act">
-                  <i class="fa-solid fa-eye"></i>
-                  Xem chi tiết
-                </a>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      <!-- config-page -->
-      <div class="config-page">
-        {% set page_number = (page - 1) * per_page %}
-        <span
-          >Hiển thị {{ page_number + 1 }} - {% if page_number + per_page >
-          amount %} {{ amount }} {% else %} {{ page_number + per_page }} {%
-          endif %}của tổng {{ amount }} cấu hình</span
-        >
-        <div class="pagination">
-          <div class="config-previous-page">
-            {% if (page - 1) > 0 %}
-            <a href="/admin/config?page={{ page - 1 }}&keyword={{ keyword }}"
-              ><i class="fa-solid fa-chevron-left"></i
-            ></a>
-            {% else %}
-            <span><i class="fa-solid fa-chevron-left"></i></span>
-            {% endif %}
-          </div>
-          <div class="config-number-page">{{ page }}</div>
-          {% if amount > (page * per_page) %}
-          <div class="config-next-page">
-            <a href="/admin/config?page={{ page + 1 }}&keyword={{ keyword }}"
-              ><i class="fa-solid fa-chevron-right"></i
-            ></a>
-            {% else %}
-            <span><i class="fa-solid fa-chevron-right"></i></span>
-            {% endif %}
-          </div>
-        </div>
+        <i class="fa-solid fa-angle-right"></i>
+        <a href="/admin/config/{{ config[0] }}">Chi tiết cấu hình</a>
       </div>
     </div>
 
-    <div class="popup-error" id="popup-error">
+    <div class="config-detail-info-container">
+      <div class="config-detail-info-title">
+        <span>Thông tin cấu hình</span>
+        <div class="config-detail-actions">
+          <button type="button" id="config-edit-btn">
+            <i class="fa-solid fa-pen"></i>
+            Chỉnh sửa
+          </button>
+          <button type="button" id="config-cancel-btn" style="display: none">
+            <i class="fa-solid fa-xmark"></i>
+            Hủy
+          </button>
+          <button
+            type="submit"
+            form="config-edit-form"
+            id="config-save-btn"
+            style="display: none"
+          >
+            <i class="fa-solid fa-check"></i>
+            Lưu
+          </button>
+        </div>
+      </div>
+
+      <form
+        id="config-edit-form"
+        action="/admin/config/{{ config[0] }}"
+        method="post"
+      >
+        <div class="config-detail-info">
+          <div class="config-detail-item">
+            <div class="config-detail-item-logo">
+              <i class="fa-solid fa-microchip"></i>
+            </div>
+            <div class="config-detail-item-info">
+              <span>CPU</span>
+              <span class="config-value"> {{ config[1] }} </span>
+              <input
+                type="text"
+                name="cpu"
+                class="config-input"
+                value="{{ config[1] }}"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="config-detail-info">
+          <div class="config-detail-item">
+            <div class="config-detail-item-logo">
+              <i class="fa-solid fa-memory"></i>
+            </div>
+            <div class="config-detail-item-info">
+              <span>RAM</span>
+              <span class="config-value"> {{ config[2] }} </span>
+              <input
+                type="text"
+                name="ram"
+                class="config-input"
+                value="{{ config[2] }}"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="config-detail-info">
+          <div class="config-detail-item">
+            <div class="config-detail-item-logo">
+              <i class="fa-solid fa-hard-drive"></i>
+            </div>
+            <div class="config-detail-item-info">
+              <span>Ổ cứng</span>
+              <span class="config-value"> {{ config[3] }} </span>
+              <input
+                type="text"
+                name="hard_drive"
+                class="config-input"
+                value="{{ config[3] }}"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="config-detail-info">
+          <div class="config-detail-item">
+            <div class="config-detail-item-logo">
+              <i class="fa-solid fa-sim-card"></i>
+            </div>
+            <div class="config-detail-item-info">
+              <span>Card màn hình</span>
+              <span class="config-value"> {{ config[4] }} </span>
+              <input
+                type="text"
+                name="screen_card"
+                class="config-input"
+                value="{{ config[4] }}"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="config-detail-info">
+          <div class="config-detail-item">
+            <div class="config-detail-item-logo">
+              <i class="fa-solid fa-hotel"></i>
+            </div>
+            <div class="config-detail-item-info">
+              <span>Phòng sử dụng</span>
+              <div class="config-value room-value">
+                {% for room in rooms %} {% if room[2] == config[0] %}
+                <span>{{ room[1] }}</span>
+                {% endif %} {% endfor %}
+              </div>
+
+              <div class="config-room-box" id="config-room-box">
+                {% for room in rooms %}
+                <label>
+                  {% if room[2] == config[0] %}
+                  <input
+                    type="checkbox"
+                    name="rooms"
+                    value="{{ room[0] }}"
+                    checked
+                  />
+                  {% else %}
+                  <input type="checkbox" name="rooms" value="{{ room[0] }}" />
+                  {% endif %} {{ room[1] }}
+                </label>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="popup-confirm" id="popup-confirm">
       <div class="popup">
         <div class="popup-icon">
-          <i class="fa-solid fa-circle-exclamation"></i>
+          <i class="fa-solid fa-triangle-exclamation"></i>
         </div>
-        <div class="popup-error-message" id="popup-error-message">
-          Vui lòng nhập đầy đủ thông tin!
+        <div class="popup-message">
+          Bạn có chắc chắn muốn hủy?
+          <br />
+          Các thay đổi sẽ không được lưu.
         </div>
-        <button type="button" id="popup-error-close">Đóng</button>
+        <div class="popup-actions">
+          <button type="button" id="popup-cancel-no">Không</button>
+          <button type="button" id="popup-cancel-yes">Hủy chỉnh sửa</button>
+        </div>
       </div>
     </div>
 
     <div class="popup-success" id="popup-success">
       <div class="popup">
         <div class="popup-icon">
-          <i class="fa-solid fa-circle-exclamation"></i>
+          <i class="fa-solid fa-circle-check"></i>
         </div>
-        <div class="popup-success-message" id="popup-success-message">
-          Thêm cấu hình thành công!
-        </div>
-        <div id="config-page" data-success="{{ success or '' }}"></div>
+        <div class="popup-success-message">Đã lưu thay đổi thành công!</div>
         <button type="button" id="popup-success-close">Đóng</button>
       </div>
     </div>
-    <script src="/static/js/admin/config.js"></script>
+
+    <script src="/static/js/admin/config-detail.js"></script>
   </body>
 </html>
