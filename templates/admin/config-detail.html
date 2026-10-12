@@ -332,7 +332,7 @@
           </div>
           <div class="config-detail-add-act" id="config-detail-add-act">
             <i class="fa-solid fa-plus"></i>
-            Thêm phần mềm
+            Cập nhật phần mềm tương thích
           </div>
           <button
             type="submit"
@@ -374,6 +374,7 @@
                   <tr>
                     <th>#</th>
                     <th>Mã phần mềm</th>
+                    <th>Ảnh phần mềm</th>
                     <th>Tên phần mềm</th>
                     <th>Phiên bản</th>
                     <th>Nhà phát hành</th>
@@ -386,10 +387,10 @@
                   <tr>
                     <td>{{ loop.index }}</td>
                     <td>PM{{ program[0] }}</td>
+                    <td><img src="{{ program[4] }}" alt="" /></td>
                     <td>{{ program[1] }}</td>
                     <td>{{ program[2] }}</td>
                     <td>{{ program[3] }}</td>
-                    <td>{{ program[4] }}</td>
                     <td>
                       {% if program[0] in selected_program_ids %}
                       <label for="">
@@ -427,6 +428,7 @@
               <tr>
                 <th>#</th>
                 <th>Mã phần mềm</th>
+                <th>Ảnh phần mềm</th>
                 <th>Tên phần mềm</th>
                 <th>Phiên bản</th>
                 <th>Nhà phát hành</th>
@@ -440,10 +442,10 @@
               <tr>
                 <td>{{ start_index + loop.index }}</td>
                 <td>PM{{ cf_pg[0] }}</td>
+                <td><img src="{{ cf_pg[4] }}" alt="" /></td>
                 <td>{{ cf_pg[1] }}</td>
                 <td>{{ cf_pg[2] }}</td>
                 <td>{{ cf_pg[3] }}</td>
-                <td>{{ cf_pg[4] }}</td>
                 <td>
                   <a
                     href="/admin/config/{{ config[0] }}/program/{{ cf_pg[0] }}/delete"

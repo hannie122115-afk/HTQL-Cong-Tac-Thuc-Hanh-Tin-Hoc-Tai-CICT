@@ -10,7 +10,9 @@ router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
 
-# Trang chu
+# ====================================Trang chu========================
+
+
 def get_user_by_id(accountId):
     conn = get_connection()
     cursor = conn.cursor()
@@ -57,9 +59,9 @@ def get_config(per_page, offset, keyword):
             SELECT *
             FROM CAU_HINH
             WHERE 
-                Cpu LIKE %s
-                OR Ram LIKE %s
-                OR OCung LIKE %s
+                Cpu ILIKE %s
+                OR Ram ILIKE %s
+                OR OCung ILIKE %s
             LIMIT %s OFFSET %s
         """,
         (
@@ -88,9 +90,9 @@ def get_sum_config(keyword):
             SELECT COUNT(MaCauHinh)
             FROM CAU_HINH
             WHERE 
-                Cpu LIKE %s
-                OR Ram LIKE %s
-                OR OCung LIKE %s
+                Cpu ILIKE %s
+                OR Ram ILIKE %s
+                OR OCung ILIKE %s
         """,
         (
             f"%{keyword}%",
@@ -222,6 +224,55 @@ def add_config(
     )
 
 
+@router.post("/admin/config/{config_id}/delete")
+def delete_config(
+    request: Request,
+    config_id: int,
+):
+    role = request.session.get("role")
+    if role != 0:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = get_connection()
+
+    try:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            DELETE FROM CAU_HINH_PHAN_MEM
+            WHERE MaCauHinh = %s
+            """,
+            (config_id,),
+        )
+
+        cursor.execute(
+            """
+            DELETE FROM CAU_HINH
+            WHERE MaCauHinh = %s
+            """,
+            (config_id,),
+        )
+
+        if cursor.rowcount == 0:
+            conn.rollback()
+            request.session["success"] = "Cấu hình không tồn tại."
+        else:
+            conn.commit()
+            request.session["success"] = "Xóa cấu hình thành công!"
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
+
+    return RedirectResponse(
+        url="/admin/config",
+        status_code=303,
+    )
+
+
 # ====================================Chi tiet cau hinh may========================
 
 
@@ -234,8 +285,8 @@ def get_program(keyword):
             SELECT *
             FROM PHAN_MEM
             WHERE 
-                TenPhanMem LIKE %s
-                OR NhaPhatHanh LIKE %s
+                TenPhanMem ILIKE %s
+                OR NhaPhatHanh ILIKE %s
         """,
         (
             f"%{keyword}%",
@@ -263,8 +314,8 @@ def get_sum_config_program(config_id, keyword):
                 ON chpm.MaPhanMem = pm.MaPhanMem
             WHERE chpm.MaCauHinh = %s
             AND (
-                pm.TenPhanMem LIKE %s
-                OR pm.NhaPhatHanh LIKE %s
+                pm.TenPhanMem ILIKE %s
+                OR pm.NhaPhatHanh ILIKE %s
             )
         """,
         (
@@ -299,8 +350,8 @@ def get_config_program(
                 ON chpm.MaPhanMem = pm.MaPhanMem
             WHERE chpm.MaCauHinh = %s
             AND (
-                pm.TenPhanMem LIKE %s
-                OR pm.NhaPhatHanh LIKE %s
+                pm.TenPhanMem ILIKE %s
+                OR pm.NhaPhatHanh ILIKE %s
             )
             ORDER BY pm.MaPhanMem
             LIMIT %s OFFSET %s
@@ -556,5 +607,286 @@ def save_config_program(
 
     return RedirectResponse(
         url=f"/admin/config/{config_id}",
+        status_code=303,
+    )
+
+
+# ====================================Phan mem========================
+
+
+def get_programs(per_page, offset, keyword):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+            SELECT *
+            FROM PHAN_MEM
+            WHERE 
+                TenPhanMem ILIKE %s
+                OR NhaPhatHanh ILIKE %s
+            LIMIT %s OFFSET %s
+        """,
+        (
+            f"%{keyword}%",
+            f"%{keyword}%",
+            per_page,
+            offset,
+        ),
+    )
+
+    programs = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return programs
+
+
+def get_sum_programs(keyword):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+            SELECT COUNT(MaPhanMem)
+            FROM PHAN_MEM
+            WHERE 
+                TenPhanMem ILIKE %s
+                OR NhaPhatHanh ILIKE %s
+        """,
+        (
+            f"%{keyword}%",
+            f"%{keyword}%",
+        ),
+    )
+
+    program = cursor.fetchone()[0]
+
+    cursor.close()
+    conn.close()
+
+    return program
+
+
+@router.get("/admin/program")
+def show_admin_program(
+    request: Request,
+    page: int = 1,
+    keyword: str = "",
+):
+    role = request.session.get("role")
+    if role != 0:
+        return RedirectResponse(url="/login", status_code=303)
+
+    user = get_user_by_id(request.session.get("accountId"))
+    avt = request.session.get("avt")
+
+    per_page = 10  # moi bang hien 10 dong
+    offset = (page - 1) * per_page
+    programs = get_programs(per_page, offset, keyword)
+    amount = get_sum_programs(keyword)
+    success = request.session.pop("success", None)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/program.html",
+        context={
+            "programs": programs,
+            "page": page,
+            "user": user,
+            "avt": avt,
+            "amount": amount,
+            "per_page": per_page,
+            "keyword": keyword,
+            # "rooms": rooms,
+            "success": success,
+        },
+    )
+
+
+@router.post("/admin/program")
+def add_program(
+    request: Request,
+    program_name: str = Form(""),
+    program_version: str = Form(""),
+    program_publisher: str = Form(""),
+    program_img: str = Form(""),
+    success: int = 1,
+):
+    role = request.session.get("role")
+    if role != 0:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+            INSERT INTO PHAN_MEM
+            (TenPhanMem, PhienBan, NhaPhatHanh, AnhPhanMem)
+            VALUES (%s, %s, %s, %s)
+            RETURNING MaPhanMem
+        """,
+        (
+            program_name,
+            program_version,
+            program_publisher,
+            program_img,
+        ),
+    )
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    request.session["success"] = "Thêm phần mềm thành công!"
+
+    return RedirectResponse(
+        url="program",
+        status_code=303,
+    )
+
+
+from fastapi.responses import JSONResponse
+
+
+@router.get("/admin/program/{program_id}/compatibility")
+def get_program_compatibility(
+    request: Request,
+    program_id: int,
+):
+    role = request.session.get("role")
+    if role != 0:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            SELECT
+                c.MaCauHinh,
+                c.CPU,
+                c.RAM,
+                c.OCung,
+                c.CardManHinh
+            FROM CAU_HINH c
+            JOIN CAU_HINH_PHAN_MEM cp
+                ON c.MaCauHinh = cp.MaCauHinh
+            WHERE cp.MaPhanMem = %s
+            ORDER BY c.MaCauHinh
+            """,
+            (program_id,),
+        )
+
+        rows = cursor.fetchall()
+
+        configs = [
+            {
+                "MaCauHinh": row[0],
+                "CPU": row[1],
+                "RAM": row[2],
+                "OCung": row[3],
+                "CardManHinh": row[4],
+            }
+            for row in rows
+        ]
+
+        return JSONResponse(content=configs)
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@router.post("/admin/program/{program_id}/delete")
+def delete_program(
+    request: Request,
+    program_id: int,
+):
+    role = request.session.get("role")
+    if role != 0:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = get_connection()
+
+    try:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            DELETE FROM CAU_HINH_PHAN_MEM
+            WHERE MaPhanMem = %s
+            """,
+            (program_id,),
+        )
+
+        cursor.execute(
+            """
+            DELETE FROM PHAN_MEM
+            WHERE MaPhanMem = %s
+            """,
+            (program_id,),
+        )
+
+        if cursor.rowcount == 0:
+            conn.rollback()
+            request.session["success"] = "Phần mềm không tồn tại."
+        else:
+            conn.commit()
+            request.session["success"] = "Xóa phần mềm thành công!"
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
+
+    return RedirectResponse(
+        url="/admin/program",
+        status_code=303,
+    )
+
+
+@router.post("/admin/program/{program_id}/edit")
+def edit_config(
+    request: Request,
+    program_id: int,
+    program_name: str = Form(""),
+    program_version: str = Form(""),
+    program_publisher: str = Form(""),
+    program_img: str = Form(""),
+):
+    role = request.session.get("role")
+    if role != 0:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE PHAN_MEM
+        SET TenPhanMem = %s,
+            PhienBan = %s,
+            NhaPhatHanh = %s,
+            AnhPhanMem = %s
+        WHERE MaPhanMem = %s
+        """,
+        (
+            program_name,
+            program_version,
+            program_publisher,
+            program_img,
+            program_id,
+        ),
+    )
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    request.session["success"] = "Cập nhật phần mềm thành công!"
+
+    return RedirectResponse(
+        url=f"/admin/program",
         status_code=303,
     )

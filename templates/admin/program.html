@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phần mềm | Quản trị viên</title>
+    <link rel="stylesheet" href="/static/css/Nhap.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="header-left">
+        <div class="header-left-logo">
+          <div class="header-left-icon">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div class="header-left-title">Edu-LIMS</div>
+        </div>
+        <div class="header-left-describe">
+          Hệ thống công tác thực hành tin học
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="header-label">
+          <i class="fa-solid fa-bell"></i>
+        </div>
+        <div class="header-user" id="headerUser">
+          <div class="header-avt">
+            <img src="{{avt}}" alt="" />
+          </div>
+          <div class="navbar-arrow">
+            <i class="fa-solid fa-caret-down"></i>
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- navbar -->
+    <div class="navbar-container" id="navbarContainer">
+      <div class="navbar-user-container">
+        <a href="">
+          <div class="navbar-user-avt">
+            <img src="{{avt}}" alt="" />
+          </div>
+          <div class="navbar-user-name">
+            <p>{{ user[1] }}</p>
+            <p>Quản trị viên</p>
+          </div>
+        </a>
+      </div>
+      <div class="navbar-box">
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <div class="navbar-item-title">Hồ sơ cá nhân</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Phần mềm</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-download"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Cấu hình máy</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user-gear"></i>
+              </div>
+              <div class="navbar-item-title">Tài khoản</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-users"></i>
+              </div>
+              <div class="navbar-item-title">Cán bộ</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-chalkboard-user"></i>
+              </div>
+              <div class="navbar-item-title">Giảng viên</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-file-lines"></i>
+              </div>
+              <div class="navbar-item-title">Duyệt yêu cầu</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-regular fa-calendar-days"></i>
+              </div>
+              <div class="navbar-item-title">Lịch thực hành</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="navbar-logout">
+        <a href="/logout">
+          <div class="navbar-logout-icon">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </div>
+          <div class="navbar-logout-title">Đăng xuất</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- body -->
+
+    <div class="program-container container-web">
+      <div class="direction">
+        <a href="/admin">Trang chủ</a>
+        <i class="fa-solid fa-angle-right"></i>
+        <a href="/admin/program">Phần mềm</a>
+      </div>
+
+      <!-- search -->
+      <form method="get" action="/admin/program">
+        <div class="program-search-box">
+          <input
+            type="text"
+            name="keyword"
+            id=""
+            placeholder="Tìm kiếm theo tên phần mềm, nhà phát hành..."
+            value="{{ keyword or '' }}"
+          />
+          <button type="submit" class="submit-program-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </div>
+      </form>
+      <div class="program-add-act" id="program-add-act">
+        <i class="fa-solid fa-plus"></i>
+        Thêm phần mềm
+      </div>
+
+      <!-- add program -->
+      <div
+        class="program-add-container"
+        id="program-add-container"
+        tabindex="-1"
+      >
+        <form action="/admin/program" method="post" id="program-form">
+          <div class="program-add-item">
+            <span class="program-add-title"> Tên phần mềm </span>
+            <input
+              type="text"
+              name="program_name"
+              id=""
+              placeholder="Nhập tên phần mềm..."
+            />
+          </div>
+          <div class="program-add-item">
+            <span class="program-add-title"> Phiên bản </span>
+            <input
+              type="text"
+              name="program_version"
+              id=""
+              placeholder="Nhập phiên bản..."
+            />
+          </div>
+          <div class="program-add-item">
+            <span class="program-add-title"> Nhà phát hành </span>
+            <input
+              type="text"
+              name="program_publisher"
+              id=""
+              placeholder="Nhập tên nhà phát hành..."
+            />
+          </div>
+          <div class="program-add-item">
+            <span class="program-add-title"> Đường dẫn ảnh phần mềm </span>
+            <input
+              type="text"
+              name="program_img"
+              placeholder="Nhập URL ảnh..."
+            />
+          </div>
+
+          <div class="add-program-btn">
+            <div class="cancel-add-program-btn" id="cancel-add-program-btn">
+              Hủy
+            </div>
+            <button
+              type="submit"
+              class="submit-add-program-btn"
+              id="submit-add-program-btn"
+            >
+              Thêm
+            </button>
+            <button
+              type="submit"
+              class="submit-add-program-btn"
+              id="submit-edit-program-btn"
+              style="display: none"
+            >
+              Lưu chỉnh sửa
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- program-list -->
+      <div class="program-table" id="program-table">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Mã phần mềm</th>
+              <th>Ảnh phần mềm</th>
+              <th>Tên phần mềm</th>
+              <th>Phiên bản</th>
+              <th>Nhà phát hành</th>
+              <th colspan="2">Thao tác</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% set start_index = (page - 1) * per_page %} {%for program in
+            programs%}
+            <tr>
+              <td>{{ start_index + loop.index }}</td>
+              <td>PM{{ program[0] }}</td>
+              <td>
+                {% if program[4] %}
+                <img src="{{ program[4] }}" alt="{{ program[1] }}" />
+                {% else %} Chưa có ảnh {% endif %}
+              </td>
+              <td>{{ program[1] }}</td>
+              <td>{{ program[2] }}</td>
+              <td>{{ program[3] }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="edit-detail-act"
+                  data-id="{{ program[0] }}"
+                  data-name="{{ program[1] }}"
+                  data-version="{{ program[2] }}"
+                  data-publisher="{{ program[3] }}"
+                  data-img="{{ program[4] or '' }}"
+                >
+                  <i class="fa-solid fa-pen"></i>
+                  Chỉnh sửa
+                </button>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="delete-detail-act"
+                  data-id="{{ program[0] }}"
+                  data-name="{{ program[1] }}"
+                >
+                  <i class="fa-solid fa-trash-can"></i>
+                  Xóa
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- program-page -->
+      <div class="program-page">
+        {% set page_number = (page - 1) * per_page %}
+        <span
+          >Hiển thị {{ page_number + 1 }} - {% if page_number + per_page >
+          amount %} {{ amount }} {% else %} {{ page_number + per_page }} {%
+          endif %}của tổng {{ amount }} cấu hình</span
+        >
+        <div class="pagination">
+          <div class="program-previous-page">
+            {% if (page - 1) > 0 %}
+            <a href="/admin/program?page={{ page - 1 }}&keyword={{ keyword }}"
+              ><i class="fa-solid fa-chevron-left"></i
+            ></a>
+            {% else %}
+            <span><i class="fa-solid fa-chevron-left"></i></span>
+            {% endif %}
+          </div>
+          <div class="program-number-page">{{ page }}</div>
+          {% if amount > (page * per_page) %}
+          <div class="program-next-page">
+            <a href="/admin/program?page={{ page + 1 }}&keyword={{ keyword }}"
+              ><i class="fa-solid fa-chevron-right"></i
+            ></a>
+            {% else %}
+            <span><i class="fa-solid fa-chevron-right"></i></span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- pop up -->
+
+    <div class="popup-error" id="popup-error">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="popup-error-message" id="popup-error-message">
+          Vui lòng nhập đầy đủ thông tin!
+        </div>
+        <button type="button" id="popup-error-close">Đóng</button>
+      </div>
+    </div>
+
+    <div class="popup-success" id="popup-success">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="popup-success-message" id="popup-success-message">
+          {{ success }}
+        </div>
+        <button type="button" id="popup-success-close">Đóng</button>
+      </div>
+    </div>
+
+    <div class="popup-confirm" id="popup-confirm">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+
+        <div class="popup-message">
+          Bạn có chắc chắn muốn hủy?
+          <br />
+          Các thay đổi sẽ không được lưu.
+        </div>
+
+        <div class="popup-actions">
+          <button type="button" id="popup-cancel-no">Không</button>
+          <button type="button" id="popup-cancel-yes">Hủy chỉnh sửa</button>
+        </div>
+      </div>
+    </div>
+    <div id="program-page" data-success="{{ success or '' }}"></div>
+
+    <!-- Popup xác nhận xóa phần mềm -->
+    <div class="popup-confirm" id="popup-delete-program">
+      <div class="popup popup-delete-program-content">
+        <div class="popup-icon">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+
+        <h3>Xác nhận xóa phần mềm</h3>
+
+        <p>
+          Phần mềm:
+          <strong id="delete-program-name"></strong>
+        </p>
+
+        <p>Phần mềm này đang tương thích với các cấu hình sau:</p>
+
+        <div class="delete-program-table-wrapper">
+          <table class="delete-program-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Mã cấu hình</th>
+                <th>CPU</th>
+                <th>RAM</th>
+                <th>Ổ cứng</th>
+                <th>Card màn hình</th>
+              </tr>
+            </thead>
+            <tbody id="delete-program-configs">
+              <!-- JavaScript thêm các dòng cấu hình tại đây -->
+            </tbody>
+          </table>
+        </div>
+
+        <p id="delete-program-empty" style="display: none">
+          Phần mềm chưa được liên kết với cấu hình nào.
+        </p>
+
+        <p class="delete-program-warning">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          Nếu xóa, phần mềm sẽ bị gỡ khỏi danh sách phần mềm tương thích của các
+          cấu hình trên. Bạn có chắc chắn muốn xóa không?
+        </p>
+
+        <div class="popup-actions">
+          <button type="button" id="delete-program-cancel">Hủy</button>
+
+          <form id="delete-program-form" method="post" action="">
+            <button type="submit" id="delete-program-confirm">
+              Xác nhận xóa
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/js/admin/program.js"></script>
+  </body>
+</html>

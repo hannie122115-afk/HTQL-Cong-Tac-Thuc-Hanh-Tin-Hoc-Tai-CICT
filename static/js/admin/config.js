@@ -1,5 +1,5 @@
 const addConfig = document.getElementById("config-add-act");
-const addConfigForm = document.getElementById("config-add-container");
+const addConfigForm = document.getElementById("config-add-form");
 const cancelConfigBtn = document.getElementById("cancel-add-config-btn");
 
 addConfig.addEventListener("click", function (e) {
@@ -58,4 +58,21 @@ if (success) {
 
 popupSuccessClose.addEventListener("click", function () {
   popupSuccess.classList.remove("show");
+});
+
+// popup delete
+const deleteConfigPopup = document.getElementById("popup-delete-config");
+const deleteConfigForm = document.getElementById("delete-config-form");
+const deleteConfigCancel = document.getElementById("delete-config-cancel");
+
+document.querySelectorAll(".delete-detail-act").forEach(function (button) {
+  button.addEventListener("click", async function () {
+    const id = button.dataset.id;
+    deleteConfigPopup.classList.add("show");
+    deleteConfigForm.action = `/admin/config/${id}/delete`;
+  });
+});
+
+deleteConfigCancel.addEventListener("click", function () {
+  deleteConfigPopup.classList.remove("show");
 });

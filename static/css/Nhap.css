@@ -17,6 +17,142 @@
   display: block;
 }
 
+/* # ====================================Cau hinh may======================== */
+
+/* Lớp phủ toàn màn hình */
+.popup-confirm {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+
+  justify-content: center;
+  align-items: center;
+
+  padding: 20px;
+  box-sizing: border-box;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(3px);
+}
+
+.popup-confirm.show {
+  display: flex;
+}
+
+/* Khung popup */
+.popup-delete-config-content {
+  width: 100%;
+  max-width: 440px;
+  padding: 28px;
+  box-sizing: border-box;
+
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+
+  text-align: center;
+  animation: popupAppear 0.2s ease-out;
+}
+
+.popup-delete-config-content .popup-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #fff0e6;
+  color: #e67e22;
+  font-size: 25px;
+}
+
+.popup-delete-config-content h3 {
+  margin: 0 0 12px;
+  color: #1e293b;
+  font-size: 20px;
+}
+
+.popup-delete-config-content p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* Hai nút Hủy và Xác nhận */
+.popup-delete-config-content .popup-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.popup-delete-config-content .popup-actions form {
+  margin: 0;
+}
+
+.popup-delete-config-content .popup-actions button {
+  min-width: 120px;
+  padding: 11px 16px;
+  border: none;
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+/* Nút Hủy */
+#delete-config-cancel {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+#delete-config-cancel:hover {
+  background: #cbd5e1;
+}
+
+/* Nút Xác nhận xóa */
+#delete-config-confirm {
+  background: #dc2626;
+  color: #fff;
+}
+
+#delete-config-confirm:hover {
+  background: #b91c1c;
+}
+
+@keyframes popupAppear {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .popup-delete-config-content .popup-actions {
+    flex-direction: column-reverse;
+  }
+
+  .popup-delete-config-content .popup-actions button {
+    width: 100%;
+  }
+
+  .popup-delete-config-content .popup-actions form {
+    width: 100%;
+  }
+}
+
 /* config add */
 .config-add-act {
   display: inline-flex;
@@ -585,4 +721,154 @@
 
 .config-detail-delete-program:hover {
   background: #fee2e2;
+}
+
+/* # ====================================phan mêm======================== */
+
+/* Form thêm / chỉnh sửa phần mềm */
+.program-add-container {
+  display: none;
+}
+
+/* Chỉ hiện khi có class show */
+.program-add-container.show {
+  display: block;
+}
+
+/* Popup xác nhận */
+.popup-confirm {
+  display: none;
+}
+
+.popup-confirm.show {
+  display: flex;
+}
+
+/* Popup thành công */
+.popup-success {
+  display: none;
+}
+
+.popup-success.show {
+  display: flex;
+}
+
+/* Popup lỗi */
+.popup-error {
+  display: none;
+}
+
+.popup-error.show {
+  display: flex;
+}
+
+/* Popup xác nhận xóa */
+#popup-delete-program {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+#popup-delete-program.show {
+  display: flex;
+}
+
+.popup-delete-program-content {
+  width: min(900px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.delete-program-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin: 16px 0;
+}
+
+.delete-program-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.delete-program-table th,
+.delete-program-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.delete-program-table th {
+  background: #f3f5f8;
+}
+
+.delete-program-warning {
+  color: #b42318;
+  background: #fff1f0;
+  padding: 12px;
+  border-radius: 8px;
+  line-height: 1.6;
+}
+
+#delete-program-form {
+  display: inline-flex;
+  margin: 0;
+}
+
+#delete-program-confirm {
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#delete-program-cancel {
+  padding: 10px 16px;
+  cursor: pointer;
+}
+.program-table.hidden {
+  display: none;
+}
+
+.program-add-container {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(3px);
+
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.program-add-container.show {
+  display: flex;
+}
+
+.program-add-container form {
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  background: #fff;
+  padding: 28px;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
 }
