@@ -19,6 +19,39 @@
 
 /* # ====================================Cau hinh may======================== */
 
+.config-add-container {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.config-add-container.show {
+  display: flex;
+}
+
+.config-add-container > form {
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  background: #fff;
+  padding: 28px;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
 /* Lớp phủ toàn màn hình */
 .popup-confirm {
   display: none;
@@ -171,28 +204,6 @@
   background: #1d4ed8;
 }
 
-/* Mặc định ẩn */
-.config-add-container {
-  display: none;
-
-  margin-top: 15px;
-  padding: 20px;
-
-  width: 500px;
-  min-height: 200px;
-
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Khi JS thêm class show thì hiện */
-.config-add-container.show {
-  display: block;
-}
-
 /* room */
 .config-room-box {
   display: none;
@@ -263,6 +274,52 @@
   border: none;
   cursor: pointer;
 }
+
+/* ====================chi tiet phan mềm=========== */
+
+/* Lớp phủ chỉnh sửa */
+.config-detail-info-container.editing {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  padding: 20px;
+  box-sizing: border-box;
+
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+/* Khung thông tin màu trắng */
+.config-detail-info-container.editing #config-edit-form {
+  width: 100%;
+  max-width: 600px;
+  padding: 28px;
+  box-sizing: border-box;
+
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+/* Các trường nhập liệu */
+.config-detail-info-container.editing .config-input {
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+}
+
+/* Ẩn thông tin chỉ đọc khi đang chỉnh sửa */
+.config-detail-info-container.editing .config-value {
+  display: none;
+}
+
 /* =========================
    NÚT CHỈNH SỬA / HỦY / LƯU
    ========================= */

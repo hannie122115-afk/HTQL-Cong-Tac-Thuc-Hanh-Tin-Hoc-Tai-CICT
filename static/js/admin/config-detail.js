@@ -13,7 +13,13 @@ const roomValue = document.querySelector(".room-value");
 const roomBox = document.getElementById("config-room-box");
 
 // EDIT
+
+const configInfoContainer = document.querySelector(
+  ".config-detail-info-container",
+);
+
 editBtn.addEventListener("click", function () {
+  configInfoContainer.classList.add("editing");
   editBtn.style.display = "none";
   cancelBtn.style.display = "inline-flex";
   saveBtn.style.display = "inline-flex";
@@ -82,9 +88,7 @@ popupSuccessClose.addEventListener("click", function () {
 // ADD PROGRAM DETAIL
 const addProgramBtn = document.getElementById("config-detail-add-act");
 const saveProgramBtn = document.getElementById("config-detail-save-act");
-const programFormContainer = document.getElementById(
-  "program-form-container",
-);
+const programFormContainer = document.getElementById("program-form-container");
 
 addProgramBtn.addEventListener("click", function () {
   programFormContainer.classList.add("show");

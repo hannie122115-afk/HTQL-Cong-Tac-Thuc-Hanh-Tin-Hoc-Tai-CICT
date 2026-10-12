@@ -1,14 +1,15 @@
 const addConfig = document.getElementById("config-add-act");
+const addConfigFormBox = document.getElementById("config-add-container");
 const addConfigForm = document.getElementById("config-add-form");
 const cancelConfigBtn = document.getElementById("cancel-add-config-btn");
 
 addConfig.addEventListener("click", function (e) {
   e.stopPropagation();
-  addConfigForm.classList.toggle("show");
+  addConfigFormBox.classList.toggle("show");
 });
 
 cancelConfigBtn.addEventListener("click", function () {
-  addConfigForm.classList.remove("show");
+  addConfigFormBox.classList.remove("show");
 });
 
 // room

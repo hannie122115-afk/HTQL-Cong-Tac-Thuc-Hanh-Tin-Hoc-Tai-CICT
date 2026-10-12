@@ -179,34 +179,14 @@
 
       <!-- config info -->
       <div class="config-detail-info-container">
-        <div class="config-detail-info-title">
-          <span>Thông tin cấu hình</span>
-          <div class="config-detail-actions">
-            <button type="button" id="config-edit-btn">
-              <i class="fa-solid fa-pen"></i>
-              Chỉnh sửa
-            </button>
-            <button type="button" id="config-cancel-btn" style="display: none">
-              <i class="fa-solid fa-xmark"></i>
-              Hủy
-            </button>
-            <button
-              type="submit"
-              form="config-edit-form"
-              id="config-save-btn"
-              style="display: none"
-            >
-              <i class="fa-solid fa-check"></i>
-              Lưu
-            </button>
-          </div>
-        </div>
-
         <form
           id="config-edit-form"
           action="/admin/config/{{ config[0] }}"
           method="post"
         >
+          <div class="config-detail-info-title">
+            <span>Thông tin cấu hình</span>
+          </div>
           <div class="config-detail-info">
             <div class="config-detail-item">
               <div class="config-detail-item-logo">
@@ -312,6 +292,26 @@
             </div>
           </div>
         </form>
+
+        <div class="config-detail-actions">
+          <button type="button" id="config-edit-btn">
+            <i class="fa-solid fa-pen"></i>
+            Chỉnh sửa
+          </button>
+          <button type="button" id="config-cancel-btn" style="display: none">
+            <i class="fa-solid fa-xmark"></i>
+            Hủy
+          </button>
+          <button
+            type="submit"
+            form="config-edit-form"
+            id="config-save-btn"
+            style="display: none"
+          >
+            <i class="fa-solid fa-check"></i>
+            Lưu
+          </button>
+        </div>
       </div>
 
       <!-- program list -->
