@@ -929,3 +929,125 @@
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
 }
+
+/* =======================PHONG THUC HANH=================== */
+
+/* ===== POPUP THÊM PHÒNG ===== */
+
+/* Mặc định ẩn popup */
+.room-add-container {
+  display: none;
+}
+
+/* Khi nhấn nút Thêm phòng */
+.room-add-container.show {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  justify-content: center;
+  align-items: center;
+
+  padding: 20px;
+  box-sizing: border-box;
+
+  background: rgba(0, 0, 0, 0.55);
+}
+
+/* Khung form */
+#room-add-form {
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  padding: 28px;
+  border-radius: 14px;
+  background: #fff;
+
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+}
+
+/* Từng trường nhập liệu */
+#room-add-form .room-add-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+/* Nhãn */
+#room-add-form .room-add-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #263449;
+}
+
+/* Ô nhập và danh sách chọn */
+#room-add-form input,
+#room-add-form select {
+  width: 100%;
+  min-height: 42px;
+  box-sizing: border-box;
+
+  padding: 10px 12px;
+  border: 1px solid #d1d9e6;
+  border-radius: 8px;
+  background: #fff;
+
+  font-size: 14px;
+  outline: none;
+}
+
+/* Khi chọn ô nhập */
+#room-add-form input:focus,
+#room-add-form select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Hai nút thao tác */
+#room-add-form .add-config-btn {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+#room-add-form .add-config-btn button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Nút Hủy */
+#cancel-add-config-btn {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* Nút Thêm phòng */
+#room-add-form .submit-add-config-btn {
+  background: #2563eb;
+  color: #fff;
+}
+
+#room-add-form .submit-add-config-btn:hover {
+  background: #1d4ed8;
+}
+
+/* Màn hình nhỏ */
+@media (max-width: 480px) {
+  #room-add-form {
+    padding: 20px;
+  }
+
+  #room-add-form .add-config-btn button {
+    padding: 10px 12px;
+  }
+}

@@ -398,12 +398,12 @@ def show_admin_config_detail(
 
     cursor.execute(
         """
-                SELECT MaPhong, TenPhong, MaCauHinh
-                FROM PHONG
-                WHERE 
-                    MaCauHinh = %s
-                    OR MaCauHinh IS NULL
-                ORDER BY TenPhong
+            SELECT MaPhong, TenPhong, MaCauHinh
+            FROM PHONG
+            WHERE 
+                MaCauHinh = %s
+                OR MaCauHinh IS NULL
+            ORDER BY TenPhong
             """,
         (config_id,),
     )
@@ -411,10 +411,10 @@ def show_admin_config_detail(
 
     cursor.execute(
         """
-                SELECT MaPhong, TenPhong, MaCauHinh
-                FROM PHONG
-                ORDER BY TenPhong
-            """,
+            SELECT MaPhong, TenPhong, MaCauHinh
+            FROM PHONG
+            ORDER BY TenPhong
+        """,
     )
     rooms = cursor.fetchall()
 
@@ -888,5 +888,261 @@ def edit_config(
 
     return RedirectResponse(
         url=f"/admin/program",
+        status_code=303,
+    )
+
+
+# ====================================Phong thuc hanh========================
+
+
+def get_rooms(per_page, offset, keyword):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+            SELECT
+                p.MaPhong,
+                p.TenPhong,
+                COUNT(mt.MaMayTinh) AS TongSoMay,
+                cb.TenCanBo AS TenCanBo,
+                p.TinhTrangPhong
+            FROM PHONG p
+            LEFT JOIN MAY_TINH mt
+                ON mt.MaPhong = p.MaPhong
+            LEFT JOIN CAN_BO cb
+                ON cb.MaCanBo = p.MaCanBo
+            GROUP BY
+                p.MaPhong,
+                cb.MaCanBo
+            HAVING
+                p.TenPhong ILIKE %s
+                OR COUNT(mt.MaMayTinh)::TEXT ILIKE %s
+            ORDER BY p.MaPhong
+            LIMIT %s OFFSET %s;
+        """,
+        (
+            f"%{keyword}%",
+            f"%{keyword}%",
+            per_page,
+            offset,
+        ),
+    )
+
+    rooms = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return rooms
+
+
+def get_sum_rooms(keyword):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+            SELECT COUNT(*)
+            FROM (
+                SELECT p.MaPhong
+                FROM PHONG p
+                LEFT JOIN MAY_TINH mt
+                    ON mt.MaPhong = p.MaPhong
+                GROUP BY p.MaPhong
+                HAVING
+                    p.TenPhong ILIKE %s
+                    OR COUNT(mt.MaMayTinh)::TEXT ILIKE %s
+            ) AS matched_rooms;
+        """,
+        (
+            f"%{keyword}%",
+            f"%{keyword}%",
+        ),
+    )
+
+    room = cursor.fetchone()[0]
+
+    cursor.close()
+    conn.close()
+
+    return room
+
+
+def get_staffs_room():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+            SELECT *
+            FROM CAN_BO
+        """,
+    )
+
+    staffs = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return staffs
+
+
+def get_configs_room():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+            SELECT *
+            FROM CAU_HINH
+        """,
+    )
+
+    configs = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return configs
+
+
+@router.get("/admin/room")
+def show_admin_room(
+    request: Request,
+    page: int = 1,
+    keyword: str = "",
+):
+    role = request.session.get("role")
+    if role != 0:
+        return RedirectResponse(url="/login", status_code=303)
+
+    user = get_user_by_id(request.session.get("accountId"))
+    avt = request.session.get("avt")
+    staffs = get_staffs_room()
+    configs = get_configs_room()
+
+    per_page = 10  # moi bang hien 10 dong
+    offset = (page - 1) * per_page
+    rooms = get_rooms(per_page, offset, keyword)
+    amount = get_sum_rooms(keyword)
+    success = request.session.pop("success", None)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/room.html",
+        context={
+            "rooms": rooms,
+            "staffs": staffs,
+            "configs": configs,
+            "page": page,
+            "user": user,
+            "avt": avt,
+            "amount": amount,
+            "per_page": per_page,
+            "keyword": keyword,
+            "success": success,
+        },
+    )
+
+
+@router.post("/admin/room")
+def add_room(
+    request: Request,
+    room_name: str = Form(""),
+    config_id: str = Form(""),
+    staff_id: str = Form(""),
+    machine_count: int = Form(...),
+):
+    role = request.session.get("role")
+    if role != 0:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+            INSERT INTO PHONG
+            (TenPhong, MaCanBo, MaCauHinh)
+            VALUES (%s, %s, %s)
+            RETURNING MaPhong
+        """,
+        (
+            room_name,
+            staff_id,
+            config_id,
+        ),
+    )
+
+    roomId = cursor.fetchone()[0]
+
+    if machine_count:
+        for machine in range(machine_count):
+            cursor.execute(
+                """
+                    INSERT INTO MAY_TINH
+                    (MaPhong)
+                    VALUES (%s)
+                """,
+                (roomId,),
+            )
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    request.session["success"] = "Thêm phòng thành công!"
+
+    return RedirectResponse(
+        url="room",
+        status_code=303,
+    )
+
+
+@router.post("/admin/room/{room_id}/delete")
+def delete_room(
+    request: Request,
+    room_id: int,
+):
+    role = request.session.get("role")
+    if role != 0:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = get_connection()
+
+    try:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            DELETE FROM MAY_TINH
+            WHERE MaPhong = %s
+            """,
+            (room_id,),
+        )
+
+        cursor.execute(
+            """
+            DELETE FROM PHONG
+            WHERE MaPhong = %s
+            """,
+            (room_id,),
+        )
+
+        if cursor.rowcount == 0:
+            conn.rollback()
+            request.session["success"] = "Phòng không tồn tại."
+        else:
+            conn.commit()
+            request.session["success"] = "Xóa phòng thành công!"
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
+
+    return RedirectResponse(
+        url="/admin/room",
         status_code=303,
     )
