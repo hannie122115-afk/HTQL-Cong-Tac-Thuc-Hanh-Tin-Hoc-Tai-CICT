@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý tài khoản | Quản trị viên</title>
+    <link rel="stylesheet" href="/static/css/Nhap.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="header-left">
+        <div class="header-left-logo">
+          <div class="header-left-icon">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div class="header-left-title">Edu-LIMS</div>
+        </div>
+        <div class="header-left-describe">
+          Hệ thống công tác thực hành tin học
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="header-label">
+          <i class="fa-solid fa-bell"></i>
+        </div>
+        <div class="header-user" id="headerUser">
+          <div class="header-avt">
+            <img src="{{avt}}" alt="" />
+          </div>
+          <div class="navbar-arrow">
+            <i class="fa-solid fa-caret-down"></i>
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- navbar -->
+    <div class="navbar-container" id="navbarContainer">
+      <div class="navbar-user-container">
+        <a href="">
+          <div class="navbar-user-avt">
+            <img src="{{avt}}" alt="" />
+          </div>
+          <div class="navbar-user-name">
+            <p>{{ user[1] }}</p>
+            <p>Quản trị viên</p>
+          </div>
+        </a>
+      </div>
+      <div class="navbar-box">
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <div class="navbar-item-title">Hồ sơ cá nhân</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Phần mềm</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-download"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Cấu hình máy</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user-gear"></i>
+              </div>
+              <div class="navbar-item-title">Tài khoản</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-users"></i>
+              </div>
+              <div class="navbar-item-title">Cán bộ</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-chalkboard-user"></i>
+              </div>
+              <div class="navbar-item-title">Giảng viên</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-file-lines"></i>
+              </div>
+              <div class="navbar-item-title">Duyệt yêu cầu</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-regular fa-calendar-days"></i>
+              </div>
+              <div class="navbar-item-title">Lịch thực hành</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="navbar-logout">
+        <a href="/logout">
+          <div class="navbar-logout-icon">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </div>
+          <div class="navbar-logout-title">Đăng xuất</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- body -->
+
+    <div class="account-container container-web">
+      <div class="direction">
+        <a href="/admin">Trang chủ</a>
+        <i class="fa-solid fa-angle-right"></i>
+        <a href="/admin/account">Quản lý tài khoản</a>
+      </div>
+
+      <!-- search -->
+      <form method="get" action="/admin/account">
+        <div class="account-search-box">
+          <input
+            type="text"
+            name="keyword"
+            id=""
+            placeholder="Tìm kiếm theo tên đăng nhập, họ tên..."
+            value="{{ keyword or '' }}"
+          />
+          <button type="submit" class="submit-account-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </div>
+        <div class="account-filter-act" id="account-role-filter">
+          <label class="account-role-title" for="account-role">
+            Vai trò:
+          </label>
+          <select name="role" id="account-role">
+            {% if role == "" %}
+            <option value="" selected>Tất cả</option>
+            {% else %}
+            <option value="">Tất cả</option>
+            {% endif %} {% if role == "1" %}
+            <option value="1" selected>Giảng viên</option>
+            {% else %}
+            <option value="1">Giảng viên</option>
+            {% endif %} {% if role == "0" %}
+            <option value="0" selected>Cán bộ</option>
+            {% else %}
+            <option value="0">Cán bộ</option>
+            {% endif %}
+          </select>
+        </div>
+
+        <div class="account-filter-act" id="account-status-filter">
+          <label class="account-status-title" for="account-status">
+            Trạng thái:
+          </label>
+          <select name="status" id="account-status">
+            {% if status == "" %}
+            <option value="" selected>Tất cả</option>
+            {% else %}
+            <option value="">Tất cả</option>
+            {% endif %} {% if status == "1" %}
+            <option value="1" selected>Đang hoạt động</option>
+            {% else %}
+            <option value="1">Đang hoạt động</option>
+            {% endif %} {% if status == "0" %}
+            <option value="0" selected>Bị khóa</option>
+            {% else %}
+            <option value="0">Bị khóa</option>
+            {% endif %}
+          </select>
+        </div>
+      </form>
+
+      <div class="account-add-act" id="account-add-act">
+        <i class="fa-solid fa-plus"></i>
+        Cấp tài khoản
+      </div>
+
+      <!-- add account -->
+      <div class="account-add-container" id="account-add-container" hidden>
+        <div class="account-popup-content">
+          <h3 id="account-popup-title">Cấp tài khoản</h3>
+          <form action="/admin/account" method="post" id="account-add-form">
+            <div class="account-add-item">
+              <span class="account-add-title">Email</span>
+              <input
+                type="email"
+                name="account_email"
+                id="account_email"
+                placeholder="Nhập email..."
+              />
+            </div>
+
+            <div class="account-add-item">
+              <span class="account-add-title">Họ tên</span>
+              <input
+                type="text"
+                name="account_name"
+                id="account_name"
+                placeholder="Nhập họ tên..."
+              />
+            </div>
+
+            <div class="account-add-item">
+              <span class="account-add-title">Ngày sinh</span>
+              <input type="date" name="account_birth" id="account_birth" />
+            </div>
+
+            <div class="account-add-item">
+              <span class="account-add-title">Giới tính</span>
+              <label>
+                <input type="radio" name="account_gender" value="1" checked />
+                Nam
+              </label>
+              <label>
+                <input type="radio" name="account_gender" value="0" />
+                Nữ
+              </label>
+            </div>
+
+            <div class="account-add-item">
+              <span class="account-add-title">Số điện thoại</span>
+              <input
+                type="tel"
+                name="account_tel"
+                id="account_tel"
+                maxlength="10"
+                placeholder="Nhập số điện thoại..."
+              />
+            </div>
+
+            <div class="account-add-item">
+              <span class="account-add-title">Vai trò</span>
+              <label
+                ><input type="radio" name="account_role" value="1" checked />
+                Giảng viên</label
+              >
+              <label
+                ><input type="radio" name="account_role" value="0" /> Cán
+                bộ</label
+              >
+            </div>
+
+            <div class="add-account-btn">
+              <button type="button" id="cancel-add-account-btn">Hủy</button>
+              <button type="submit" id="submit-add-account-btn">
+                Cấp tài khoản
+              </button>
+
+              <button type="button" id="toggle-account-status-btn"></button>
+              <button type="button" id="close-see-detail-account-btn">
+                Đóng
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- account-list -->
+      <div class="account-table">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Mã tài khoản</th>
+              <th>Tên đăng nhập</th>
+              <th>Họ tên</th>
+              <th>Email</th>
+              <th>Vai trò</th>
+              <th>Trạng thái</th>
+              <th colspan="2">Thao tác</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% if accounts %} {% set start_index = (page - 1) * per_page %} {%
+            for account in accounts %}
+            <tr>
+              <td>{{ start_index + loop.index }}</td>
+              <td>TK{{ account[0] }}</td>
+              <td>{{ account[1] }}</td>
+              {% if account[2] == 1 %}
+              <td>{{ account[6] }}</td>
+              <td>{{ account[7] }}</td>
+              <td>Giảng viên</td>
+              {% elif account[2] == 0 %}
+              <td>{{ account[4] }}</td>
+              <td>{{ account[5] }}</td>
+              <td>Cán bộ</td>
+              {% else %}
+              <td>[Không cung cấp]</td>
+              <td>[Không cung cấp]</td>
+              <td>Quản trị viên</td>
+              {% endif %} {% if account[3] == 1 %}
+              <td>Đang hoạt động</td>
+              {% else %}
+              <td>Bị khóa</td>
+              {% endif %}
+
+              <td>
+                <button
+                  type="button"
+                  class="see-detail-act"
+                  data-id="{{ account[0] }}"
+                >
+                  <i class="fa-solid fa-eye"></i>
+                  Xem chi tiết
+                </button>
+              </td>
+
+              <td>
+                <button
+                  type="button"
+                  class="delete-detail-act"
+                  data-id="{{ account[0] }}"
+                >
+                  <i class="fa-solid fa-trash-can"></i>
+                  Xóa
+                </button>
+              </td>
+            </tr>
+            {% endfor %} {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- account-page -->
+      <div class="account-page">
+        {% set page_number = (page - 1) * per_page %}
+        <span
+          >Hiển thị {{ page_number + 1 }} - {% if page_number + per_page >
+          amount %} {{ amount }} {% else %} {{ page_number + per_page }} {%
+          endif %}của tổng {{ amount }} phòng</span
+        >
+        <div class="pagination">
+          <div class="account-previous-page">
+            {% if (page - 1) > 0 %}
+            <a href="/admin/account?page={{ page - 1 }}&keyword={{ keyword }}"
+              ><i class="fa-solid fa-chevron-left"></i
+            ></a>
+            {% else %}
+            <span><i class="fa-solid fa-chevron-left"></i></span>
+            {% endif %}
+          </div>
+          <div class="account-number-page">{{ page }}</div>
+          <div class="account-next-page">
+            {% if amount > (page * per_page) %}
+            <a href="/admin/account?page={{ page + 1 }}&keyword={{ keyword }}">
+              <i class="fa-solid fa-chevron-right"></i>
+            </a>
+            {% else %}
+            <span>
+              <i class="fa-solid fa-chevron-right"></i>
+            </span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- popup -->
+
+    <div class="popup-error" id="popup-error">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="popup-error-message" id="popup-error-message"></div>
+        <button type="button" id="popup-error-close">Đóng</button>
+      </div>
+    </div>
+
+    <div class="popup-success" id="popup-success">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="popup-success-message" id="popup-success-message">
+          {{ success }}
+        </div>
+        <button type="button" id="popup-success-close">Đóng</button>
+      </div>
+    </div>
+
+    <div
+      class="popup-success-account"
+      id="popup-success-account"
+      data-account-id="{{ pending_account_id }}"
+    >
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div
+          class="popup-success-account-message"
+          id="popup-success-account-message"
+        >
+          Cấp tài khoản thành công!
+          <br />
+          Gửi mail ngay.
+        </div>
+        <button type="button" id="popup-success-account-send">Gửi mail</button>
+        <button type="button" id="popup-success-account-close">Đóng</button>
+      </div>
+    </div>
+
+    <div
+      id="account-page"
+      data-success="{{ success or '' }}"
+      data-error="{{ error or '' }}"
+    ></div>
+
+    <div class="popup-confirm" id="popup-delete-account">
+      <div class="popup popup-delete-account-content">
+        <div class="popup-icon">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+
+        <h3>Xác nhận xóa tài khoản này?</h3>
+        <p id="delete-account-message">Tài khoản sẽ bị xóa khỏi hệ thống.</p>
+
+        <div class="popup-actions">
+          <button type="button" id="delete-account-cancel">Hủy</button>
+
+          <form id="delete-account-form" method="post" action="">
+            <button type="submit" id="delete-account-confirm">
+              Xác nhận xóa
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/js/admin/account.js"></script>
+  </body>
+</html>

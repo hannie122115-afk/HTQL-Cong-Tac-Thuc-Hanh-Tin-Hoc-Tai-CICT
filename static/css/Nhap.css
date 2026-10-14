@@ -1526,3 +1526,409 @@
 #room-edit-form.editing #room_status {
   display: block;
 }
+
+/* ===============ACCOUNT=================== */
+
+/* ===== POPUP CHUNG ===== */
+[hidden] {
+  display: none !important;
+}
+
+/* ===== FORM CẤP TÀI KHOẢN / CHI TIẾT ===== */
+.account-add-container {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.55);
+  overflow-y: auto;
+}
+
+.account-add-container.show {
+  display: flex;
+}
+
+.account-popup-content {
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
+}
+
+.account-popup-content h3 {
+  margin: 0 0 24px;
+  color: #173b70;
+  font-size: 22px;
+  text-align: center;
+}
+
+.account-add-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.account-add-title {
+  width: 100%;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.account-add-item input[type="text"],
+.account-add-item input[type="email"],
+.account-add-item input[type="date"],
+.account-add-item input[type="tel"] {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  outline: none;
+  font-size: 14px;
+}
+
+.account-add-item input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.account-add-item label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #334155;
+  font-size: 14px;
+}
+
+.account-add-item input:disabled {
+  cursor: not-allowed;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* ===== CÁC NÚT TRONG FORM ===== */
+.add-account-btn {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.add-account-btn button {
+  min-height: 40px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+#cancel-add-account-btn,
+#close-see-detail-account-btn {
+  color: #334155;
+  background: #e2e8f0;
+}
+
+#submit-add-account-btn {
+  color: #fff;
+  background: #2563eb;
+}
+
+#toggle-account-status-btn {
+  color: #fff;
+  background: #dc2626;
+}
+
+.add-account-btn button:hover {
+  filter: brightness(0.94);
+}
+
+.add-account-btn button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ===== POPUP THÀNH CÔNG / LỖI ===== */
+.popup-error,
+.popup-success,
+.popup-success-account {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.popup-error.show,
+.popup-success.show,
+.popup-success-account.show {
+  display: flex;
+}
+
+.popup {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 420px;
+  padding: 28px;
+  border-radius: 14px;
+  background: #fff;
+  text-align: center;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
+}
+
+.popup-icon {
+  margin-bottom: 16px;
+  font-size: 42px;
+  color: #2563eb;
+}
+
+.popup-error .popup-icon {
+  color: #dc2626;
+}
+
+.popup-success .popup-icon,
+.popup-success-account .popup-icon {
+  color: #16a34a;
+}
+
+.popup-error-message,
+.popup-success-message,
+.popup-success-account-message {
+  margin-bottom: 20px;
+  color: #334155;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.popup button {
+  min-height: 40px;
+  margin: 4px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 7px;
+  color: #fff;
+  background: #2563eb;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.popup button:hover {
+  filter: brightness(0.92);
+}
+
+#popup-success-account-send {
+  background: #16a34a;
+}
+
+#popup-success-account-close,
+#popup-error-close,
+#popup-success-close {
+  background: #64748b;
+}
+
+/* ===== NÚT THAO TÁC TRÊN BẢNG ===== */
+.see-detail-act,
+.delete-detail-act {
+  padding: 8px 11px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.see-detail-act {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.delete-detail-act {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.see-detail-act:hover,
+.delete-detail-act:hover {
+  filter: brightness(0.95);
+}
+
+/* ===== NÚT CẤP TÀI KHOẢN ===== */
+.account-add-act {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 11px 16px;
+  border-radius: 7px;
+  color: #fff;
+  background: #2563eb;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.account-add-act:hover {
+  background: #1d4ed8;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .account-popup-content {
+    padding: 20px 16px;
+  }
+
+  .account-popup-content h3 {
+    font-size: 19px;
+  }
+
+  .add-account-btn {
+    justify-content: stretch;
+  }
+
+  .add-account-btn button {
+    flex: 1;
+  }
+
+  .popup {
+    padding: 22px 16px;
+  }
+}
+
+/* ===== POPUP XÁC NHẬN XÓA TÀI KHOẢN ===== */
+#popup-delete-account {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+#popup-delete-account.show {
+  display: flex;
+}
+
+.popup-delete-account-content {
+  width: 100%;
+  max-width: 420px;
+  padding: 28px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  animation: deletePopupShow 0.2s ease;
+}
+
+#popup-delete-account .popup-icon {
+  margin-bottom: 16px;
+  color: #e53935;
+  font-size: 42px;
+}
+
+#popup-delete-account h3 {
+  margin: 0 0 12px;
+  color: #263238;
+  font-size: 20px;
+}
+
+#delete-account-message {
+  margin: 0 0 24px;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+#popup-delete-account .popup-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+#popup-delete-account button {
+  min-width: 100px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#delete-account-cancel {
+  background: #e9ecef;
+  color: #333;
+}
+
+#delete-account-cancel:hover {
+  background: #d6d9dc;
+}
+
+#delete-account-form {
+  margin: 0;
+}
+
+#delete-account-confirm {
+  background: #dc3545;
+  color: #fff;
+}
+
+#delete-account-confirm:hover {
+  background: #bb2d3b;
+}
+
+@keyframes deletePopupShow {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .popup-delete-account-content {
+    padding: 22px 16px;
+  }
+
+  #popup-delete-account .popup-actions {
+    gap: 8px;
+  }
+
+  #popup-delete-account button {
+    min-width: 90px;
+    padding: 10px 12px;
+  }
+}
+[hidden] {
+  display: none !important;
+}
+
+.account-add-container {
+  display: none;
+}
+
+.account-add-container.show {
+  display: flex;
+}

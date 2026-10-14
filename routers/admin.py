@@ -1,9 +1,14 @@
 from fastapi import APIRouter, Request, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
+from pwdlib import PasswordHash
 from typing import List
-import re
+from datetime import date
+from datetime import datetime, timedelta
+from psycopg2.extras import RealDictCursor
+import re, secrets, string, hashlib, os
 
+from email_service import send_account_email
 from database import get_connection
 
 router = APIRouter()
@@ -39,7 +44,7 @@ def get_user_by_id(accountId):
 def show_admin(request: Request):
     role = request.session.get("role")
 
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
@@ -136,7 +141,7 @@ def show_admin_config(
     keyword: str = "",
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
@@ -177,7 +182,7 @@ def add_config(
     success: int = 1,
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -231,7 +236,7 @@ def delete_config(
     config_id: int,
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
 
@@ -382,7 +387,7 @@ def show_admin_config_detail(
     page: int = 1,
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -476,7 +481,7 @@ def update_config(
     rooms: List[int] = Form([]),
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -541,7 +546,7 @@ def delete_program_from_config(
     program_id: int,
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -577,7 +582,7 @@ def save_config_program(
     program_ids: list[int] = Form(default=[]),
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -677,7 +682,7 @@ def show_admin_program(
     keyword: str = "",
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
@@ -716,7 +721,7 @@ def add_program(
     success: int = 1,
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -757,7 +762,7 @@ def get_program_compatibility(
     program_id: int,
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -805,7 +810,7 @@ def delete_program(
     program_id: int,
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
 
@@ -858,7 +863,7 @@ def edit_config(
     program_img: str = Form(""),
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -1015,7 +1020,7 @@ def show_admin_room(
     keyword: str = "",
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
@@ -1056,7 +1061,7 @@ def add_room(
     machine_count: int = Form(...),
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -1107,7 +1112,7 @@ def delete_room(
     room_id: int,
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
 
@@ -1255,7 +1260,7 @@ def show_admin_room_detail(
     page: int = 1,
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -1312,7 +1317,7 @@ def update_room(
     room_status: int = Form(...),
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -1354,7 +1359,7 @@ def delete_computer_room(
     computer_id: str,
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -1390,7 +1395,7 @@ def add_computer_room(
     machine_count: int = Form(...),
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
 
     if machine_count < 1 or machine_count > 59:
@@ -1479,7 +1484,7 @@ def update_computer_status(
     computer_status: int = Form(...),
 ):
     role = request.session.get("role")
-    if role != 0:
+    if role != 2:
         return RedirectResponse(url="/login", status_code=303)
 
     if computer_status not in (0, 1, 2, 3):
@@ -1522,3 +1527,795 @@ def update_computer_status(
         url=f"/admin/room/{room_id}",
         status_code=303,
     )
+
+
+# ====================================Tai khoan========================
+
+
+def get_accounts(per_page, offset, keyword, role, status):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+            SELECT 
+                tk.MaTaiKhoan
+                ,tk.TenDangNhap
+                ,tk.VaiTro
+                ,tk.TrangThai
+                ,cb.TenCanBo
+                ,cb.Email
+                ,gv.TenGiangVien
+                ,gv.Email
+            FROM TAI_KHOAN_DANG_NHAP tk
+            LEFT JOIN CAN_BO cb ON cb.MaTaiKhoan = tk.MaTaiKhoan
+            LEFT JOIN GIANG_VIEN gv ON gv.MaTaiKhoan = tk.MaTaiKhoan
+            WHERE
+            (
+                %s = ''
+                OR cb.TenCanBo ILIKE %s
+                OR gv.TenGiangVien ILIKE %s
+                OR tk.TenDangNhap ILIKE %s
+            )
+            AND (%s IS NULL OR tk.VaiTro = %s)
+            AND (%s IS NULL OR tk.TrangThai = %s)
+            LIMIT %s OFFSET %s
+        """,
+        (
+            keyword,
+            f"%{keyword}%",
+            f"%{keyword}%",
+            f"%{keyword}%",
+            role,
+            role,
+            status,
+            status,
+            per_page,
+            offset,
+        ),
+    )
+
+    accounts = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return accounts
+
+
+def get_sum_accounts(keyword, role, status):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+            SELECT COUNT(DISTINCT tk.MaTaiKhoan)
+            FROM TAI_KHOAN_DANG_NHAP tk
+            LEFT JOIN CAN_BO cb ON cb.MaTaiKhoan = tk.MaTaiKhoan
+            LEFT JOIN GIANG_VIEN gv ON gv.MaTaiKhoan = tk.MaTaiKhoan
+            WHERE 
+            (
+                %s = ''
+                OR cb.TenCanBo ILIKE %s
+                OR gv.TenGiangVien ILIKE %s
+                OR tk.TenDangNhap ILIKE %s
+            )
+            AND (%s IS NULL OR tk.VaiTro = %s)
+            AND (%s IS NULL OR tk.TrangThai = %s)
+        """,
+        (
+            keyword,
+            f"%{keyword}%",
+            f"%{keyword}%",
+            f"%{keyword}%",
+            role,
+            role,
+            status,
+            status,
+        ),
+    )
+
+    account = cursor.fetchone()[0]
+
+    cursor.close()
+    conn.close()
+
+    return account
+
+
+@router.get("/admin/account")
+def show_admin_account(
+    request: Request,
+    page: int = 1,
+    keyword: str = "",
+    role: str = "",
+    status: str = "",
+):
+    admin_role = request.session.get("role")
+    if admin_role != 2:
+        return RedirectResponse(url="/login", status_code=303)
+
+    user = get_user_by_id(request.session.get("accountId"))
+    avt = request.session.get("avt")
+
+    per_page = 10  # moi bang hien 10 dong
+    offset = (page - 1) * per_page
+    role = role if role != "" else None
+    status = status if status != "" else None
+    accounts = get_accounts(per_page, offset, keyword, role, status)
+    amount = get_sum_accounts(keyword, role, status)
+    success = request.session.pop("success", None)
+    error = request.session.pop("error", None)
+    pending_account_id = request.session.pop("pending_account_id", None)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/account.html",
+        context={
+            "accounts": accounts,
+            "page": page,
+            "user": user,
+            "avt": avt,
+            "amount": amount,
+            "per_page": per_page,
+            "keyword": keyword,
+            "success": success,
+            "status": status,
+            "success": success,
+            "error": error,
+            "pending_account_id": pending_account_id,
+        },
+    )
+
+
+def generate_username(email):
+    username = email.split("@")[0].lower()
+    return username + "ctu"
+
+
+password_hash = PasswordHash.recommended()
+
+
+def hash_password(password: str) -> str:
+    return password_hash.hash(password)
+
+
+def generate_setup_token():
+    return secrets.token_urlsafe(32)
+
+
+def hash_setup_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+# @router.post("/admin/account")
+# def add_account(
+#     request: Request,
+#     account_email: str = Form(""),
+#     account_name: str = Form(""),
+#     account_birth: str = Form(""),
+#     account_gender: str = Form(""),
+#     account_tel: str = Form(""),
+#     account_role: str = Form(""),
+# ):
+#     admin_role = request.session.get("role")
+#     if admin_role != 2:
+#         return RedirectResponse(url="/login", status_code=303)
+#     conn = get_connection()
+#     cursor = conn.cursor()
+
+#     account_email = account_email.strip()
+#     account_name = account_name.strip()
+#     account_tel = account_tel.strip()
+#     birth_date = date.fromisoformat(account_birth)
+
+#     try:
+#         while True:
+#             account_username = generate_username(account_email)
+#             cursor.execute(
+#                 """
+#                 SELECT 1
+#                 FROM TAI_KHOAN_DANG_NHAP
+#                 WHERE TenDangNhap = %s
+#                 """,
+#                 (account_username,),
+#             )
+#             if cursor.fetchone() is None:
+#                 break
+
+#         cursor.execute(
+#             """
+#             INSERT INTO TAI_KHOAN_DANG_NHAP
+#                 (TenDangNhap, MatKhau, VaiTro, AnhDaiDien, TrangThai)
+#             VALUES (%s, %s, %s, %s, %s)
+#             RETURNING MaTaiKhoan
+#             """,
+#             (
+#                 account_username,
+#                 hash_password(secrets.token_urlsafe(16)),
+#                 int(account_role),
+#                 "https://cdn2.fptshop.com.vn/small/avatar_trang_1_cd729c335b.jpg",
+#                 1,
+#             ),
+#         )
+#         account_id_new = cursor.fetchone()[0]
+#         request.session["pending_account_id"] = account_id_new
+#         if account_role == "1":
+#             cursor.execute(
+#                 """
+#                 INSERT INTO GIANG_VIEN
+#                     (TenGiangVien, GioiTinh, NgaySinh,
+#                      SoDienThoai, Email, MaTaiKhoan)
+#                 VALUES (%s, %s, %s, %s, %s, %s)
+#                 """,
+#                 (
+#                     account_name,
+#                     int(account_gender),
+#                     birth_date,
+#                     account_tel,
+#                     account_email,
+#                     account_id_new,
+#                 ),
+#             )
+#         else:
+#             cursor.execute(
+#                 """
+#                 INSERT INTO CAN_BO
+#                     (TenCanBo, GioiTinh, NgaySinh,
+#                      SoDienThoai, Email, MaTaiKhoan)
+#                 VALUES (%s, %s, %s, %s, %s, %s)
+#                 """,
+#                 (
+#                     account_name,
+#                     int(account_gender),
+#                     birth_date,
+#                     account_tel,
+#                     account_email,
+#                     account_id_new,
+#                 ),
+#             )
+
+#         conn.commit()
+#         request.session["success"] = "Cấp tài khoản thành công!"
+#         return RedirectResponse(url="/admin/account", status_code=303)
+#     except Exception:
+#         conn.rollback()
+#         raise
+#     finally:
+#         cursor.close()
+#         conn.close()
+
+@router.post("/admin/account")
+def add_account(
+    request: Request,
+    account_email: str = Form(""),
+    account_name: str = Form(""),
+    account_birth: str = Form(""),
+    account_gender: str = Form(""),
+    account_tel: str = Form(""),
+    account_role: str = Form(""),
+):
+    print("1. Bat dau add_account")
+
+    admin_role = request.session.get("role")
+    if admin_role != 2:
+        print("2. Khong co quyen admin")
+        return RedirectResponse(url="/login", status_code=303)
+
+    conn = get_connection()
+    print("3. Da ket noi database")
+
+    cursor = conn.cursor()
+
+    try:
+        account_email = account_email.strip()
+        account_name = account_name.strip()
+        account_tel = account_tel.strip()
+        birth_date = date.fromisoformat(account_birth)
+
+        print("4. Da xu ly du lieu form")
+
+        # Giữ nguyên phần kiểm tra username và các câu INSERT hiện tại.
+
+        # Ngay trước conn.commit()
+        print("5. Chuan bi commit")
+        conn.commit()
+        print("6. Commit thanh cong")
+
+        request.session["success"] = "Cấp tài khoản thành công!"
+        print("7. Chuan bi redirect")
+
+        return RedirectResponse(
+            url="/admin/account",
+            status_code=303,
+        )
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cursor.close()
+        conn.close()
+        print("8. Da dong ket noi database")
+
+
+@router.post("/admin/account/send-email/{account_id}")
+async def send_account_setup_email(
+    request: Request,
+    account_id: int,
+):
+    # 1. Kiểm tra quyền quản trị viên
+    admin_role = request.session.get("role")
+    if admin_role != 2:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT
+                tk.MaTaiKhoan,
+                tk.TenDangNhap,
+                tk.VaiTro,
+                tk.TrangThai,
+                COALESCE(gv.Email, cb.Email) AS Email
+            FROM TAI_KHOAN_DANG_NHAP tk
+            LEFT JOIN GIANG_VIEN gv
+                ON gv.MaTaiKhoan = tk.MaTaiKhoan
+            LEFT JOIN CAN_BO cb
+                ON cb.MaTaiKhoan = tk.MaTaiKhoan
+            WHERE tk.MaTaiKhoan = %s
+            """,
+            (account_id,),
+        )
+        account = cursor.fetchone()
+
+        if account is None:
+            return JSONResponse(
+                {
+                    "error": False,
+                    "message": "Không tìm thấy tài khoản.",
+                },
+                status_code=404,
+            )
+
+        account_id_db, username, role, status, email = account
+
+        if status != 1:
+            return JSONResponse(
+                {
+                    "success": False,
+                    "message": "Tài khoản đang bị khóa.",
+                },
+                status_code=400,
+            )
+
+        # Tạo token và thời hạn 24 giờ
+        setup_token = generate_setup_token()
+        token_hash = hash_setup_token(setup_token)
+        expires_at = datetime.now() + timedelta(hours=24)
+
+        cursor.execute(
+            """
+            INSERT INTO THIET_LAP_TAI_KHOAN
+                (MaTaiKhoan, TokenHash, HetHan, DaSuDung)
+            VALUES (%s, %s, %s, FALSE)
+            ON CONFLICT (MaTaiKhoan)
+            DO UPDATE SET
+                TokenHash = EXCLUDED.TokenHash,
+                HetHan = EXCLUDED.HetHan,
+                DaSuDung = FALSE
+            """,
+            (
+                account_id_db,
+                token_hash,
+                expires_at,
+            ),
+        )
+        conn.commit()
+
+        # Tạo liên kết thiết lập mật khẩu
+        base_url = os.getenv(
+            "APP_BASE_URL",
+            "http://127.0.0.1:8000",
+        ).rstrip("/")
+
+        setup_link = f"{base_url}/account/setup?token={setup_token}"
+
+        await send_account_email(
+            to_email=email,
+            username=username,
+            setup_link=setup_link,
+        )
+
+        return JSONResponse(
+            {
+                "success": True,
+                "message": f"Đã gửi email đến {email}.",
+            }
+        )
+
+    except Exception:
+        if conn:
+            conn.rollback()
+
+        # Ghi lỗi chi tiết ở terminal để tiện sửa lỗi
+        import logging
+
+        logging.exception("Lỗi gửi email thiết lập tài khoản")
+
+        return JSONResponse(
+            {
+                "success": False,
+                "message": (
+                    "Không gửi được email. " "Kiểm tra cấu hình SMTP và Terminal."
+                ),
+            },
+            status_code=500,
+        )
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+@router.get("/account/setup")
+def show_setup_password(request: Request, token: str):
+    return templates.TemplateResponse(
+        request=request,
+        name="account/setup_password.html",
+        context={"token": token},
+    )
+
+
+@router.post("/account/setup")
+def setup_password(
+    request: Request,
+    token: str = Form(...),
+    password: str = Form(...),
+    confirm_password: str = Form(...),
+):
+    if not token.strip():
+        return templates.TemplateResponse(
+            request=request,
+            name="account/setup_password.html",
+            context={
+                "token": token,
+                "error": "Liên kết thiết lập mật khẩu không hợp lệ.",
+            },
+            status_code=400,
+        )
+
+    if password != confirm_password:
+        return templates.TemplateResponse(
+            request=request,
+            name="account/setup_password.html",
+            context={
+                "token": token,
+                "error": "Mật khẩu xác nhận không khớp.",
+            },
+            status_code=400,
+        )
+
+    if len(password) < 8:
+        return templates.TemplateResponse(
+            request=request,
+            name="account/setup_password.html",
+            context={
+                "token": token,
+                "error": "Mật khẩu phải có ít nhất 8 ký tự.",
+            },
+            status_code=400,
+        )
+
+    token_hash = hash_setup_token(token)
+    conn = None
+    try:
+        conn = get_connection()
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(
+                """
+                SELECT MaTaiKhoan, HetHan, DaSuDung
+                FROM THIET_LAP_TAI_KHOAN
+                WHERE TokenHash = %s
+                FOR UPDATE
+                """,
+                (token_hash,),
+            )
+            setup = cur.fetchone()
+
+            if not setup:
+                conn.rollback()
+                return templates.TemplateResponse(
+                    request=request,
+                    name="account/setup_password.html",
+                    context={
+                        "token": "",
+                        "error": "Liên kết không hợp lệ hoặc đã bị thay thế.",
+                    },
+                    status_code=400,
+                )
+
+            if setup["dasudung"]:
+                conn.rollback()
+                return templates.TemplateResponse(
+                    request=request,
+                    name="account/setup_password.html",
+                    context={
+                        "token": "",
+                        "error": "Liên kết này đã được sử dụng.",
+                    },
+                    status_code=400,
+                )
+
+            if (
+                setup["hethan"] <= datetime.now(setup["hethan"].tzinfo)
+                if setup["hethan"].tzinfo
+                else setup["hethan"] <= datetime.now()
+            ):
+                conn.rollback()
+                return templates.TemplateResponse(
+                    request=request,
+                    name="account/setup_password.html",
+                    context={
+                        "token": "",
+                        "error": "Liên kết đã hết hạn. Vui lòng yêu cầu gửi email mới.",
+                    },
+                    status_code=400,
+                )
+            account_id = setup["mataikhoan"]
+
+            password_hashed = hash_password(password)
+            cur.execute(
+                """
+                UPDATE TAI_KHOAN_DANG_NHAP
+                SET MatKhau = %s
+                WHERE MaTaiKhoan = %s
+                """,
+                (password_hashed, account_id),
+            )
+
+            if cur.rowcount != 1:
+                conn.rollback()
+                return templates.TemplateResponse(
+                    request=request,
+                    name="account/setup_password.html",
+                    context={
+                        "token": "",
+                        "error": "Không tìm thấy tài khoản cần cập nhật.",
+                    },
+                    status_code=400,
+                )
+
+            cur.execute(
+                """
+                UPDATE THIET_LAP_TAI_KHOAN
+                SET DaSuDung = TRUE
+                WHERE MaTaiKhoan = %s
+                """,
+                (account_id,),
+            )
+
+        conn.commit()
+        request.session["success"] = (
+            "Thiết lập mật khẩu thành công. Vui lòng đăng nhập."
+        )
+        return RedirectResponse(
+            url="/login",
+            status_code=303,
+        )
+
+    except Exception:
+        if conn:
+            conn.rollback()
+
+        return templates.TemplateResponse(
+            request=request,
+            name="account/setup_password.html",
+            context={
+                "token": token,
+                "error": "Đã xảy ra lỗi khi thiết lập mật khẩu. Vui lòng thử lại.",
+            },
+            status_code=500,
+        )
+
+    finally:
+        if conn:
+            conn.close()
+
+
+@router.post("/admin/account/{role}/{account_id}/delete")
+def delete_account(request: Request, account_id: int, role: int):
+    admin_role = request.session.get("role")
+    if admin_role != 2:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = get_connection()
+
+    try:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            SELECT MaTaiKhoan
+            FROM TAI_KHOAN_DANG_NHAP
+            WHERE MaTaiKhoan = %s
+            """,
+            (account_id,),
+        )
+
+        if cursor.fetchone() is None:
+            conn.rollback()
+            request.session["error"] = "Tài khoản không tồn tại."
+            return RedirectResponse(url="/admin/account", status_code=303)
+
+        if role == 1:
+            cursor.execute(
+                """
+                DELETE FROM GIANG_VIEN
+                WHERE MaTaiKhoan = %s
+                """,
+                (account_id,),
+            )
+        elif role == 0:
+
+            cursor.execute(
+                """
+                SELECT MaCanBo
+                FROM CAN_BO
+                WHERE MaTaiKhoan = %s
+                """,
+                (account_id,),
+            )
+            staff_id_del = cursor.fetchone()
+            if staff_id_del:
+                cursor.execute(
+                    """
+                    UPDATE PHONG
+                    SET MaCanBo = NULL
+                    WHERE MaCanBo = %s
+                    """,
+                    (staff_id_del[0],),
+                )
+            cursor.execute(
+                """
+                DELETE FROM CAN_BO
+                WHERE MaTaiKhoan = %s
+                """,
+                (account_id,),
+            )
+
+        cursor.execute(
+            """
+            DELETE FROM TAI_KHOAN_DANG_NHAP
+            WHERE MaTaiKhoan = %s
+            """,
+            (account_id,),
+        )
+
+        if cursor.rowcount == 0:
+            conn.rollback()
+            request.session["error"] = "Tài khoản không tồn tại."
+        else:
+            conn.commit()
+            request.session["success"] = "Xóa tài khoản thành công!"
+
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+    return RedirectResponse(
+        url="/admin/account",
+        status_code=303,
+    )
+
+
+@router.get("/admin/account/{account_id}/detail")
+def account_detail(request: Request, account_id: int):
+    admin_role = request.session.get("role")
+    if admin_role != 2:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    tk.MaTaiKhoan,
+                    tk.TenDangNhap,
+                    tk.VaiTro,
+                    tk.TrangThai,
+                    cb.TenCanBo,
+                    cb.GioiTinh,
+                    cb.NgaySinh,
+                    cb.SoDienThoai,
+                    cb.Email,
+                    gv.TenGiangVien,
+                    gv.GioiTinh,
+                    gv.NgaySinh,
+                    gv.SoDienThoai,
+                    gv.Email
+                FROM TAI_KHOAN_DANG_NHAP tk
+                LEFT JOIN CAN_BO cb ON cb.MaTaiKhoan = tk.MaTaiKhoan
+                LEFT JOIN GIANG_VIEN gv ON gv.MaTaiKhoan = tk.MaTaiKhoan
+                WHERE tk.MaTaiKhoan = %s
+                """,
+                (account_id,),
+            )
+            row = cursor.fetchone()
+
+        if not row:
+            return JSONResponse(
+                {"error": "Không tìm thấy tài khoản."},
+                status_code=404,
+            )
+        is_teacher = str(row[2]) == "1"
+        return {
+            "id": row[0],
+            "username": row[1],
+            "role": str(row[2]),
+            "status": int(row[3]),
+            "name": row[9] if is_teacher else row[4],
+            "gender": row[10] if is_teacher else row[5],
+            "birth": (
+                row[11].isoformat()
+                if is_teacher and row[11]
+                else (row[6].isoformat() if row[6] else "")
+            ),
+            "tel": row[12] if is_teacher else row[7],
+            "email": row[13] if is_teacher else row[8],
+        }
+    finally:
+        conn.close()
+
+
+@router.post("/admin/account/{account_id}/status")
+def update_account_status(
+    request: Request,
+    account_id: int,
+    status: int = Form(...),
+):
+    admin_role = request.session.get("role")
+    if admin_role != 2:
+        return RedirectResponse(url="/login", status_code=303)
+
+    if status not in (0, 1):
+        request.session["error"] = "Trạng thái không hợp lệ."
+        return RedirectResponse(url="/admin/account", status_code=303)
+
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE TAI_KHOAN_DANG_NHAP
+                SET TrangThai = %s
+                WHERE MaTaiKhoan = %s
+                """,
+                (status, account_id),
+            )
+
+            if cursor.rowcount == 0:
+                conn.rollback()
+                request.session["error"] = "Tài khoản không tồn tại."
+            else:
+                conn.commit()
+                request.session["success"] = (
+                    "Mở khóa tài khoản thành công."
+                    if status == 1
+                    else "Khóa tài khoản thành công."
+                )
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+    return RedirectResponse(url="/admin/account", status_code=303)

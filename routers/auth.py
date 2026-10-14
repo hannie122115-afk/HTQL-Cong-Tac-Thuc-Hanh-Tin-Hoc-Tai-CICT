@@ -19,9 +19,9 @@ def login(request: Request, username: str = Form(""), password: str = Form("")):
 
     cursor.execute(
         """
-        SELECT MaTaiKhoan, TenTaiKhoan, MatKhau, VaiTro, AnhDaiDien
+        SELECT MaTaiKhoan, TenDangNhap, MatKhau, VaiTro, AnhDaiDien, TrangThai
         FROM TAI_KHOAN_DANG_NHAP
-        WHERE TenTaiKhoan = %s
+        WHERE TenDangNhap = %s
     """,
         (username,),
     )
@@ -50,19 +50,33 @@ def login(request: Request, username: str = Form(""), password: str = Form("")):
             name="login.html",
             context={"message": "Mật khẩu không chính xác!"},
         )
+    if account[5] != 1:
+        return templates.TemplateResponse(
+            request=request,
+            name="login.html",
+            context={"message": "Không thể đăng nhập do tài khoản đã bị khóa!"},
+        )
 
     request.session["accountId"] = account[0]
     request.session["accountName"] = account[1]
     request.session["role"] = account[3]
     request.session["avt"] = account[4]
 
+    # role = account[3]
+    # if role == 2:
+    #     return RedirectResponse(url="/admin", status_code=303)
+    # if role == 1:
+    #     return RedirectResponse(url="/teacher", status_code=303)
+    # if role == 0:
+    #     return RedirectResponse(url="/staff", status_code=303)
     role = account[3]
-    if role == 0:
-        return RedirectResponse(url="/admin", status_code=303)
+
     if role == 1:
         return RedirectResponse(url="/teacher", status_code=303)
-    if role == 2:
+    elif role == 0:
         return RedirectResponse(url="/staff", status_code=303)
+    else:
+        return RedirectResponse(url="/admin", status_code=303)
 
 
 @router.get("/logout")

@@ -13,7 +13,7 @@ router = APIRouter()
 def show_admin(request: Request):
     role = request.session.get("role")
 
-    if role != 2:
+    if role != 1:
         return RedirectResponse(url="/login", status_code=303)
 
     return templates.TemplateResponse(request=request, name="staff/index.html")
