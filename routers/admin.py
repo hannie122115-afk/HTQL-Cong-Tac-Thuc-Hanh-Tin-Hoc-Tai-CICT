@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 from typing import List
+import re
 
 from database import get_connection
 
@@ -1077,14 +1078,15 @@ def add_room(
     roomId = cursor.fetchone()[0]
 
     if machine_count:
-        for machine in range(machine_count):
+        for machine in range(1, machine_count + 1):
+            computerId = f"P{room_name}M{machine}"
+
             cursor.execute(
                 """
-                    INSERT INTO MAY_TINH
-                    (MaPhong)
-                    VALUES (%s)
+                INSERT INTO MAY_TINH (MaMayTinh, MaPhong, TinhTrangMay)
+                VALUES (%s, %s, %s)
                 """,
-                (roomId,),
+                (computerId, roomId, 0),
             )
 
     conn.commit()
@@ -1144,5 +1146,379 @@ def delete_room(
 
     return RedirectResponse(
         url="/admin/room",
+        status_code=303,
+    )
+
+
+# ==================chi tiet phong thuc hanh =========================
+
+
+def get_room(roomId):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+            SELECT
+                p.MaPhong,
+                p.TenPhong,
+                cb.TenCanBo AS TenCanBo,
+                cb.MaCanBo AS MaCanBo,
+                ch.CPU AS CPU,
+                ch.MaCauHinh,
+                p.TinhTrangPhong
+            FROM PHONG p
+            LEFT JOIN CAN_BO cb
+                ON cb.MaCanBo = p.MaCanBo
+            LEFT JOIN CAU_HINH ch
+                ON ch.MaCauHinh = p.MaCauHinh
+            WHERE MaPhong = %s
+        """,
+        (roomId,),
+    )
+
+    room = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    return room
+
+
+def get_computer(room_id, keyword, per_page, offset):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM MAY_TINH
+        WHERE MaPhong = %s
+          AND (
+              MaMayTinh::TEXT ILIKE %s
+              OR TinhTrangMay::TEXT ILIKE %s
+          )
+        ORDER BY MaMayTinh
+        LIMIT %s OFFSET %s
+        """,
+        (
+            room_id,
+            f"%{keyword}%",
+            f"%{keyword}%",
+            per_page,
+            offset,
+        ),
+    )
+
+    computers = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return computers
+
+
+def get_sum_computer(room_id, keyword):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+            SELECT COUNT(*)
+            FROM MAY_TINH
+            WHERE MaPhong = %s
+            AND (
+                MaMayTinh::TEXT ILIKE %s
+                OR TinhTrangMay::TEXT ILIKE %s
+            )
+        """,
+        (
+            room_id,
+            f"%{keyword}%",
+            f"%{keyword}%",
+        ),
+    )
+
+    amount = cursor.fetchone()[0]
+
+    cursor.close()
+    conn.close()
+
+    return amount
+
+
+@router.get("/admin/room/{room_id}")
+def show_admin_room_detail(
+    request: Request,
+    room_id: int,
+    keyword: str = "",
+    page: int = 1,
+):
+    role = request.session.get("role")
+    if role != 0:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    user = get_user_by_id(request.session.get("accountId"))
+    avt = request.session.get("avt")
+
+    success = request.session.pop("success", None)
+    error = request.session.pop("error", None)
+
+    per_page = 10  # moi bang hien 5 dong
+    offset = (page - 1) * per_page
+
+    room = get_room(room_id)
+    configs = get_all_room()
+    amount = get_sum_computer(
+        room_id,
+        keyword,
+    )
+    computers = get_computer(room_id, keyword, per_page, offset)
+    staffs = get_staffs_room()
+
+    cursor.close()
+    conn.close()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/room-detail.html",
+        context={
+            "room": room,
+            "configs": configs,
+            "computers": computers,
+            "staffs": staffs,
+            "user": user,
+            "avt": avt,
+            "success": success,
+            "page": page,
+            "amount": amount,
+            "per_page": per_page,
+            "keyword": keyword,
+            "success": success,
+            "error": error,
+        },
+    )
+
+
+@router.post("/admin/room/{room_id}")
+def update_room(
+    request: Request,
+    room_id: int,
+    room_name: str = Form(""),
+    config_id: int = Form(...),
+    staff_id: int = Form(...),
+    room_status: int = Form(...),
+):
+    role = request.session.get("role")
+    if role != 0:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE PHONG
+        SET TenPhong = %s,
+            MaCauHinh = %s,
+            MaCanBo = %s,
+            TinhTrangPhong = %s
+        WHERE MaPhong = %s
+        """,
+        (
+            room_name,
+            config_id,
+            staff_id,
+            room_status,
+            room_id,
+        ),
+    )
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    request.session["success"] = "Cập nhật phòng thành công!"
+
+    return RedirectResponse(
+        url=f"/admin/room/{room_id}",
+        status_code=303,
+    )
+
+
+@router.get("/admin/room/{room_id}/computer/{computer_id}/delete")
+def delete_computer_room(
+    request: Request,
+    room_id: int,
+    computer_id: str,
+):
+    role = request.session.get("role")
+    if role != 0:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+            DELETE FROM MAY_TINH
+            WHERE MaMayTinh = %s
+            AND MaPhong = %s
+        """,
+        (
+            computer_id,
+            room_id,
+        ),
+    )
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    request.session["success"] = "Đã xóa máy tính ra khỏi phòng!"
+
+    return RedirectResponse(
+        url=f"/admin/room/{room_id}",
+        status_code=303,
+    )
+
+
+@router.post("/admin/room/{room_id}/computer/add")
+def add_computer_room(
+    request: Request,
+    room_id: int,
+    machine_count: int = Form(...),
+):
+    role = request.session.get("role")
+    if role != 0:
+        return RedirectResponse(url="/login", status_code=303)
+
+    if machine_count < 1 or machine_count > 59:
+        request.session["error"] = "Số lượng máy phải nhỏ hơn hoặc bằng 60!"
+        return RedirectResponse(
+            url=f"/admin/room/{room_id}",
+            status_code=303,
+        )
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            """
+            SELECT TenPhong
+            FROM PHONG
+            WHERE MaPhong = %s
+            FOR UPDATE
+            """,
+            (room_id,),
+        )
+
+        room = cursor.fetchone()
+        prefix = f"P{room[0]}M"
+
+        cursor.execute(
+            """
+            SELECT MaMayTinh
+            FROM MAY_TINH
+            WHERE MaPhong = %s
+            """,
+            (room_id,),
+        )
+
+        computers = cursor.fetchall()
+
+        max_number = 0
+        for computer in computers:
+            computer_id = str(computer[0])
+            match = re.fullmatch(
+                re.escape(prefix) + r"(\d+)",
+                computer_id,
+            )
+            if match:
+                number = int(match.group(1))
+                max_number = max(max_number, number)
+
+        for number in range(
+            max_number + 1,
+            max_number + machine_count + 1,
+        ):
+            new_computer_id = f"{prefix}{number}"
+
+            cursor.execute(
+                """
+                INSERT INTO MAY_TINH
+                    (MaMayTinh, MaPhong, TinhTrangMay)
+                VALUES (%s, %s, %s)
+                """,
+                (new_computer_id, room_id, 0),
+            )
+
+        conn.commit()
+        request.session["success"] = "Thêm máy tính thành công!"
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    return RedirectResponse(
+        url=f"/admin/room/{room_id}",
+        status_code=303,
+    )
+
+
+@router.post("/admin/room/{room_id}/computer/{computer_id}/update")
+def update_computer_status(
+    request: Request,
+    room_id: int,
+    computer_id: str,
+    computer_status: int = Form(...),
+):
+    role = request.session.get("role")
+    if role != 0:
+        return RedirectResponse(url="/login", status_code=303)
+
+    if computer_status not in (0, 1, 2, 3):
+        request.session["error"] = "Tình trạng máy tính không hợp lệ!"
+        return RedirectResponse(
+            url=f"/admin/room/{room_id}",
+            status_code=303,
+        )
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            """
+            UPDATE MAY_TINH
+            SET TinhTrangMay = %s
+            WHERE MaMayTinh = %s
+              AND MaPhong = %s
+            """,
+            (computer_status, computer_id, room_id),
+        )
+
+        if cursor.rowcount == 0:
+            conn.rollback()
+            request.session["error"] = "Không tìm thấy máy tính!"
+        else:
+            conn.commit()
+            request.session["success"] = "Cập nhật tình trạng máy tính thành công!"
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    return RedirectResponse(
+        url=f"/admin/room/{room_id}",
         status_code=303,
     )

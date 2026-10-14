@@ -264,12 +264,18 @@
               <div class="config-detail-item-logo">
                 <i class="fa-solid fa-hotel"></i>
               </div>
+
               <div class="config-detail-item-info">
                 <span>Phòng sử dụng</span>
+
                 <div class="config-value room-value">
-                  {% for room in rooms %} {% if room[2] == config[0] %}
+                  {% set has_rooms = namespace(value=false) %} {% for room in
+                  rooms %} {% if room[2] == config[0] %}
                   <span>{{ room[1] }}</span>
-                  {% endif %} {% endfor %}
+                  {% set has_rooms.value = true %} {% endif %} {% endfor %} {%
+                  if not has_rooms.value %}
+                  <span>Chưa có phòng nào dùng cấu hình này.</span>
+                  {% endif %}
                 </div>
 
                 <div class="config-room-box" id="config-room-box">
@@ -437,12 +443,14 @@
             </thead>
 
             <tbody>
-              {% set start_index = (page - 1) * per_page %} {% for cf_pg in
-              config_programs %}
+              {% if config_programs %} {% set start_index = (page - 1) *
+              per_page %} {% for cf_pg in config_programs %}
               <tr>
                 <td>{{ start_index + loop.index }}</td>
                 <td>PM{{ cf_pg[0] }}</td>
-                <td><img src="{{ cf_pg[4] }}" alt="" /></td>
+                <td>
+                  <img src="{{ cf_pg[4] }}" alt="" />
+                </td>
                 <td>{{ cf_pg[1] }}</td>
                 <td>{{ cf_pg[2] }}</td>
                 <td>{{ cf_pg[3] }}</td>
@@ -456,7 +464,14 @@
                   </a>
                 </td>
               </tr>
-              {% endfor %}
+              {% endfor %} {% else %}
+              <tr>
+                <td colspan="7" class="empty-computer-message">
+                  <i class="fa-solid fa-laptop-code"></i>
+                  Chưa có phần mềm tương thích nào cho cấu hình này.
+                </td>
+              </tr>
+              {% endif %}
             </tbody>
           </table>
         </div>

@@ -212,7 +212,7 @@
             <label class="room-add-title" for="config-id">
               Chọn cấu hình chung
             </label>
-            <select name="config_id" id="config-id" required>
+            <select name="config_id" id="config-id">
               <option value="">-- Chọn cấu hình --</option>
               {% for config in configs %}
               <option value="{{ config[0] }}">
@@ -225,7 +225,7 @@
             <label class="room-add-title" for="staff-id">
               Chọn cán bộ quản lý
             </label>
-            <select name="staff_id" id="staff-id" required>
+            <select name="staff_id" id="staff-id" >
               <option value="">-- Chọn cán bộ --</option>
               {% for staff in staffs %}
               <option value="{{ staff[0] }}">{{ staff[1] }}</option>
@@ -243,7 +243,7 @@
               min="1"
               max="59"
               value="1"
-              required
+              
             />
           </div>
 
@@ -279,20 +279,32 @@
           </thead>
 
           <tbody>
-            {% set start_index = (page - 1) * per_page %} {%for room in rooms%}
+            {% if rooms %} {% set start_index = (page - 1) * per_page %} {% for
+            room in rooms %}
             <tr>
               <td>{{ start_index + loop.index }}</td>
               <td>P{{ room[0] }}</td>
-              <td>{{ room[1] }}</td>
+              <td>Phòng {{ room[1] }}</td>
               <td>{{ room[2] }}</td>
-              <td>{{ room[3] }}</td>
-              <td>{{ room[4] }}</td>
+              <td>{{ room[3] or 'Chưa phân công' }}</td>
+
+              {% if room[4] == -1 %}
+              <td>Ngừng hoạt động</td>
+              {% elif room[4] == 1 %}
+              <td>Đang hoạt động</td>
+              {% elif room[4] == 0 %}
+              <td>Bảo trì</td>
+              {% else %}
+              <td>Chưa xác định</td>
+              {% endif %}
+
               <td>
                 <a href="/admin/room/{{ room[0] }}" class="see-detail-act">
                   <i class="fa-solid fa-eye"></i>
                   Xem chi tiết
                 </a>
               </td>
+
               <td>
                 <button
                   type="button"
@@ -304,7 +316,14 @@
                 </button>
               </td>
             </tr>
-            {% endfor %}
+            {% endfor %} {% else %}
+            <tr>
+              <td colspan="8" class="empty-room-message">
+                <i class="fa-solid fa-door-open"></i>
+                Chưa có phòng thực hành.
+              </td>
+            </tr>
+            {% endif %}
           </tbody>
         </table>
       </div>
@@ -346,9 +365,7 @@
         <div class="popup-icon">
           <i class="fa-solid fa-circle-exclamation"></i>
         </div>
-        <div class="popup-error-message" id="popup-error-message">
-          
-        </div>
+        <div class="popup-error-message" id="popup-error-message"></div>
         <button type="button" id="popup-error-close">Đóng</button>
       </div>
     </div>
@@ -378,9 +395,7 @@
           <button type="button" id="delete-room-cancel">Hủy</button>
 
           <form id="delete-room-form" method="post" action="">
-            <button type="submit" id="delete-room-confirm">
-              Xác nhận xóa
-            </button>
+            <button type="submit" id="delete-room-confirm">Xác nhận xóa</button>
           </form>
         </div>
       </div>

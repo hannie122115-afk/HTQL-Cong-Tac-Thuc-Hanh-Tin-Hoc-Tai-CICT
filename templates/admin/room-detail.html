@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chi tiết phòng thực hành | Quản trị viên</title>
+
+    <link rel="stylesheet" href="/static/css/Nhap.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="header-left">
+        <div class="header-left-logo">
+          <div class="header-left-icon">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div class="header-left-title">Edu-LIMS</div>
+        </div>
+        <div class="header-left-describe">
+          Hệ thống công tác thực hành tin học
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="header-label">
+          <i class="fa-solid fa-bell"></i>
+        </div>
+        <div class="header-user" id="headerUser">
+          <div class="header-avt">
+            <img src="{{avt}}" alt="" />
+          </div>
+          <div class="navbar-arrow">
+            <i class="fa-solid fa-caret-down"></i>
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- navbar -->
+    <div class="navbar-container" id="navbarContainer">
+      <div class="navbar-user-container">
+        <a href="">
+          <div class="navbar-user-avt">
+            <img src="{{avt}}" alt="" />
+          </div>
+          <div class="navbar-user-name">
+            <p>{{ user[1] }}</p>
+            <p>Quản trị viên</p>
+          </div>
+        </a>
+      </div>
+      <div class="navbar-box">
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <div class="navbar-item-title">Hồ sơ cá nhân</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Phần mềm</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-download"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Cấu hình máy</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user-gear"></i>
+              </div>
+              <div class="navbar-item-title">Tài khoản</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-users"></i>
+              </div>
+              <div class="navbar-item-title">Cán bộ</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-chalkboard-user"></i>
+              </div>
+              <div class="navbar-item-title">Giảng viên</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-file-lines"></i>
+              </div>
+              <div class="navbar-item-title">Duyệt yêu cầu</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-regular fa-calendar-days"></i>
+              </div>
+              <div class="navbar-item-title">Lịch thực hành</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="navbar-logout">
+        <a href="/logout">
+          <div class="navbar-logout-icon">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </div>
+          <div class="navbar-logout-title">Đăng xuất</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="config-detail-container container-web">
+      <div class="direction">
+        <a href="/admin">Trang chủ</a>
+        <i class="fa-solid fa-angle-right"></i>
+        <a href="/admin/room">Phòng thực hành</a>
+        <i class="fa-solid fa-angle-right"></i>
+        <a href="/admin/room/{{ room[0] }}">Chi tiết phòng thực hành</a>
+      </div>
+
+      <!-- room info -->
+      <div class="room-detail-info-container">
+        <form
+          id="room-edit-form"
+          action="/admin/room/{{ room[0] }}"
+          method="post"
+        >
+          <div class="room-detail-info-title">
+            <span>Thông tin phòng thực hành</span>
+          </div>
+          <div class="room-detail-info">
+            <div class="room-detail-item">
+              <div class="room-detail-item-logo">
+                <i class="fa-solid fa-microchip"></i>
+              </div>
+              <div class="room-detail-item-info">
+                <span>Tên phòng</span>
+                <span class="room-value"> {{ room[1] }} </span>
+                <input
+                  type="text"
+                  name="room_name"
+                  class="room-input"
+                  value="{{ room[1] }}"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="room-detail-info">
+            <div class="room-detail-item">
+              <div class="room-detail-item-logo">
+                <i class="fa-solid fa-memory"></i>
+              </div>
+              <div class="room-detail-item-info">
+                <label class="room-add-title" for="config-id">
+                  Cấu hình chung
+                </label>
+                <span class="room-value"> {{ room[4] }} </span>
+                <select name="config_id" id="config-id">
+                  <option value="{{ room[5] }}" selected>{{ room[4] }}</option>
+                  {% for config in configs %}
+                  <option value="{{ config[0] }}">
+                    CH{{ config[0] }} - {{ config[1] }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="room-detail-info">
+            <div class="room-detail-item">
+              <div class="room-detail-item-logo">
+                <i class="fa-solid fa-hard-drive"></i>
+              </div>
+              <div class="room-detail-item-info">
+                <label class="room-add-title" for="staff-id">
+                  Cán bộ quản lý
+                </label>
+                <span class="room-value"> {{ room[2] }} </span>
+                <select name="staff_id" id="staff-id">
+                  <option value="{{ room[3] }}" selected>{{ room[2] }}</option>
+                  {% for staff in staffs %}
+                  <option value="{{ staff[0] }}">{{ staff[1] }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="room-detail-info">
+              <div class="room-detail-item">
+                <div class="room-detail-item-logo">
+                  <i class="fa-solid fa-memory"></i>
+                </div>
+                <div class="room-detail-item-info">
+                  <label class="room-add-title" for="room_status">
+                    Tình trạng phòng
+                  </label>
+                  {% if room[6] == -1 %}
+                  <span class="room-value"> Ngừng hoạt động </span>
+                  {% elif room[6] == 1 %}
+                  <span class="room-value"> Đang hoạt động </span>
+                  {% elif room[6] == 0 %}
+                  <span class="room-value"> Bảo trì </span>
+                  {% endif %}
+                  <select name="room_status" id="room_status">
+                    {% if room[6] == -1 %}
+                    <option value="-1">Ngừng hoạt động</option>
+                    {% elif room[6] == 1 %}
+                    <option value="1">Đang hoạt động</option>
+                    {% elif room[6] == 0 %}
+                    <option value="0">Bảo trì</option>
+                    {% endif %}
+                    <option value="-1">Ngừng hoạt động</option>
+                    <option value="1">Đang hoạt động</option>
+                    <option value="0">Bảo trì</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <div class="room-detail-actions">
+          <button type="button" id="room-edit-btn">
+            <i class="fa-solid fa-pen"></i>
+            Chỉnh sửa
+          </button>
+          <button type="button" id="room-cancel-btn" style="display: none">
+            <i class="fa-solid fa-xmark"></i>
+            Hủy
+          </button>
+          <button
+            type="submit"
+            form="room-edit-form"
+            id="room-save-btn"
+            style="display: none"
+          >
+            <i class="fa-solid fa-check"></i>
+            Lưu
+          </button>
+        </div>
+      </div>
+
+      <!-- computer list -->
+      <div class="room-detail-computer">
+        <!-- search -->
+        <form method="get" action="/admin/room/{{ room[0] }}">
+          <div class="room-detail-search-box">
+            <input
+              type="text"
+              name="keyword"
+              id=""
+              placeholder="Tìm kiếm mã máy, trạng thái hoạt động..."
+              value="{{ keyword or '' }}"
+            />
+            <button type="submit" class="submit-room-detail-search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+          </div>
+          <div class="room-detail-add-act" id="room-detail-add-act">
+            <i class="fa-solid fa-plus"></i>
+            Thêm máy tính
+          </div>
+        </form>
+        <!-- add computer -->
+        <div class="room-add-computer" id="computer-container">
+          <form
+            id="add-computer-form"
+            method="post"
+            action="/admin/room/{{ room[0] }}/computer/add"
+          >
+            <span>Thêm máy tính</span>
+            <p>
+              Số lượng máy hiện tại: {{ amount }}. Nhập số lượng máy cần thêm:
+            </p>
+            <input
+              type="number"
+              name="machine_count"
+              min="1"
+              max="59"
+              required
+            />
+            <button type="button" id="cancel-add-computer">Hủy</button>
+            <button type="submit">Thêm</button>
+          </form>
+        </div>
+
+        <!-- computer room table -->
+        <div class="computer-room-table">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Mã máy tính</th>
+                <th>Tình trạng máy tính</th>
+                <th colspan="2">Thao tác</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% if computers %} {% set start_index = (page - 1) * per_page %}
+              {% for computer in computers %}
+              <tr>
+                <td>{{ start_index + loop.index }}</td>
+                <td>{{ computer[0] }}</td>
+                {% if computer[1] == 0 %}
+                <td>Đang hoạt động</td>
+                {% elif computer[1] == 1 %}
+                <td>Hư hỏng</td>
+                {% elif computer[1] == 2 %}
+                <td>Đang sửa chữa</td>
+                {% elif computer[1] == 3 %}
+                <td>Đang bảo trì</td>
+                {% else %}
+                <td>Chưa xác định</td>
+                {% endif %}
+
+                <td>
+                  <button
+                    type="button"
+                    class="update-computer-btn"
+                    data-id="{{ computer[0] }}"
+                    data-status="{{ computer[1] }}"
+                  >
+                    <i class="fa-solid fa-pen"></i>
+                    Cập nhật tình trạng máy
+                  </button>
+                </td>
+                <td>
+                  <a
+                    href="/admin/room/{{ room[0] }}/computer/{{ computer[0] }}/delete"
+                    class="room-detail-delete-computer"
+                  >
+                    <i class="fa-solid fa-trash"></i>
+                    Xóa
+                  </a>
+                </td>
+              </tr>
+              {% endfor %} {% else %}
+              <tr>
+                <td colspan="4" class="empty-computer-message">
+                  <i class="fa-solid fa-computer"></i>
+                  Chưa có máy tính nào được thêm vào phòng thực hành.
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="room-detail-update-computer" id="computer-status-overlay">
+          <form method="post" id="computer-status-form" action="">
+            <h3>Cập nhật tình trạng máy tính</h3>
+            <label for="computer-status-select"> Tình trạng máy tính </label>
+            <select name="computer_status" id="computer-status-select">
+              <option value="0">Đang hoạt động</option>
+              <option value="1">Hư hỏng</option>
+              <option value="2">Đang sửa chữa</option>
+              <option value="3">Đang bảo trì</option>
+            </select>
+
+            <div class="popup-actions">
+              <button type="button" id="cancel-computer-status">Hủy</button>
+              <button type="submit">Lưu thay đổi</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="room-page">
+          {% set page_number = (page - 1) * per_page %}
+          <span
+            >Hiển thị {{ page_number + 1 }} - {% if page_number + per_page >
+            amount %} {{ amount }} {% else %} {{ page_number + per_page }} {%
+            endif %}của tổng {{ amount }} máy tính</span
+          >
+          <div class="pagination">
+            <div class="room-previous-page">
+              {% if (page - 1) > 0 %}
+              <a href="/admin/room?page={{ page - 1 }}&keyword={{ keyword }}"
+                ><i class="fa-solid fa-chevron-left"></i
+              ></a>
+              {% else %}
+              <span><i class="fa-solid fa-chevron-left"></i></span>
+              {% endif %}
+            </div>
+            <div class="room-number-page">{{ page }}</div>
+            {% if amount > (page * per_page) %}
+            <div class="room-next-page">
+              <a href="/admin/room?page={{ page + 1 }}&keyword={{ keyword }}"
+                ><i class="fa-solid fa-chevron-right"></i
+              ></a>
+              {% else %}
+              <span><i class="fa-solid fa-chevron-right"></i></span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="popup-confirm" id="popup-confirm">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div class="popup-message">
+          Bạn có chắc chắn muốn hủy?
+          <br />
+          Các thay đổi sẽ không được lưu.
+        </div>
+        <div class="popup-actions">
+          <button type="button" id="popup-cancel-no">Không</button>
+          <button type="button" id="popup-cancel-yes">Hủy chỉnh sửa</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="popup-success" id="popup-success">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div class="popup-success-message" id="popup-success-message">
+          {{ success }}
+        </div>
+        <div id="room-page" data-success="{{ success or '' }}"></div>
+        <button type="button" id="popup-success-close">Đóng</button>
+      </div>
+    </div>
+
+    <div class="popup-error" id="popup-error">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div class="popup-error-message" id="popup-error-message">
+          {{ error }}
+        </div>
+        <div id="config-page" data-error="{{ error or '' }}"></div>
+        <button type="button" id="popup-error-close">Đóng</button>
+      </div>
+    </div>
+
+    <div class="popup-confirm" id="popup-delete-confirm">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div class="popup-message">
+          Bạn có chắc chắn muốn xóa máy tính này khỏi phòng thực hành?
+        </div>
+        <div class="popup-actions">
+          <button type="button" id="popup-delete-no">Không</button>
+          <button type="button" id="popup-delete-yes">Xác nhận xóa</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/js/admin/room-detail.js"></script>
+  </body>
+</html>

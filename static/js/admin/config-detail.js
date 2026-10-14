@@ -39,10 +39,9 @@ editBtn.addEventListener("click", function () {
 // ROOM DROPDOWN
 const roomConfigTitle = document.getElementById("config-room-title");
 
-if (roomConfigTitle) {
+if (roomConfigTitle && roomBox) {
   roomConfigTitle.addEventListener("click", function (e) {
     e.stopPropagation();
-
     roomBox.classList.toggle("show");
   });
 }
@@ -62,7 +61,6 @@ popupCancelNo.addEventListener("click", function () {
 
 popupCancelYes.addEventListener("click", function () {
   popupConfirm.classList.remove("show");
-
   window.location.reload();
 });
 
@@ -71,9 +69,7 @@ popupCancelYes.addEventListener("click", function () {
 const popupSuccess = document.getElementById("popup-success");
 const popupSuccessMessage = document.getElementById("popup-success-message");
 const popupSuccessClose = document.getElementById("popup-success-close");
-
 const configPage = document.getElementById("config-page");
-
 const successMessage = configPage.dataset.success;
 
 if (successMessage) {
@@ -92,9 +88,7 @@ const programFormContainer = document.getElementById("program-form-container");
 
 addProgramBtn.addEventListener("click", function () {
   programFormContainer.classList.add("show");
-
   addProgramBtn.style.display = "none";
-
   saveProgramBtn.style.display = "inline-flex";
 });
 
@@ -102,9 +96,7 @@ addProgramBtn.addEventListener("click", function () {
 const deleteConfirmPopup = document.getElementById("popup-delete-confirm");
 const deleteNoBtn = document.getElementById("popup-delete-no");
 const deleteYesBtn = document.getElementById("popup-delete-yes");
-
 let deleteUrl = "";
-
 const deleteButtons = document.querySelectorAll(
   ".config-detail-delete-program",
 );

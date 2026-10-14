@@ -1051,3 +1051,478 @@
     padding: 10px 12px;
   }
 }
+
+.empty-room-message {
+  text-align: center;
+  padding: 30px 15px;
+  color: #64748b;
+  font-size: 15px;
+}
+
+.empty-room-message i {
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.empty-computer-message {
+  text-align: center;
+  padding: 30px 15px;
+  color: #64748b;
+  font-size: 15px;
+}
+
+.empty-computer-message i {
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.popup-error {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.popup-error.show {
+  display: flex;
+}
+
+.popup-error .popup {
+  width: 90%;
+  max-width: 400px;
+  padding: 24px;
+  border-radius: 12px;
+  background: #fff;
+  text-align: center;
+}
+
+/* =======================CHI TIET PHONG THUC HANH=================== */
+/* ==================== EDIT ROOM ==================== */
+
+/* Ẩn nút Hủy và Lưu khi chưa chỉnh sửa */
+#room-cancel-btn,
+#room-save-btn {
+  display: none;
+}
+
+/* Trạng thái chỉnh sửa */
+#room-edit-form .room-input {
+  display: none;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #fff;
+  color: #1e293b;
+}
+
+#room-edit-form .room-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Các nút thao tác */
+#room-edit-btn,
+#room-cancel-btn,
+#room-save-btn {
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+#room-edit-btn {
+  display: inline-flex;
+  background: #2563eb;
+  color: #fff;
+}
+
+#room-edit-btn:hover {
+  background: #1d4ed8;
+}
+
+#room-cancel-btn {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+#room-cancel-btn:hover {
+  background: #d1d5db;
+}
+
+#room-save-btn {
+  background: #16a34a;
+  color: #fff;
+}
+
+#room-save-btn:hover {
+  background: #15803d;
+}
+
+/* ==================== POPUP OVERLAY ==================== */
+
+#popup-confirm,
+#computer-container,
+#computer-status-overlay,
+#popup-success,
+#popup-delete-confirm {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+/* JS thêm class show để mở popup */
+#popup-confirm.show,
+#computer-container.show,
+#computer-status-overlay.show,
+#popup-success.show,
+#popup-delete-confirm.show {
+  display: flex;
+}
+
+/* Nội dung popup */
+#popup-confirm > *,
+#computer-container > *,
+#computer-status-overlay > *,
+#popup-success > *,
+#popup-delete-confirm > * {
+  box-sizing: border-box;
+}
+
+/* Form thêm máy và cập nhật trạng thái */
+#add-computer-form,
+#computer-status-form {
+  width: 100%;
+  max-width: 440px;
+  padding: 24px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Các trường nhập liệu trong popup */
+#add-computer-form input,
+#add-computer-form select,
+#computer-status-form input,
+#computer-status-form select {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* ==================== POPUP BUTTONS ==================== */
+
+#popup-cancel-no,
+#popup-cancel-yes,
+#cancel-add-computer,
+#cancel-computer-status,
+#popup-delete-no,
+#popup-delete-yes,
+#popup-success-close {
+  padding: 9px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#popup-cancel-no,
+#cancel-add-computer,
+#cancel-computer-status,
+#popup-delete-no {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+#popup-cancel-yes {
+  background: #2563eb;
+  color: #fff;
+}
+
+#popup-delete-yes {
+  background: #dc2626;
+  color: #fff;
+}
+
+#popup-success-close {
+  background: #16a34a;
+  color: #fff;
+}
+
+/* ==================== ADD COMPUTER BUTTON ==================== */
+
+#room-detail-add-act {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+}
+
+#room-detail-add-act:hover {
+  background: #1d4ed8;
+}
+
+/* ==================== UPDATE / DELETE COMPUTER ==================== */
+
+.update-computer-btn {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 5px;
+  background: #f59e0b;
+  color: #fff;
+  cursor: pointer;
+}
+
+.room-detail-delete-computer {
+  color: #dc2626;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.room-detail-delete-computer:hover {
+  text-decoration: underline;
+}
+
+/* ==================== SUCCESS MESSAGE ==================== */
+
+#popup-success-message {
+  margin-bottom: 16px;
+  color: #166534;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 600px) {
+  #add-computer-form,
+  #computer-status-form {
+    max-width: 100%;
+    padding: 18px;
+  }
+
+  #room-edit-btn,
+  #room-cancel-btn,
+  #room-save-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}
+
+/* ==================== POPUP CHỈNH SỬA PHÒNG ==================== */
+
+/* Khung thông tin phòng */
+.room-detail-info-container {
+  position: relative;
+}
+
+/* Khi chưa chỉnh sửa, form hiển thị bình thường */
+#room-edit-form {
+  display: block;
+}
+
+/* Khi bấm Chỉnh sửa: biến form thành popup */
+#room-edit-form.editing {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10001;
+
+  width: calc(100% - 40px);
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  padding: 28px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.25);
+}
+
+/* Tiêu đề popup */
+#room-edit-form.editing .room-detail-info-title {
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* Các nhóm thông tin */
+#room-edit-form.editing .room-detail-info {
+  display: block;
+  margin-bottom: 16px;
+}
+
+#room-edit-form.editing .room-detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+#room-edit-form.editing .room-detail-item-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Input và select trong popup */
+#room-edit-form.editing .room-input,
+#room-edit-form.editing select {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  box-sizing: border-box;
+  padding: 9px 12px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #fff;
+  color: #334155;
+  font-size: 14px;
+}
+
+#room-edit-form.editing .room-value {
+  display: none;
+}
+
+#room-edit-form.editing .room-input:focus,
+#room-edit-form.editing select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Nút Chỉnh sửa / Hủy / Lưu nằm trong popup */
+.room-detail-info-container:has(#room-edit-form.editing) .room-detail-actions {
+  position: fixed;
+  top: calc(50% + 245px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10002;
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  width: calc(100% - 40px);
+  max-width: 544px;
+  box-sizing: border-box;
+}
+
+/* Nút thao tác */
+#room-edit-btn,
+#room-cancel-btn,
+#room-save-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#room-edit-btn {
+  background: #2563eb;
+  color: #fff;
+}
+
+#room-cancel-btn {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+#room-save-btn {
+  background: #16a34a;
+  color: #fff;
+}
+
+/* Popup xác nhận Hủy */
+#popup-confirm,
+#popup-delete-confirm {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10010;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+#popup-confirm.show,
+#popup-delete-confirm.show {
+  display: flex;
+}
+
+#popup-confirm .popup,
+#popup-delete-confirm .popup {
+  width: 100%;
+  max-width: 420px;
+  padding: 24px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+}
+
+/* Màn hình nhỏ */
+@media (max-width: 600px) {
+  #room-edit-form.editing {
+    padding: 20px;
+  }
+
+  .room-detail-info-container:has(#room-edit-form.editing)
+    .room-detail-actions {
+    top: auto;
+    bottom: 8%;
+    width: calc(100% - 40px);
+  }
+}
+
+/* Mặc định: chỉ hiện thông tin dạng span */
+#room-edit-form .room-input,
+#room-edit-form #config-id,
+#room-edit-form #staff-id,
+#room-edit-form #room_status {
+  display: none;
+}
+
+/* Khi bấm Chỉnh sửa: ẩn span */
+#room-edit-form.editing .room-value {
+  display: none;
+}
+
+/* Khi bấm Chỉnh sửa: hiện input và select */
+#room-edit-form.editing .room-input,
+#room-edit-form.editing #config-id,
+#room-edit-form.editing #staff-id,
+#room-edit-form.editing #room_status {
+  display: block;
+}
