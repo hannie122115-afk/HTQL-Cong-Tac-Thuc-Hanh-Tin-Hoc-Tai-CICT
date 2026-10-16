@@ -1932,3 +1932,90 @@
 .account-add-container.show {
   display: flex;
 }
+
+/* =========confirm password========= */
+
+/* ===== POPUP LỖI THIẾT LẬP MẬT KHẨU ===== */
+.popup-confirm-error {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+}
+
+.popup-confirm-error.show {
+  display: flex;
+}
+
+.popup-confirm-error .popup {
+  width: 100%;
+  max-width: 400px;
+  padding: 28px 24px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  animation: popupConfirmShow 0.25s ease-out;
+}
+
+.popup-confirm-error .popup-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 16px;
+  color: #dc2626;
+  background: #fee2e2;
+  border-radius: 50%;
+  font-size: 28px;
+}
+
+.popup-confirm-error-message {
+  margin-bottom: 22px;
+  color: #334155;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+#popup-confirm-error-close {
+  min-width: 100px;
+  padding: 10px 24px;
+  color: #ffffff;
+  background: #2563eb;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#popup-confirm-error-close:hover {
+  background: #1d4ed8;
+}
+
+@keyframes popupConfirmShow {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .popup-confirm-error .popup {
+    max-width: 340px;
+    padding: 24px 18px;
+  }
+}

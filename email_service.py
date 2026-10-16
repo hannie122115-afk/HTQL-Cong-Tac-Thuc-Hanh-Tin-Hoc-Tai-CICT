@@ -4,7 +4,7 @@ import aiosmtplib
 from dotenv import load_dotenv
 from email.message import EmailMessage
 
-load_dotenv() #đọc các biến đc khai báo trong .env
+load_dotenv()  # đọc các biến đc khai báo trong .env
 
 
 async def send_account_email(
@@ -23,8 +23,7 @@ async def send_account_email(
     message["From"] = smtp_email
     message["To"] = to_email
 
-    message.set_content(
-        f"""Xin chào,
+    message.set_content(f"""Xin chào,
 
 Tài khoản Edu-LIMS của bạn đã được tạo.
 
@@ -37,8 +36,7 @@ Nếu bạn không yêu cầu tạo tài khoản này, hãy liên hệ quản tr
 
 Trân trọng,
 Edu-LIMS
-"""
-    )
+""")
 
     await aiosmtplib.send(
         message,

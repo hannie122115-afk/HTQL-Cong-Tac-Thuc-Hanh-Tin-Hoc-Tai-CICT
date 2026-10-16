@@ -1644,9 +1644,11 @@ def show_admin_account(
     status = status if status != "" else None
     accounts = get_accounts(per_page, offset, keyword, role, status)
     amount = get_sum_accounts(keyword, role, status)
+
     success = request.session.pop("success", None)
     error = request.session.pop("error", None)
     pending_account_id = request.session.pop("pending_account_id", None)
+    account_created = request.session.pop("account_created", False)
 
     return templates.TemplateResponse(
         request=request,
@@ -1664,6 +1666,7 @@ def show_admin_account(
             "success": success,
             "error": error,
             "pending_account_id": pending_account_id,
+            "account_created": account_created,
         },
     )
 
@@ -1688,103 +1691,6 @@ def hash_setup_token(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
-# @router.post("/admin/account")
-# def add_account(
-#     request: Request,
-#     account_email: str = Form(""),
-#     account_name: str = Form(""),
-#     account_birth: str = Form(""),
-#     account_gender: str = Form(""),
-#     account_tel: str = Form(""),
-#     account_role: str = Form(""),
-# ):
-#     admin_role = request.session.get("role")
-#     if admin_role != 2:
-#         return RedirectResponse(url="/login", status_code=303)
-#     conn = get_connection()
-#     cursor = conn.cursor()
-
-#     account_email = account_email.strip()
-#     account_name = account_name.strip()
-#     account_tel = account_tel.strip()
-#     birth_date = date.fromisoformat(account_birth)
-
-#     try:
-#         while True:
-#             account_username = generate_username(account_email)
-#             cursor.execute(
-#                 """
-#                 SELECT 1
-#                 FROM TAI_KHOAN_DANG_NHAP
-#                 WHERE TenDangNhap = %s
-#                 """,
-#                 (account_username,),
-#             )
-#             if cursor.fetchone() is None:
-#                 break
-
-#         cursor.execute(
-#             """
-#             INSERT INTO TAI_KHOAN_DANG_NHAP
-#                 (TenDangNhap, MatKhau, VaiTro, AnhDaiDien, TrangThai)
-#             VALUES (%s, %s, %s, %s, %s)
-#             RETURNING MaTaiKhoan
-#             """,
-#             (
-#                 account_username,
-#                 hash_password(secrets.token_urlsafe(16)),
-#                 int(account_role),
-#                 "https://cdn2.fptshop.com.vn/small/avatar_trang_1_cd729c335b.jpg",
-#                 1,
-#             ),
-#         )
-#         account_id_new = cursor.fetchone()[0]
-#         request.session["pending_account_id"] = account_id_new
-#         if account_role == "1":
-#             cursor.execute(
-#                 """
-#                 INSERT INTO GIANG_VIEN
-#                     (TenGiangVien, GioiTinh, NgaySinh,
-#                      SoDienThoai, Email, MaTaiKhoan)
-#                 VALUES (%s, %s, %s, %s, %s, %s)
-#                 """,
-#                 (
-#                     account_name,
-#                     int(account_gender),
-#                     birth_date,
-#                     account_tel,
-#                     account_email,
-#                     account_id_new,
-#                 ),
-#             )
-#         else:
-#             cursor.execute(
-#                 """
-#                 INSERT INTO CAN_BO
-#                     (TenCanBo, GioiTinh, NgaySinh,
-#                      SoDienThoai, Email, MaTaiKhoan)
-#                 VALUES (%s, %s, %s, %s, %s, %s)
-#                 """,
-#                 (
-#                     account_name,
-#                     int(account_gender),
-#                     birth_date,
-#                     account_tel,
-#                     account_email,
-#                     account_id_new,
-#                 ),
-#             )
-
-#         conn.commit()
-#         request.session["success"] = "Cấp tài khoản thành công!"
-#         return RedirectResponse(url="/admin/account", status_code=303)
-#     except Exception:
-#         conn.rollback()
-#         raise
-#     finally:
-#         cursor.close()
-#         conn.close()
-
 @router.post("/admin/account")
 def add_account(
     request: Request,
@@ -1795,49 +1701,94 @@ def add_account(
     account_tel: str = Form(""),
     account_role: str = Form(""),
 ):
-    print("1. Bat dau add_account")
-
     admin_role = request.session.get("role")
     if admin_role != 2:
-        print("2. Khong co quyen admin")
         return RedirectResponse(url="/login", status_code=303)
-
     conn = get_connection()
-    print("3. Da ket noi database")
-
     cursor = conn.cursor()
 
+    account_email = account_email.strip()
+    account_name = account_name.strip()
+    account_tel = account_tel.strip()
+    birth_date = date.fromisoformat(account_birth)
+
     try:
-        account_email = account_email.strip()
-        account_name = account_name.strip()
-        account_tel = account_tel.strip()
-        birth_date = date.fromisoformat(account_birth)
+        while True:
+            account_username = generate_username(account_email)
+            cursor.execute(
+                """
+                SELECT 1
+                FROM TAI_KHOAN_DANG_NHAP
+                WHERE TenDangNhap = %s
+                """,
+                (account_username,),
+            )
+            if cursor.fetchone() is None:
+                break
 
-        print("4. Da xu ly du lieu form")
-
-        # Giữ nguyên phần kiểm tra username và các câu INSERT hiện tại.
-
-        # Ngay trước conn.commit()
-        print("5. Chuan bi commit")
-        conn.commit()
-        print("6. Commit thanh cong")
-
-        request.session["success"] = "Cấp tài khoản thành công!"
-        print("7. Chuan bi redirect")
-
-        return RedirectResponse(
-            url="/admin/account",
-            status_code=303,
+        cursor.execute(
+            """
+            INSERT INTO TAI_KHOAN_DANG_NHAP
+                (TenDangNhap, MatKhau, VaiTro, AnhDaiDien, TrangThai)
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING MaTaiKhoan
+            """,
+            (
+                account_username,
+                hash_password(secrets.token_urlsafe(16)),
+                int(account_role),
+                "https://cdn2.fptshop.com.vn/small/avatar_trang_1_cd729c335b.jpg",
+                1,
+            ),
         )
+        account_id_new = cursor.fetchone()[0]
+        request.session["pending_account_id"] = account_id_new
+        if account_role == "1":
+            cursor.execute(
+                """
+                INSERT INTO GIANG_VIEN
+                    (TenGiangVien, GioiTinh, NgaySinh,
+                     SoDienThoai, Email, MaTaiKhoan)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                """,
+                (
+                    account_name,
+                    int(account_gender),
+                    birth_date,
+                    account_tel,
+                    account_email,
+                    account_id_new,
+                ),
+            )
+        else:
+            cursor.execute(
+                """
+                INSERT INTO CAN_BO
+                    (TenCanBo, GioiTinh, NgaySinh,
+                     SoDienThoai, Email, MaTaiKhoan)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                """,
+                (
+                    account_name,
+                    int(account_gender),
+                    birth_date,
+                    account_tel,
+                    account_email,
+                    account_id_new,
+                ),
+            )
 
+        conn.commit()
+        request.session["success"] = "Cấp tài khoản thành công!"
+        request.session["pending_account_id"] = account_id_new
+        request.session["account_created"] = True
+        return RedirectResponse(url="/admin/account", status_code=303)
     except Exception:
         conn.rollback()
         raise
-
     finally:
         cursor.close()
         conn.close()
-        print("8. Da dong ket noi database")
 
 
 @router.post("/admin/account/send-email/{account_id}")
@@ -1845,7 +1796,6 @@ async def send_account_setup_email(
     request: Request,
     account_id: int,
 ):
-    # 1. Kiểm tra quyền quản trị viên
     admin_role = request.session.get("role")
     if admin_role != 2:
         return RedirectResponse(url="/login", status_code=303)
@@ -1969,7 +1919,7 @@ async def send_account_setup_email(
 def show_setup_password(request: Request, token: str):
     return templates.TemplateResponse(
         request=request,
-        name="account/setup_password.html",
+        name="admin/setup_password.html",
         context={"token": token},
     )
 
@@ -1984,7 +1934,7 @@ def setup_password(
     if not token.strip():
         return templates.TemplateResponse(
             request=request,
-            name="account/setup_password.html",
+            name="admin/setup_password.html",
             context={
                 "token": token,
                 "error": "Liên kết thiết lập mật khẩu không hợp lệ.",
@@ -1995,7 +1945,7 @@ def setup_password(
     if password != confirm_password:
         return templates.TemplateResponse(
             request=request,
-            name="account/setup_password.html",
+            name="admin/setup_password.html",
             context={
                 "token": token,
                 "error": "Mật khẩu xác nhận không khớp.",
@@ -2003,13 +1953,19 @@ def setup_password(
             status_code=400,
         )
 
-    if len(password) < 8:
+    if (
+        len(password) < 8
+        or not re.search(r"[A-Z]", password)
+        or not re.search(r"[a-z]", password)
+        or not re.search(r"[0-9]", password)
+        or not re.search(r"[^A-Za-z0-9]", password)
+    ):
         return templates.TemplateResponse(
             request=request,
-            name="account/setup_password.html",
+            name="admin/setup_password.html",
             context={
                 "token": token,
-                "error": "Mật khẩu phải có ít nhất 8 ký tự.",
+                "error": "Mật khẩu cần có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, chữ số và ký tự đặc biệt.",
             },
             status_code=400,
         )
@@ -2034,7 +1990,7 @@ def setup_password(
                 conn.rollback()
                 return templates.TemplateResponse(
                     request=request,
-                    name="account/setup_password.html",
+                    name="admin/setup_password.html",
                     context={
                         "token": "",
                         "error": "Liên kết không hợp lệ hoặc đã bị thay thế.",
@@ -2046,7 +2002,7 @@ def setup_password(
                 conn.rollback()
                 return templates.TemplateResponse(
                     request=request,
-                    name="account/setup_password.html",
+                    name="admin/setup_password.html",
                     context={
                         "token": "",
                         "error": "Liên kết này đã được sử dụng.",
@@ -2062,7 +2018,7 @@ def setup_password(
                 conn.rollback()
                 return templates.TemplateResponse(
                     request=request,
-                    name="account/setup_password.html",
+                    name="admin/setup_password.html",
                     context={
                         "token": "",
                         "error": "Liên kết đã hết hạn. Vui lòng yêu cầu gửi email mới.",
@@ -2085,7 +2041,7 @@ def setup_password(
                 conn.rollback()
                 return templates.TemplateResponse(
                     request=request,
-                    name="account/setup_password.html",
+                    name="admin/setup_password.html",
                     context={
                         "token": "",
                         "error": "Không tìm thấy tài khoản cần cập nhật.",
@@ -2117,7 +2073,7 @@ def setup_password(
 
         return templates.TemplateResponse(
             request=request,
-            name="account/setup_password.html",
+            name="admin/setup_password.html",
             context={
                 "token": token,
                 "error": "Đã xảy ra lỗi khi thiết lập mật khẩu. Vui lòng thử lại.",

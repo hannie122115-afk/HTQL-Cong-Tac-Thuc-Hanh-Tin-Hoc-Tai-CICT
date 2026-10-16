@@ -63,7 +63,7 @@ cancelBtn?.addEventListener("click", () => {
   window.location.reload();
 });
 
-accountForm.addEventListener("submit", function (event) {
+accountForm?.addEventListener("submit", function (event) {
   const accountEmail = accountForm.querySelector('[name="account_email"]');
   const accountName = accountForm.querySelector('[name="account_name"]');
   const accountBirth = accountForm.querySelector('[name="account_birth"]');
@@ -256,13 +256,13 @@ closeErrorBtn?.addEventListener("click", () => {
 });
 
 // ======POPUP ======
-if (pageData?.dataset.success) {
+if (pageData?.dataset.success && pageData?.dataset.account === "false") {
   successMessage.textContent = pageData.dataset.success;
   successPopup.classList.add("show");
 } else {
   successPopup.classList.remove("show");
 }
-if (pendingAccountId && pageData?.dataset.accountCreated === "true") {
+if (pendingAccountId && pageData?.dataset.account === "true") {
   successAccountPopup.classList.add("show");
 } else {
   successAccountPopup.classList.remove("show");
@@ -296,6 +296,7 @@ deleteBtns.forEach((button) => {
     }
   });
 });
-deleteCancelBtn.addEventListener("click", () => {
+deleteCancelBtn?.addEventListener("click", () => {
   deletePopup.classList.remove("show");
 });
+

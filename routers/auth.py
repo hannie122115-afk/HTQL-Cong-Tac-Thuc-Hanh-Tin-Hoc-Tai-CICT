@@ -9,7 +9,12 @@ templates = Jinja2Templates(directory="templates")
 
 @router.get("/login")
 def show_login(request: Request):
-    return templates.TemplateResponse(request=request, name="login.html")
+    message = request.session.pop("success", None)
+    return templates.TemplateResponse(
+        request=request,
+        name="login.html",
+        context={"message": message},
+    )
 
 
 @router.post("/login")
