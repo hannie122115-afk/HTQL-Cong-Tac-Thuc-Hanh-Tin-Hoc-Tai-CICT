@@ -51,7 +51,12 @@ def show_admin(request: Request):
     avt = request.session.get("avt")
 
     return templates.TemplateResponse(
-        request=request, name="admin/index.html", context={"user": user, "avt": avt}
+        request=request,
+        name="admin/index.html",
+        context={
+            "user": user,
+            "avt": avt,
+        },
     )
 
 

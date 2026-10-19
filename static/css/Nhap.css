@@ -2019,3 +2019,97 @@
     padding: 24px 18px;
   }
 }
+
+/* ===============YEU CAU XAP LICH ======= */
+/* =========================================================
+   1. MẶC ĐỊNH CHO THẺ HIDDEN (Để JS .hidden = true/false chạy chuẩn)
+   ========================================================= */
+[hidden] {
+  display: none !important;
+}
+
+/* =========================================================
+   2. ẨN / HIỆN FORM THÊM YÊU CẦU
+   ========================================================= */
+/* Mặc định ẩn form */
+#required-add-container {
+  display: none;
+  background-color: #ffffff;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Khi thêm class active từ JS thì hiện form */
+#required-add-container.active {
+  display: block;
+}
+
+/* Con trỏ dạng bấm cho các nút đóng/mở form */
+#required-add-act,
+#cancel-add-required-btn {
+  cursor: pointer;
+}
+
+/* =========================================================
+   3. KHUNG CHỨA (Định vị vị trí làm chuẩn cho dropdown)
+   ========================================================= */
+.required-add-item,
+.required-type-item,
+.required-add-item-box-input {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+/* =========================================================
+   4. DROPDOWN GỢI Ý AUTO-COMPLETE (Courses, Programs, Weeks)
+   ========================================================= */
+#course-suggestions,
+#program-suggestions,
+#week-start-suggestions,
+#week-end-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  max-height: 180px;
+  overflow-y: auto;
+  z-index: 1000; /* Nổi lên trên các phần tử khác */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Style cho từng mục gợi ý khi render ra từ JS */
+.course-suggestion-item,
+.program-suggestion-item,
+.week-suggestion-item {
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #1e293b;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.15s ease;
+}
+
+/* Hiệu ứng di chuột vào item gợi ý */
+.course-suggestion-item:hover,
+.program-suggestion-item:hover,
+.week-suggestion-item:hover {
+  background-color: #e0e7ff;
+  color: #3730a3;
+}
+
+/* Trường hợp không tìm thấy kết quả */
+.week-suggestion-empty,
+.course-suggestion-empty,
+.program-suggestion-empty {
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #94a3b8;
+  font-style: italic;
+}

@@ -30,7 +30,9 @@
           <i class="fa-solid fa-bell"></i>
         </div>
         <div class="header-user" id="headerUser">
-          <div class="header-avt">hinh cho nay</div>
+          <div class="header-avt">
+            <img src="{{ user[7] }}" alt="Ảnh đại diện" />
+          </div>
           <div class="navbar-arrow">
             <i class="fa-solid fa-caret-down"></i>
           </div>
@@ -41,14 +43,44 @@
     <div class="navbar-container" id="navbarContainer">
       <div class="navbar-user-container">
         <a href="">
-          <div class="navbar-user-avt">{{avt}}</div>
+          <div class="navbar-user-avt">
+            <img src="{{ user[7] }}" alt="Ảnh đại diện" />
+          </div>
           <div class="navbar-user-name">
-            <p>Ten</p>
-            <p>Vai tro</p>
+            <p>{{ user[1] }}</p>
+            <p>{{ user[8] }}</p>
           </div>
         </a>
       </div>
       <div class="navbar-box">
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user-gear"></i>
+              </div>
+              <div class="navbar-item-title">Lịch thực hành của tôi</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+
+        <div class="navbar-item">
+          <a href="/teacher/required">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Yêu cầu xếp lịch</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+
         <div class="navbar-item">
           <a href="">
             <div class="navbar-item-name">
@@ -62,33 +94,7 @@
             </div>
           </a>
         </div>
-        <div class="navbar-item">
-          <a href="">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-solid fa-display"></i>
-              </div>
-              <div class="navbar-item-title">Cấu hình máy</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </a>
-        </div>
-        <div class="navbar-item">
-          <a href="">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-solid fa-user-gear"></i>
-              </div>
-              <div class="navbar-item-title">Tài khoản</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </a>
-        </div>
-        <div class="navbar-item">
+        <!-- <div class="navbar-item">
           <a href="">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
@@ -139,7 +145,7 @@
               <i class="fa-solid fa-chevron-right"></i>
             </div>
           </a>
-        </div>
+        </div> -->
       </div>
       <div class="navbar-logout">
         <a href="/logout">
@@ -156,29 +162,32 @@
     <div class="grid-dashboard">
       <a href="">
         <div class="dashboard-item-icon">
-          <i class="fa-solid fa-display"></i>
+          <i class="fa-solid fa-users"></i>
         </div>
-        <div class="dashboard-item-title">Cấu hình máy</div>
+        <div class="dashboard-item-title">Lịch thực hành</div>
       </a>
-      <a href="">
+
+      <a href="/teacher/required">
         <div class="dashboard-item-icon">
           <i class="fa-solid fa-user-gear"></i>
         </div>
-        <div class="dashboard-item-title">Tài khoản</div>
+        <div class="dashboard-item-title">Yêu cầu xếp lịch</div>
       </a>
+
       <a href="">
         <div class="dashboard-item-icon">
-          <i class="fa-solid fa-users"></i>
+          <i class="fa-solid fa-display"></i>
         </div>
-        <div class="dashboard-item-title">Cán bộ</div>
+        <div class="dashboard-item-title">Hồ sơ</div>
       </a>
+
       <a href="">
         <div class="dashboard-item-icon">
           <i class="fa-solid fa-chalkboard-user"></i>
         </div>
-        <div class="dashboard-item-title">Giảng viên</div>
+        <div class="dashboard-item-title">Đăng xuất</div>
       </a>
-      <a href="">
+      <!-- <a href="">
         <div class="dashboard-item-icon">
           <i class="fa-solid fa-file-lines"></i>
         </div>
@@ -189,7 +198,7 @@
           <i class="fa-regular fa-calendar-days"></i>
         </div>
         <div class="dashboard-item-title">Lịch thực hành</div>
-      </a>
+      </a> -->
     </div>
     <script src="/static/js/auth/navbar.js"></script>
   </body>

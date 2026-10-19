@@ -299,4 +299,3 @@ deleteBtns.forEach((button) => {
 deleteCancelBtn?.addEventListener("click", () => {
   deletePopup.classList.remove("show");
 });
-

@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Giảng viên | Yêu cầu xếp lịch</title>
+    <link rel="stylesheet" href="/static/css/Nhap.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="header-left">
+        <div class="header-left-logo">
+          <div class="header-left-icon">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div class="header-left-title">Edu-LIMS</div>
+        </div>
+        <div class="header-left-describe">
+          Hệ thống công tác thực hành tin học
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="header-label">
+          <i class="fa-solid fa-bell"></i>
+        </div>
+        <div class="header-user" id="headerUser">
+          <div class="header-avt">
+            <img src="{{ user[7] }}" alt="Ảnh đại diện" />
+          </div>
+          <div class="navbar-arrow">
+            <i class="fa-solid fa-caret-down"></i>
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- navbar -->
+    <div class="navbar-container" id="navbarContainer">
+      <div class="navbar-user-container">
+        <a href="">
+          <div class="navbar-user-avt">
+            <img src="{{ user[7] }}" alt="Ảnh đại diện" />
+          </div>
+          <div class="navbar-user-name">
+            <p>{{ user[1] }}</p>
+            <p>{{ user[8] }}</p>
+          </div>
+        </a>
+      </div>
+      <div class="navbar-box">
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user-gear"></i>
+              </div>
+              <div class="navbar-item-title">Lịch thực hành của tôi</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Yêu cầu xếp lịch</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <div class="navbar-item-title">Hồ sơ cá nhân</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <!-- <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-users"></i>
+              </div>
+              <div class="navbar-item-title">Cán bộ</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-chalkboard-user"></i>
+              </div>
+              <div class="navbar-item-title">Giảng viên</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-file-lines"></i>
+              </div>
+              <div class="navbar-item-title">Duyệt yêu cầu</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-regular fa-calendar-days"></i>
+              </div>
+              <div class="navbar-item-title">Lịch thực hành</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div> -->
+      </div>
+      <div class="navbar-logout">
+        <a href="/logout">
+          <div class="navbar-logout-icon">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </div>
+          <div class="navbar-logout-title">Đăng xuất</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- body -->
+
+    <div
+      class="required-container container-web"
+      id="required-page"
+      data-success="{{ success or '' }}"
+    >
+      <div class="direction">
+        <a href="/teacher">Trang chủ</a>
+        <i class="fa-solid fa-angle-right"></i>
+        <a href="/teacher/required">Yêu cầu xếp lịch</a>
+      </div>
+
+      <!-- search -->
+
+      <div class="required-search-box">
+        <form method="get" action="/teacher/required">
+          <input
+            type="text"
+            name="keyword"
+            id=""
+            placeholder="Tìm kiếm theo tên học phần..."
+            value="{{ keyword or '' }}"
+          />
+          <button type="submit" class="submit-required-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </form>
+        <!-- lam them chon ngay -->
+        <!-- dropdown trang thai yeu cau -->
+      </div>
+
+      <div class="required-add-act" id="required-add-act">
+        <i class="fa-solid fa-plus"></i>
+        Yêu cầu mới
+      </div>
+
+      <!-- add required -->
+      <div
+        class="required-add-container"
+        id="required-add-container"
+        tabindex="-1"
+      >
+        <form action="/teacher/required" method="post" id="required-form">
+          <span class="required-add-title">
+            Học kì hiện tại: {{ semester[1] }}
+          </span>
+
+          <div class="required-add-item">
+            <span class="required-add-title"> Tên học phần </span>
+            <input
+              type="text"
+              name="required_course_name"
+              id="required_course_name"
+              placeholder="Nhập tên học phần..."
+              autocomplete="off"
+            />
+            <input
+              type="hidden"
+              name="required_course_id"
+              id="required_course_id"
+            />
+            <div id="course-suggestions" class="course-suggestions"></div>
+          </div>
+
+          <div class="required-add-item">
+            <span class="required-add-title"> Tên phần mềm </span>
+            <input
+              type="text"
+              name="required_program_name"
+              id="required_program_name"
+              placeholder="Nhập tên phần mềm..."
+              autocomplete="off"
+            />
+            <input
+              type="hidden"
+              name="required_program_id"
+              id="required_program_id"
+            />
+            <div id="program-suggestions" class="program-suggestions"></div>
+          </div>
+
+          <div class="required-add-item">
+            <span class="required-add-title"> Số lượng máy tính </span>
+            <input
+              type="number"
+              name="required_computer_amount"
+              id="required_computer_amount"
+              placeholder="Nhập số từ 1 đến 6..."
+            />
+          </div>
+
+          <div class="required-add-item">
+            <span class="required-add-title">Buổi thực hành</span>
+            <label>
+              <input type="radio" name="required_lesson" value="1" checked />
+              Sáng (7h00 - 11h30)
+            </label>
+            <label>
+              <input type="radio" name="required_lesson" value="2" />
+              Chiều (13h30 - 17h00)
+            </label>
+            <label>
+              <input type="radio" name="required_lesson" value="3" />
+              Tối (18h20 - 20h00)
+            </label>
+          </div>
+
+          <!-- required-type -->
+          <div class="required-add-item">
+            <span class="required-add-title"> Loại yêu cầu </span>
+            <div class="required-add-item-box">
+              <label>
+                <input type="radio" name="required_type" value="1" checked />
+                Yêu cầu phòng dài hạn
+              </label>
+              <label>
+                <input type="radio" name="required_type" value="0" />
+                Yêu cầu phòng phát sinh
+              </label>
+            </div>
+            <div class="required-type-box">
+              <div class="required-type" id="week-day-field" hidden>
+                <span class="required-type-title">
+                  Thứ thực hành trong tuần
+                </span>
+                <div class="required-week-day-box">
+                  <label>
+                    <input type="checkbox" name="required_week_day" value="2" />
+                    Thứ 2
+                  </label>
+                  <label>
+                    <input type="checkbox" name="required_week_day" value="3" />
+                    Thứ 3
+                  </label>
+                  <label>
+                    <input type="checkbox" name="required_week_day" value="4" />
+                    Thứ 4
+                  </label>
+                  <label>
+                    <input type="checkbox" name="required_week_day" value="5" />
+                    Thứ 5
+                  </label>
+                  <label>
+                    <input type="checkbox" name="required_week_day" value="6" />
+                    Thứ 6
+                  </label>
+                  <label>
+                    <input type="checkbox" name="required_week_day" value="7" />
+                    Thứ 7
+                  </label>
+                  <label>
+                    <input type="checkbox" name="required_week_day" value="8" />
+                    Chủ nhật
+                  </label>
+                </div>
+              </div>
+              <div class="required-type-item" id="week-start-field" hidden>
+                <span class="required-type-title"> Tuần bắt đầu </span>
+                <div class="required-type-item">
+                  <input
+                    type="text"
+                    name="required-week-start"
+                    id="required-week-start"
+                    placeholder="Nhập tuần bắt đầu..."
+                    autocomplete="off"
+                  />
+                  <input
+                    type="hidden"
+                    name="required_week_start_id"
+                    id="required-week-start-id"
+                  />
+                  <div
+                    id="week-start-suggestions"
+                    class="week-start-suggestions"
+                  ></div>
+                </div>
+                <span id="week-start-date"></span>
+              </div>
+
+              <div class="required-type" id="week-end-field" hidden>
+                <span class="required-type-title"> Tuần kết thúc </span>
+                <div class="required-type-item">
+                  <input
+                    type="text"
+                    name="required-week-end"
+                    id="required-week-end"
+                    placeholder="Nhập tuần kết thúc..."
+                  />
+                  <input
+                    type="hidden"
+                    name="required_week_end_id"
+                    id="required-week-end-id"
+                  />
+                  <div
+                    id="week-end-suggestions"
+                    class="week-end-suggestions"
+                  ></div>
+                </div>
+                <span id="week-end-date"></span>
+              </div>
+              <div
+                class="required-add-item-box-item"
+                id="practice-day-field"
+                hidden
+              >
+                <span class="required-add-item-box-title">
+                  Ngày thực hành
+                </span>
+                <div class="required-add-item-box-input">
+                  <input type="date" name="required_practice_day" id="" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="required-add-item">
+            <span class="required-add-title"> Ghi chú </span>
+            <input type="number" name="required_note" id="" placeholder="" />
+          </div>
+
+          <div class="add-required-btn">
+            <div class="cancel-add-required-btn" id="cancel-add-required-btn">
+              Hủy
+            </div>
+            <button
+              type="submit"
+              class="submit-add-required-btn"
+              id="submit-add-required-btn"
+            >
+              Gửi yêu cầu
+            </button>
+            <button
+              type="submit"
+              class="submit-add-required-btn"
+              id="submit-edit-required-btn"
+              style="display: none"
+            >
+              Lưu chỉnh sửa
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- required list -->
+      <div class="required-table" id="required-table">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Mã yêu cầu</th>
+              <th>Tên học phần</th>
+              <th>Tên phần mềm</th>
+              <th>Ngày gửi</th>
+              <th>Loại yêu cầu</th>
+              <th>Lịch đăng ký</th>
+              <th>Trạng thái</th>
+              <th colspan="2">Thao tác</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% set start_index = (page - 1) * per_page %} {%for re in required%}
+            <tr>
+              <td>{{ start_index + loop.index }}</td>
+              <td>YC{{ re.MaYeuCau }}</td>
+              <td>{{ re.TenHocPhan }}</td>
+              <td>{{ re.TenPhanMem }}</td>
+              <td>{{ re.NgayYeuCau }}</td>
+
+              <!-- loai yeu cau  -->
+              {% if re.LoaiYeuCau == 0 %}
+              <td>Dài hạn</td>
+              <td>
+                {% for thu in re.DanhSachThu.split(', ') %} {% if thu == '8'
+                %}Chủ nhật{% else %}Thứ {{ thu }}{% endif %}{% if not loop.last
+                %}, {% endif %} {% endfor %}
+                <br />
+                Tuần {{ re.TuanBatDau }} - Tuần {{ re.TuanKetThuc }}
+              </td>
+              {% else %}
+              <td>Phát sinh</td>
+              <td>{{ re.NgayThucHanh }}</td>
+              {% endif %}
+
+              <!-- trang thai -->
+              <td>
+                {% if re.TrangThai == 0 %}
+                <span class="badge warning">Chờ duyệt</span>
+                {% elif re.TrangThai == 1 %}
+                <span class="badge info">Chờ xếp lịch</span>
+                {% elif re.TrangThai == 2 %}
+                <span class="badge success">Đã duyệt</span>
+                {% else %}
+                <span class="badge danger">Từ chối</span>
+                {% endif %}
+              </td>
+
+              <td>
+                <button
+                  type="button"
+                  class="see-detail-act"
+                  data-id="{{ re.MaYeuCau }}"
+                >
+                  <i class="fa-regular fa-eye"></i>
+                  Xem chi tiết
+                </button>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="delete-detail-act"
+                  data-id="{{ re[0] }}"
+                >
+                  <i class="fa-solid fa-trash-can"></i>
+                  Xóa
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- required-page -->
+      <div class="required-page">
+        {% set page_number = (page - 1) * per_page %}
+        <span
+          >Hiển thị {{ page_number + 1 }} - {% if page_number + per_page >
+          amount %} {{ amount }} {% else %} {{ page_number + per_page }} {%
+          endif %}của tổng {{ amount }} yêu cầu</span
+        >
+        <div class="pagination">
+          <div class="required-previous-page">
+            {% if (page - 1) > 0 %}
+            <a href="/admin/required?page={{ page - 1 }}&keyword={{ keyword }}"
+              ><i class="fa-solid fa-chevron-left"></i
+            ></a>
+            {% else %}
+            <span><i class="fa-solid fa-chevron-left"></i></span>
+            {% endif %}
+          </div>
+          <div class="required-number-page">{{ page }}</div>
+          {% if amount > (page * per_page) %}
+          <div class="required-next-page">
+            <a href="/admin/required?page={{ page + 1 }}&keyword={{ keyword }}"
+              ><i class="fa-solid fa-chevron-right"></i
+            ></a>
+            {% else %}
+            <span><i class="fa-solid fa-chevron-right"></i></span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- popup -->
+    <div class="popup-error" id="popup-error">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="popup-error-message" id="popup-error-message"></div>
+        <button type="button" id="popup-error-close">Đóng</button>
+      </div>
+    </div>
+
+    <div class="popup-success" id="popup-success">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="popup-success-message" id="popup-success-message">
+          {{ success }}
+        </div>
+        <button type="button" id="popup-success-close">Đóng</button>
+      </div>
+    </div>
+
+    <script src="/static/js/teacher/required.js"></script>
+    <script src="/static/js/auth/navbar.js"></script>
+  </body>
+</html>

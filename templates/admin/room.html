@@ -225,7 +225,7 @@
             <label class="room-add-title" for="staff-id">
               Chọn cán bộ quản lý
             </label>
-            <select name="staff_id" id="staff-id" >
+            <select name="staff_id" id="staff-id">
               <option value="">-- Chọn cán bộ --</option>
               {% for staff in staffs %}
               <option value="{{ staff[0] }}">{{ staff[1] }}</option>
@@ -243,7 +243,6 @@
               min="1"
               max="59"
               value="1"
-              
             />
           </div>
 
@@ -401,5 +400,6 @@
       </div>
     </div>
     <script src="/static/js/admin/room.js"></script>
+    <script src="/static/js/auth/navbar.js"></script>
   </body>
 </html>
