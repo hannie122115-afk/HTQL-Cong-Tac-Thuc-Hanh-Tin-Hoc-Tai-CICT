@@ -53,7 +53,7 @@ def show_admin(request: Request):
 # ==================yeu cau sap lich ===================
 
 
-def get_required(per_page, offset, keyword, userId):
+def get_required(per_page, offset, keyword, teacherId):
     conn = get_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
 
@@ -75,8 +75,8 @@ def get_required(per_page, offset, keyword, userId):
                 , tbd.TenTuanHoc AS "TuanBatDau"
                 , tkt.TenTuanHoc AS "TuanKetThuc"
                 , CASE 
-                    WHEN yc.NgayThucHanh IS NOT NULL THEN 1 
-                    ELSE 0 
+                    WHEN yc.NgayThucHanh IS NOT NULL THEN 0 
+                    ELSE 1
                 END AS "LoaiYeuCau"
             FROM YEU_CAU_XEP_LICH yc
             JOIN HOC_PHAN hp ON hp.MaHocPhan = yc.MaHocPhan
@@ -88,7 +88,7 @@ def get_required(per_page, offset, keyword, userId):
             LEFT JOIN YEU_CAU_THU yct ON yct.MaYeuCau = yc.MaYeuCau
             WHERE 
                 yc.MaGiangVien = %s
-                AND hp.TenHocPhan = %s
+                AND hp.TenHocPhan ILIKE %s
             GROUP BY
                 yc.MaYeuCau
                 , yc.NgayYeuCau
@@ -107,7 +107,7 @@ def get_required(per_page, offset, keyword, userId):
             LIMIT %s OFFSET %s
         """,
         (
-            userId,
+            teacherId,
             f"%{keyword}%",
             per_page,
             offset,
@@ -174,8 +174,8 @@ def show_required_teacher(
     per_page = 10
     offset = (page - 1) * per_page
 
-    amount = get_sum_required(keyword, account_id)
-    required = get_required(per_page, offset, keyword, account_id)
+    amount = get_sum_required(keyword, user[0])
+    required = get_required(per_page, offset, keyword, user[0])
 
     semester = get_semester_current()
 

@@ -213,7 +213,19 @@ function setupWeekAutocomplete(input, idInput, suggestionBox, dateSpan) {
           item.addEventListener("click", function () {
             input.value = `Tuần ${week.TenTuanHoc}`;
             idInput.value = week.MaTuanHoc;
-            dateSpan.textContent = `Từ ngày ${week.NgayBatDau} đến ngày ${week.NgayKetThuc}.`;
+
+            const [day, month, year] = week.NgayBatDau.split("/");
+            const startDate = new Date(year, month - 1, day);
+            startDate.setHours(0, 0, 0, 0);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (startDate >= today) {
+              dateSpan.textContent = `Từ ngày ${week.NgayBatDau} đến ngày ${week.NgayKetThuc}.`;
+            } else {
+              dateSpan.textContent =
+                "Không cho phép yêu cầu từ tuần ở quá khứ!";
+            }
+
             suggestionBox.replaceChildren();
           });
           suggestionBox.appendChild(item);
@@ -354,7 +366,7 @@ requiredForm.addEventListener("submit", function (e) {
 
   if (selectedType === "1") {
     const selectedWeekDays = document.querySelectorAll(
-      'input[name="required-week-day"]:checked',
+      'input[name="required_week_day"]:checked',
     );
     if (selectedWeekDays.length === 0) {
       e.preventDefault();

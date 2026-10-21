@@ -368,13 +368,17 @@
                 <div class="required-add-item-box-input">
                   <input type="date" name="required_practice_day" id="" />
                 </div>
+                <span
+                  >Yêu cầu ngày cụ thể cần cách ngày hiện tại ít nhất 3
+                  ngày.</span
+                >
               </div>
             </div>
           </div>
 
           <div class="required-add-item">
             <span class="required-add-title"> Ghi chú </span>
-            <input type="number" name="required_note" id="" placeholder="" />
+            <input type="text" name="required_note" id="" placeholder="" />
           </div>
 
           <div class="add-required-btn">
@@ -427,7 +431,7 @@
               <td>{{ re.NgayYeuCau }}</td>
 
               <!-- loai yeu cau  -->
-              {% if re.LoaiYeuCau == 0 %}
+              {% if re.LoaiYeuCau == 1 %}
               <td>Dài hạn</td>
               <td>
                 {% for thu in re.DanhSachThu.split(', ') %} {% if thu == '8'
