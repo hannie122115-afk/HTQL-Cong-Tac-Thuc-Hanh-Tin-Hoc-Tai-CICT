@@ -50,7 +50,7 @@ def show_admin(request: Request):
     )
 
 
-# ==================yeu cau sap lich ===================
+# ================== yeu cau sap lich ===================
 
 
 def get_required(per_page, offset, keyword, teacherId):
@@ -69,6 +69,7 @@ def get_required(per_page, offset, keyword, teacherId):
                 , TO_CHAR(yc.NgayThucHanh, 'DD/MM/YYYY') AS "NgayThucHanh"
                 , STRING_AGG(yct.thu::text, ', ' ORDER BY yct.thu) AS "DanhSachThu"
                 , hp.TenHocPhan AS "TenHocPhan"
+                , hp.MaHocPhan AS "MaHocPhan"
                 , pm.TenPhanMem AS "TenPhanMem"
                 , gv.TenGiangVien AS "TenGiangVien"
                 , qtv.TenQuanTriVien AS "TenQuanTriVien"
@@ -98,6 +99,7 @@ def get_required(per_page, offset, keyword, teacherId):
                 , yc.GhiChu
                 , yc.NgayThucHanh
                 , hp.TenHocPhan
+                , hp.MaHocPhan
                 , pm.TenPhanMem
                 , gv.TenGiangVien
                 , qtv.TenQuanTriVien
@@ -176,7 +178,6 @@ def show_required_teacher(
 
     amount = get_sum_required(keyword, user[0])
     required = get_required(per_page, offset, keyword, user[0])
-
     semester = get_semester_current()
 
     success = request.session.pop("success", None)
@@ -196,6 +197,9 @@ def show_required_teacher(
             "success": success,
         },
     )
+
+
+# ================== them yeu cau sap lich ===================
 
 
 @router.get("/api/courses")
@@ -289,23 +293,6 @@ def search_weeks(
         conn.close()
 
 
-def get_teacher_id(account_id: str = ""):
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        """
-        SELECT MaGiangVien
-        FROM GIANG_VIEN
-        WHERE MaTaiKhoan = %s
-    """,
-        (account_id,),
-    )
-    teacher_id = cur.fetchone()[0]
-    cur.close()
-    conn.close()
-    return teacher_id
-
-
 @router.post("/teacher/required")
 def add_required(
     request: Request,
@@ -324,7 +311,7 @@ def add_required(
     if role != 1:
         return RedirectResponse(url="/login", status_code=303)
 
-    teacher_id = get_teacher_id(request.session.get("accountId"))
+    user = get_user_by_id(account_id)
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -357,7 +344,7 @@ def add_required(
             required_note,
             required_program_id,
             required_course_id,
-            teacher_id,
+            user[0],
             week_start,
             week_end,
             practice_day,
@@ -387,5 +374,49 @@ def add_required(
 
     return RedirectResponse(
         url="required",
+        status_code=303,
+    )
+
+
+# ================== xoa yeu cau sap lich ===================
+
+
+@router.post("/teacher/required/{required_id}/delete")
+def delete_program(
+    request: Request,
+    required_id: int,
+):
+    role = request.session.get("role")
+    if role != 1:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = get_connection()
+
+    try:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            DELETE FROM YEU_CAU_XEP_LICH
+            WHERE MaYeuCau = %s
+            """,
+            (required_id,),
+        )
+
+        if cursor.rowcount == 0:
+            conn.rollback()
+            request.session["success"] = "Yêu cầu không tồn tại."
+        else:
+            conn.commit()
+            request.session["success"] = "Xóa yêu cầu thành công!"
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
+
+    return RedirectResponse(
+        url="/teacher/required",
         status_code=303,
     )

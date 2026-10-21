@@ -418,3 +418,114 @@ requiredForm.addEventListener("submit", function (e) {
     }
   }
 });
+
+// REQUIRED DETAIL
+const detailContainer = document.getElementById("required-detail-container");
+const closeDetailBtn = document.getElementById("close-detail-btn");
+
+document.querySelectorAll(".see-detail-act").forEach(function (button) {
+  button.addEventListener("click", function () {
+    const data = button.dataset;
+
+    document.getElementById("detail-id").textContent = `YC${data.id}`;
+    document.getElementById("detail-course").textContent =
+      `${data.courseId} - ${data.course}`;
+    document.getElementById("detail-program").textContent = data.program;
+    document.getElementById("detail-amount").textContent = `${data.amount} máy`;
+    document.getElementById("detail-note").textContent =
+      data.note || "Không có";
+    document.getElementById("detail-teacher").textContent = data.teacher || "";
+    document.getElementById("detail-date").textContent = data.date || "";
+
+    const lessons = {
+      1: "Sáng (7h00 - 11h30)",
+      2: "Chiều (13h30 - 17h00)",
+      3: "Tối (18h20 - 20h00)",
+    };
+    document.getElementById("detail-lesson").textContent =
+      lessons[data.lesson] || "";
+
+    const statuses = {
+      0: '<i class="fa-regular fa-hourglass"></i> Chờ duyệt',
+      1: '<i class="fa-solid fa-calendar-day"></i> Chờ xếp lịch',
+      2: '<i class="fa-solid fa-circle-check"></i> Đã duyệt',
+      3: '<i class="fa-regular fa-circle-xmark"></i> Bị từ chối',
+    };
+    document.getElementById("detail-status").innerHTML =
+      statuses[data.status] || "";
+
+    const weekDayBox = document.getElementById("detail-week-day-box");
+    const weekStartBox = document.getElementById("detail-week-start-box");
+    const weekEndBox = document.getElementById("detail-week-end-box");
+    const practiceDayBox = document.getElementById("detail-practice-day-box");
+
+    if (String(data.type) === "1") {
+      document.getElementById("detail-type").textContent = "Dài hạn";
+
+      let formattedThu = "";
+      if (data.thu) {
+        formattedThu = data.thu
+          .split(", ")
+          .map((t) => (t === "8" ? "Chủ nhật" : `Thứ ${t}`))
+          .join(", ");
+      }
+      document.getElementById("detail-week-day").textContent = formattedThu;
+      document.getElementById("detail-week-start").textContent =
+        `Tuần ${data.tuanBd}`;
+      document.getElementById("detail-week-end").textContent =
+        `Tuần ${data.tuanKt}`;
+
+      weekDayBox.style.display = "flex";
+      weekStartBox.style.display = "flex";
+      weekEndBox.style.display = "flex";
+      practiceDayBox.style.display = "none";
+    } else {
+      document.getElementById("detail-type").textContent = "Phát sinh";
+      document.getElementById("detail-practice-day").textContent = data.ngayTh;
+
+      weekDayBox.style.display = "none";
+      weekStartBox.style.display = "none";
+      weekEndBox.style.display = "none";
+      practiceDayBox.style.display = "flex";
+    }
+
+    detailContainer.classList.add("show");
+  });
+});
+
+if (closeDetailBtn && detailContainer) {
+  closeDetailBtn.addEventListener("click", function () {
+    detailContainer.classList.remove("show");
+  });
+}
+
+// DELETE REQUIRED POPUP
+const deleteRequiredPopup = document.getElementById("popup-delete-required");
+const deleteRequiredCourse = document.getElementById("delete-required-course");
+const deleteRequiredForm = document.getElementById("delete-required-form");
+const deleteRequiredCancel = document.getElementById("delete-required-cancel");
+
+document.querySelectorAll(".delete-detail-act").forEach(function (button) {
+  button.addEventListener("click", function () {
+    const id = button.dataset.id;
+    const course = button.dataset.course;
+
+    if (deleteRequiredCourse) {
+      deleteRequiredCourse.textContent = course;
+    }
+
+    if (deleteRequiredForm) {
+      deleteRequiredForm.action = `/teacher/required/${id}/delete`;
+    }
+
+    if (deleteRequiredPopup) {
+      deleteRequiredPopup.classList.add("show");
+    }
+  });
+});
+
+if (deleteRequiredCancel && deleteRequiredPopup) {
+  deleteRequiredCancel.addEventListener("click", function () {
+    deleteRequiredPopup.classList.remove("show");
+  });
+}

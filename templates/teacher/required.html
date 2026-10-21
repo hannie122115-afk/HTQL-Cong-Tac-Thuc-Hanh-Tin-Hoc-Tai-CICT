@@ -463,6 +463,20 @@
                   type="button"
                   class="see-detail-act"
                   data-id="{{ re.MaYeuCau }}"
+                  data-course="{{ re.TenHocPhan }}"
+                  data-course-id="{{ re.MaHocPhan }}"
+                  data-program="{{ re.TenPhanMem }}"
+                  data-amount="{{ re.SoLuongMay }}"
+                  data-lesson="{{ re.BuoiThucHanh }}"
+                  data-type="{{ re.LoaiYeuCau }}"
+                  data-thu="{{ re.DanhSachThu or '' }}"
+                  data-tuan-bd="{{ re.TuanBatDau or '' }}"
+                  data-tuan-kt="{{ re.TuanKetThuc or '' }}"
+                  data-ngay-th="{{ re.NgayThucHanh or '' }}"
+                  data-note="{{ re.GhiChu or '' }}"
+                  data-status="{{ re.TrangThai }}"
+                  data-teacher="{{ re.TenGiangVien }}"
+                  data-date="{{ re.NgayYeuCau }}"
                 >
                   <i class="fa-regular fa-eye"></i>
                   Xem chi tiết
@@ -472,7 +486,8 @@
                 <button
                   type="button"
                   class="delete-detail-act"
-                  data-id="{{ re[0] }}"
+                  data-id="{{ re.MaYeuCau }}"
+                  data-course="{{ re.TenHocPhan }}"
                 >
                   <i class="fa-solid fa-trash-can"></i>
                   Xóa
@@ -482,6 +497,94 @@
             {% endfor %}
           </tbody>
         </table>
+      </div>
+
+      <!-- required - detail -->
+      <div class="required-detail-container" id="required-detail-container">
+        <div class="required-detail-info-container">
+          <div class="required-detail-status" id="detail-status"></div>
+
+          <div class="required-detail-info-item">
+            <div class="required-detail-info-title">Mã yêu cầu</div>
+            <div class="required-detail-info-describe" id="detail-id"></div>
+          </div>
+          <div class="required-detail-info-item">
+            <div class="required-detail-info-title">Tên học phần</div>
+            <div class="required-detail-info-describe" id="detail-course"></div>
+          </div>
+          <div class="required-detail-info-item">
+            <div class="required-detail-info-title">Tên phần mềm</div>
+            <div
+              class="required-detail-info-describe"
+              id="detail-program"
+            ></div>
+          </div>
+          <div class="required-detail-info-item">
+            <div class="required-detail-info-title">Số lượng máy</div>
+            <div class="required-detail-info-describe" id="detail-amount"></div>
+          </div>
+          <div class="required-detail-info-item">
+            <div class="required-detail-info-title">Buổi thực hành</div>
+            <div class="required-detail-info-describe" id="detail-lesson"></div>
+          </div>
+          <div class="required-detail-info-item">
+            <div class="required-detail-info-title">Loại yêu cầu</div>
+            <div class="required-detail-info-describe" id="detail-type"></div>
+          </div>
+
+          <!-- type = 1-->
+          <div class="required-detail-info-item" id="detail-week-day-box">
+            <div class="required-detail-info-title">Thứ thực hành</div>
+            <div
+              class="required-detail-info-describe"
+              id="detail-week-day"
+            ></div>
+          </div>
+          <div class="required-detail-info-item" id="detail-week-start-box">
+            <div class="required-detail-info-title">Tuần bắt đầu</div>
+            <div
+              class="required-detail-info-describe"
+              id="detail-week-start"
+            ></div>
+          </div>
+          <div class="required-detail-info-item" id="detail-week-end-box">
+            <div class="required-detail-info-title">Tuần kết thúc</div>
+            <div
+              class="required-detail-info-describe"
+              id="detail-week-end"
+            ></div>
+          </div>
+
+          <!-- type = 0 -->
+          <div class="required-detail-info-item" id="detail-practice-day-box">
+            <div class="required-detail-info-title">Ngày thực hành</div>
+            <div
+              class="required-detail-info-describe"
+              id="detail-practice-day"
+            ></div>
+          </div>
+
+          <div class="required-detail-note-container">
+            <div class="required-detail-note-title">Ghi chú</div>
+            <div class="required-detail-note-describe" id="detail-note"></div>
+          </div>
+
+          <div class="required-detail-send-container">
+            <div class="required-detail-send-item">
+              <div class="required-detail-send-title">Người yêu cầu</div>
+              <div
+                class="required-detail-send-describe"
+                id="detail-teacher"
+              ></div>
+            </div>
+            <div class="required-detail-send-item">
+              <div class="required-detail-send-title">Ngày yêu cầu</div>
+              <div class="required-detail-send-describe" id="detail-date"></div>
+            </div>
+          </div>
+
+          <div class="close-detail-btn" id="close-detail-btn">Đóng</div>
+        </div>
       </div>
 
       <!-- required-page -->
@@ -536,6 +639,35 @@
           {{ success }}
         </div>
         <button type="button" id="popup-success-close">Đóng</button>
+      </div>
+    </div>
+
+    <div class="popup-confirm" id="popup-delete-required">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+
+        <h3>Xác nhận xóa yêu cầu</h3>
+
+        <p style="margin: 12px 0">
+          Bạn có chắc chắn muốn xóa yêu cầu thực hành học phần
+          <strong id="delete-required-course"></strong>?
+        </p>
+
+        <p style="font-size: 13px; color: #666">
+          Hành động này không thể hoàn tác.
+        </p>
+
+        <div class="popup-actions" style="margin-top: 20px">
+          <button type="button" id="delete-required-cancel">Hủy</button>
+
+          <form id="delete-required-form" method="post" action="">
+            <button type="submit" id="delete-required-confirm">
+              Xác nhận xóa
+            </button>
+          </form>
+        </div>
       </div>
     </div>
 
