@@ -279,6 +279,7 @@
             </tr>
           </thead>
 
+          {% if configs %}
           <tbody>
             {% set start_index = (page - 1) * per_page %} {%for config in
             configs%}
@@ -308,6 +309,15 @@
             </tr>
             {% endfor %}
           </tbody>
+
+          {% else %}
+          <tbody>
+            <td colspan="7" class="empty-config-message">
+              <i class="fa-solid fa-door-open"></i>
+              Không tìm thấy cấu hình nào.
+            </td>
+          </tbody>
+          {% endif %}
         </table>
       </div>
 

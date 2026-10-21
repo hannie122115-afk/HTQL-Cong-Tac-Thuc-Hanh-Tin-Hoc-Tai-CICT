@@ -381,7 +381,12 @@
                 </button>
               </td>
             </tr>
-            {% endfor %} {% endif %}
+            {% endfor %} {% else %}
+            <td colspan="8" class="empty-account-message">
+              <i class="fa-solid fa-door-open"></i>
+              Không tìm thấy tài khoản nào.
+            </td>
+            {% endif %} {% endif %}
           </tbody>
         </table>
       </div>

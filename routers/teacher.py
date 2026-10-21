@@ -53,9 +53,12 @@ def show_admin(request: Request):
 # ================== yeu cau sap lich ===================
 
 
-def get_required(per_page, offset, keyword, teacherId):
+def get_required(per_page, offset, keyword, teacherId, created_date, status):
     conn = get_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+    status_val = int(status) if status is not None and str(status).isdigit() else None
+    date_val = created_date.strip() if created_date and created_date.strip() else None
 
     cursor.execute(
         """
@@ -90,6 +93,8 @@ def get_required(per_page, offset, keyword, teacherId):
             WHERE 
                 yc.MaGiangVien = %s
                 AND hp.TenHocPhan ILIKE %s
+                AND (%s IS NULL OR %s = '' OR yc.NgayYeuCau::date = %s::date)
+                AND (%s IS NULL OR yc.TrangThai = %s)
             GROUP BY
                 yc.MaYeuCau
                 , yc.NgayYeuCau
@@ -111,6 +116,11 @@ def get_required(per_page, offset, keyword, teacherId):
         (
             teacherId,
             f"%{keyword}%",
+            date_val,
+            date_val,
+            date_val,
+            status_val,
+            status_val,
             per_page,
             offset,
         ),
@@ -164,6 +174,8 @@ def show_required_teacher(
     request: Request,
     page: int = 1,
     keyword: str = "",
+    created_date: str = "",
+    status: Optional[str] = Query(None),
 ):
     role = request.session.get("role")
     if role != 1:
@@ -177,7 +189,10 @@ def show_required_teacher(
     offset = (page - 1) * per_page
 
     amount = get_sum_required(keyword, user[0])
-    required = get_required(per_page, offset, keyword, user[0])
+    status_int = int(status) if (status is not None and status != "") else None
+    required = get_required(
+        per_page, offset, keyword, user[0], created_date, status_int
+    )
     semester = get_semester_current()
 
     success = request.session.pop("success", None)
@@ -193,6 +208,8 @@ def show_required_teacher(
             "page": page,
             "amount": amount,
             "keyword": keyword,
+            "created_date": created_date,
+            "status": status,
             "semester": semester,
             "success": success,
         },
@@ -311,7 +328,7 @@ def add_required(
     if role != 1:
         return RedirectResponse(url="/login", status_code=303)
 
-    user = get_user_by_id(account_id)
+    user = get_user_by_id(request.session.get("accountId"))
     conn = get_connection()
     cursor = conn.cursor()
 

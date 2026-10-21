@@ -276,7 +276,7 @@
               <th colspan="2">Thao tác</th>
             </tr>
           </thead>
-
+          {% if programs %}
           <tbody>
             {% set start_index = (page - 1) * per_page %} {%for program in
             programs%}
@@ -319,6 +319,15 @@
             </tr>
             {% endfor %}
           </tbody>
+
+          {% else %}
+          <tbody>
+            <td colspan="7" class="empty-program-message">
+              <i class="fa-solid fa-door-open"></i>
+              Không tìm thấy phần mềm nào.
+            </td>
+          </tbody>
+          {% endif %}
         </table>
       </div>
 
@@ -352,7 +361,6 @@
           </div>
         </div>
       </div>
-      
     </div>
 
     <!-- pop up -->

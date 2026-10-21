@@ -2248,3 +2248,73 @@
 .close-detail-btn:hover {
   background-color: #5a6268;
 }
+
+/* Khung chứa bộ lọc */
+.required-search-box {
+  margin-bottom: 20px;
+}
+
+.required-search-box form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap; /* Tự nhảy dòng mượt mà trên màn hình nhỏ */
+}
+
+/* Kiểu dáng chung cho Ô nhập từ khóa, Ngày và Dropdown */
+.required-search-box input[type="text"],
+.required-search-box input[type="date"],
+.required-search-box select {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #dcdcdc;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #333;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Độ rộng riêng cho từng ô */
+.required-search-box input[type="text"] {
+  flex: 1;
+  min-width: 240px; /* Độ rộng tối thiểu cho ô tìm kiếm */
+}
+
+.required-search-box input[type="date"] {
+  width: 160px;
+  cursor: pointer;
+}
+
+.required-search-box select {
+  min-width: 170px;
+  cursor: pointer;
+}
+
+/* Hiệu ứng khi focus vào ô nhập/chọn */
+.required-search-box input:focus,
+.required-search-box select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+/* Nút Tìm kiếm */
+.submit-required-search {
+  height: 40px;
+  width: 44px;
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  transition: background-color 0.2s ease;
+}
+
+.submit-required-search:hover {
+  background-color: #0056b3;
+}
