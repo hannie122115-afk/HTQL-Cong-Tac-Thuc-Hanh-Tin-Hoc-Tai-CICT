@@ -2318,3 +2318,86 @@
 .submit-required-search:hover {
   background-color: #0056b3;
 }
+
+
+/* ==================DUYET YEU CAU */
+/* POPUP XÁC NHẬN */
+.popup-confirm {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.popup-confirm.show {
+  display: flex;
+}
+
+.popup-confirm .popup {
+  background: #fff;
+  width: 100%;
+  max-width: 430px;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+.popup-confirm h3 {
+  margin: 12px 0;
+  font-size: 20px;
+}
+
+.reason-input-refuse {
+  margin-top: 15px;
+}
+
+.reason-input-refuse input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+}
+
+.reason-input-refuse input:focus {
+  border-color: #2563eb;
+}
+
+.message-error {
+  margin-top: 6px;
+  color: #dc2626;
+  font-size: 13px;
+}
+
+.popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.popup-actions button {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#refuse-required-cancel {
+  background: #e5e7eb;
+}
+
+#refuse-required-confirm {
+  background: #dc2626;
+  color: white;
+}
+
+#refuse-required-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+

@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Giảng viên | Yêu cầu xếp lịch</title>
+    <link rel="stylesheet" href="/static/css/Nhap.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="header-left">
+        <div class="header-left-logo">
+          <div class="header-left-icon">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div class="header-left-title">Edu-LIMS</div>
+        </div>
+        <div class="header-left-describe">
+          Hệ thống công tác thực hành tin học
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="header-label">
+          <i class="fa-solid fa-bell"></i>
+        </div>
+        <div class="header-user" id="headerUser">
+          <div class="header-avt">
+            <img src="{{ user[7] }}" alt="Ảnh đại diện" />
+          </div>
+          <div class="navbar-arrow">
+            <i class="fa-solid fa-caret-down"></i>
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- navbar -->
+    <div class="navbar-container" id="navbarContainer">
+      <div class="navbar-user-container">
+        <a href="">
+          <div class="navbar-user-avt">
+            <img src="{{ user[7] }}" alt="Ảnh đại diện" />
+          </div>
+          <div class="navbar-user-name">
+            <p>{{ user[1] }}</p>
+            <p>{{ user[8] }}</p>
+          </div>
+        </a>
+      </div>
+      <div class="navbar-box">
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user-gear"></i>
+              </div>
+              <div class="navbar-item-title">Lịch thực hành của tôi</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Yêu cầu xếp lịch</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <div class="navbar-item-title">Hồ sơ cá nhân</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <!-- <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-users"></i>
+              </div>
+              <div class="navbar-item-title">Cán bộ</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-chalkboard-user"></i>
+              </div>
+              <div class="navbar-item-title">Giảng viên</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-file-lines"></i>
+              </div>
+              <div class="navbar-item-title">Duyệt yêu cầu</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-regular fa-calendar-days"></i>
+              </div>
+              <div class="navbar-item-title">Lịch thực hành</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div> -->
+      </div>
+      <div class="navbar-logout">
+        <a href="/logout">
+          <div class="navbar-logout-icon">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </div>
+          <div class="navbar-logout-title">Đăng xuất</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- body -->
+
+    <div
+      class="accept-container container-web"
+      id="accept-page"
+      data-success="{{ success or '' }}"
+    >
+      <div class="direction">
+        <a href="/teacher">Trang chủ</a>
+        <i class="fa-solid fa-angle-right"></i>
+        <a href="/teacher/accept">Yêu cầu xếp lịch</a>
+      </div>
+
+      <!-- search -->
+
+      <div class="accept-search-box">
+        <form method="get" action="/teacher/accept">
+          <input
+            type="text"
+            name="keyword"
+            id=""
+            placeholder="Tìm kiếm theo tên học phần..."
+            value="{{ keyword or '' }}"
+          />
+          <div class="date-search">
+            <input
+              type="date"
+              name="created_date"
+              value="{{ created_date or '' }}"
+              onchange="this.form.submit()"
+              title="Lọc theo ngày gửi"
+            />
+          </div>
+
+          <select name="status" onchange="this.form.submit()">
+            {% if status is none or status == '' %}
+            <option value="" selected>-- Tất cả trạng thái --</option>
+            {% else %}
+            <option value="">-- Tất cả trạng thái --</option>
+            {% endif %} {% if status == 0 or status == '0' %}
+            <option value="0" selected>Chờ duyệt</option>
+            {% else %}
+            <option value="0">Chờ duyệt</option>
+            {% endif %} {% if status == 1 or status == '1' %}
+            <option value="1" selected>Chờ xếp lịch</option>
+            {% else %}
+            <option value="1">Chờ xếp lịch</option>
+            {% endif %} {% if status == 2 or status == '2' %}
+            <option value="2" selected>Đã duyệt</option>
+            {% else %}
+            <option value="2">Đã duyệt</option>
+            {% endif %} {% if status == 3 or status == '3' %}
+            <option value="3" selected>Từ chối</option>
+            {% else %}
+            <option value="3">Từ chối</option>
+            {% endif %}
+          </select>
+          <button type="submit" class="submit-accept-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </form>
+      </div>
+
+      <!-- accept list -->
+      <div class="accept-table" id="accept-table">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Mã yêu cầu</th>
+              <th>Tên học phần</th>
+              <th>Người yêu cầu</th>
+              <th>Loại yêu cầu</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+
+          {% if required %}
+          <tbody>
+            {% set start_index = (page - 1) * per_page %} {%for re in required%}
+            <tr>
+              <td>{{ start_index + loop.index }}</td>
+              <td>YC{{ re.MaYeuCau }}</td>
+              <td>{{ re.TenHocPhan }}</td>
+              <td>{{ re.TenGiangVien }}</td>
+
+              <!-- loai yeu cau  -->
+              {% if re.LoaiYeuCau == 1 %}
+              <td>Dài hạn</td>
+              {% else %}
+              <td>Phát sinh</td>
+              {% endif %}
+
+              <!-- trang thai -->
+              <td>
+                {% if re.TrangThai == 0 %}
+                <span class="badge warning">Chờ duyệt</span>
+                {% elif re.TrangThai == 1 %}
+                <span class="badge info">Chờ xếp lịch</span>
+                {% elif re.TrangThai == 2 %}
+                <span class="badge success">Đã duyệt</span>
+                {% else %}
+                <span class="badge danger">Từ chối</span>
+                {% endif %}
+              </td>
+
+              <td>
+                <button
+                  type="button"
+                  class="see-detail-act"
+                  data-id="{{ re.MaYeuCau }}"
+                  data-course="{{ re.TenHocPhan }}"
+                  data-course-id="{{ re.MaHocPhan }}"
+                  data-program="{{ re.TenPhanMem }}"
+                  data-amount="{{ re.SoLuongMay }}"
+                  data-lesson="{{ re.BuoiThucHanh }}"
+                  data-type="{{ re.LoaiYeuCau }}"
+                  data-thu="{{ re.DanhSachThu or '' }}"
+                  data-tuan-bd="{{ re.TuanBatDau or '' }}"
+                  data-tuan-kt="{{ re.TuanKetThuc or '' }}"
+                  data-ngay-th="{{ re.NgayThucHanh or '' }}"
+                  data-note="{{ re.GhiChu or '' }}"
+                  data-status="{{ re.TrangThai }}"
+                  data-teacher="{{ re.TenGiangVien }}"
+                  data-date="{{ re.NgayYeuCau }}"
+                >
+                  <i class="fa-regular fa-eye"></i>
+                  Xem chi tiết
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          {% else %}
+          <tbody>
+            <td colspan="9" class="empty-accept-message">
+              <i class="fa-solid fa-door-open"></i>
+              Không tìm thấy yêu cầu nào.
+            </td>
+          </tbody>
+          {% endif %}
+        </table>
+      </div>
+
+      <!-- accept - detail -->
+      <div class="required-detail-container" id="required-detail-container">
+        <div class="required-detail-info-container">
+          <div class="required-detail-status" id="detail-status"></div>
+
+          <div class="required-detail-info-item">
+            <div class="required-detail-info-title">Mã yêu cầu</div>
+            <div class="required-detail-info-describe" id="detail-id"></div>
+          </div>
+          <div class="required-detail-info-item">
+            <div class="required-detail-info-title">Tên học phần</div>
+            <div class="required-detail-info-describe" id="detail-course"></div>
+          </div>
+          <div class="required-detail-info-item">
+            <div class="required-detail-info-title">Tên phần mềm</div>
+            <div
+              class="required-detail-info-describe"
+              id="detail-program"
+            ></div>
+          </div>
+          <div class="required-detail-info-item">
+            <div class="required-detail-info-title">Số lượng máy</div>
+            <div class="required-detail-info-describe" id="detail-amount"></div>
+          </div>
+          <div class="required-detail-info-item">
+            <div class="required-detail-info-title">Buổi thực hành</div>
+            <div class="required-detail-info-describe" id="detail-lesson"></div>
+          </div>
+          <div class="required-detail-info-item">
+            <div class="required-detail-info-title">Loại yêu cầu</div>
+            <div class="required-detail-info-describe" id="detail-type"></div>
+          </div>
+
+          <!-- type = 1-->
+          <div class="required-detail-info-item" id="detail-week-day-box">
+            <div class="required-detail-info-title">Thứ thực hành</div>
+            <div
+              class="required-detail-info-describe"
+              id="detail-week-day"
+            ></div>
+          </div>
+          <div class="required-detail-info-item" id="detail-week-start-box">
+            <div class="required-detail-info-title">Tuần bắt đầu</div>
+            <div
+              class="required-detail-info-describe"
+              id="detail-week-start"
+            ></div>
+          </div>
+          <div class="required-detail-info-item" id="detail-week-end-box">
+            <div class="required-detail-info-title">Tuần kết thúc</div>
+            <div
+              class="required-detail-info-describe"
+              id="detail-week-end"
+            ></div>
+          </div>
+
+          <!-- type = 0 -->
+          <div class="required-detail-info-item" id="detail-practice-day-box">
+            <div class="required-detail-info-title">Ngày thực hành</div>
+            <div
+              class="required-detail-info-describe"
+              id="detail-practice-day"
+            ></div>
+          </div>
+
+          <div class="required-detail-note-container">
+            <div class="required-detail-note-title">Ghi chú</div>
+            <div class="required-detail-note-describe" id="detail-note"></div>
+          </div>
+
+          <div class="required-detail-send-container">
+            <div class="required-detail-send-item">
+              <div class="required-detail-send-title">Người yêu cầu</div>
+              <div
+                class="required-detail-send-describe"
+                id="detail-teacher"
+              ></div>
+            </div>
+            <div class="required-detail-send-item">
+              <div class="required-detail-send-title">Ngày yêu cầu</div>
+              <div class="required-detail-send-describe" id="detail-date"></div>
+            </div>
+          </div>
+
+          <div class="btn-box">
+            <div class="close-detail-btn" id="close-detail-btn">Đóng</div>
+            <div class="accept-detail-btn" id="accept-detail-btn">Duyệt</div>
+            <div class="refuse-detail-btn" id="refuse-detail-btn">Từ chối</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- required-page -->
+      <div class="required-page">
+        {% set page_number = (page - 1) * per_page %}
+        <span
+          >Hiển thị {{ page_number + 1 }} - {% if page_number + per_page >
+          amount %} {{ amount }} {% else %} {{ page_number + per_page }} {%
+          endif %}của tổng {{ amount }} yêu cầu</span
+        >
+        <div class="pagination">
+          <div class="required-previous-page">
+            {% if (page - 1) > 0 %}
+            <a href="/admin/accept?page={{ page - 1 }}"
+              ><i class="fa-solid fa-chevron-left"></i
+            ></a>
+            {% else %}
+            <span><i class="fa-solid fa-chevron-left"></i></span>
+            {% endif %}
+          </div>
+          <div class="required-number-page">{{ page }}</div>
+          {% if amount > (page * per_page) %}
+          <div class="required-next-page">
+            <a href="/admin/accept?page={{ page + 1 }}"
+              ><i class="fa-solid fa-chevron-right"></i
+            ></a>
+            {% else %}
+            <span><i class="fa-solid fa-chevron-right"></i></span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- popup -->
+
+    <div class="popup-success" id="popup-success">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="popup-success-message" id="popup-success-message">
+          {{ success }}
+        </div>
+      </div>
+    </div>
+
+    <div class="popup-confirm" id="popup-refuse-required">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+
+        <h3>Xác nhận từ chối yêu cầu</h3>
+
+        <p style="margin: 12px 0">
+          Bạn có chắc chắn muốn từ chối yêu cầu thực hành?
+        </p>
+
+        <p style="font-size: 13px; color: #666">
+          Vui lòng nhập lý do từ chối yêu cầu này.
+        </p>
+
+        <form id="refuse-required-form" method="post" action="">
+          <div class="reason-input-refuse" id="reason-input-refuse">
+            <input
+              type="text"
+              name="reason"
+              id="refuse-reason"
+              placeholder="Nhập lý do từ chối..."
+            />
+          </div>
+          <div class="message-error" id="message-error"></div>
+
+          <div class="popup-actions" style="margin-top: 20px">
+            <button type="button" id="refuse-required-cancel">Hủy</button>
+
+            <button type="submit" id="refuse-required-confirm">
+              Xác nhận từ chối
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="/static/js/admin/accept.js"></script>
+    <script src="/static/js/auth/navbar.js"></script>
+  </body>
+</html>

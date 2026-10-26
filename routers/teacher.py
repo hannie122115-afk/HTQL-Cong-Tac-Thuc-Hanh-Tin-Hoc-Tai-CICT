@@ -134,17 +134,32 @@ def get_required(per_page, offset, keyword, teacherId, created_date, status):
     return required
 
 
-def get_sum_required(keyword, userId):
+def get_sum_required(keyword, userId, created_date, status):
     conn = get_connection()
     cursor = conn.cursor()
+
+    status_val = int(status) if status is not None and str(status).isdigit() else None
+    date_val = created_date.strip() if created_date and created_date.strip() else None
+
     cursor.execute(
         """
             SELECT COUNT(DISTINCT yc.MaYeuCau)
             FROM YEU_CAU_XEP_LICH yc
             JOIN HOC_PHAN hp ON hp.MaHocPhan = yc.MaHocPhan
-            WHERE yc.MaGiangVien = %s AND hp.TenHocPhan ILIKE %s
+            WHERE yc.MaGiangVien = %s 
+                AND hp.TenHocPhan ILIKE %s
+                AND (%s IS NULL OR %s = '' OR yc.NgayYeuCau::date = %s::date)
+                AND (%s IS NULL OR yc.TrangThai = %s)
         """,
-        (userId, f"%{keyword}%"),
+        (
+            userId,
+            f"%{keyword}%",
+            date_val,
+            date_val,
+            date_val,
+            status_val,
+            status_val,
+        ),
     )
     amount = cursor.fetchone()[0]
     cursor.close()
@@ -188,8 +203,8 @@ def show_required_teacher(
     per_page = 10
     offset = (page - 1) * per_page
 
-    amount = get_sum_required(keyword, user[0])
     status_int = int(status) if (status is not None and status != "") else None
+    amount = get_sum_required(keyword, user[0], created_date, status_int)
     required = get_required(
         per_page, offset, keyword, user[0], created_date, status_int
     )

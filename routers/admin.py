@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Request, Form
+from fastapi import APIRouter, Request, Form, Query, Body
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 from pwdlib import PasswordHash
-from typing import List
+from typing import List, Optional
 from datetime import date
 from datetime import datetime, timedelta
 from psycopg2.extras import RealDictCursor
@@ -2280,3 +2280,272 @@ def update_account_status(
         conn.close()
 
     return RedirectResponse(url="/admin/account", status_code=303)
+
+
+# ====================================Duyet yeu cau========================
+
+
+def get_required(per_page, offset, created_date_from, created_date_to, status):
+    conn = get_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+    status_val = int(status) if status is not None and str(status).isdigit() else None
+    date_from_val = (
+        created_date_from.strip()
+        if created_date_from and created_date_from.strip()
+        else None
+    )
+    date_to_val = (
+        created_date_to.strip()
+        if created_date_to and created_date_to.strip()
+        else date_from_val
+    )
+
+    cursor.execute(
+        """
+            SELECT 
+                yc.MaYeuCau AS "MaYeuCau"
+                , TO_CHAR(yc.NgayYeuCau, 'DD/MM/YYYY') AS "NgayYeuCau"
+                , yc.BuoiThucHanh AS "BuoiThucHanh"
+                , yc.SoLuongMay AS "SoLuongMay"
+                , yc.TrangThai AS "TrangThai"
+                , yc.GhiChu AS "GhiChu"
+                , TO_CHAR(yc.NgayThucHanh, 'DD/MM/YYYY') AS "NgayThucHanh"
+                , STRING_AGG(yct.thu::text, ', ' ORDER BY yct.thu) AS "DanhSachThu"
+                , hp.TenHocPhan AS "TenHocPhan"
+                , hp.MaHocPhan AS "MaHocPhan"
+                , pm.TenPhanMem AS "TenPhanMem"
+                , gv.TenGiangVien AS "TenGiangVien"
+                , qtv.TenQuanTriVien AS "TenQuanTriVien"
+                , tbd.TenTuanHoc AS "TuanBatDau"
+                , tkt.TenTuanHoc AS "TuanKetThuc"
+                , CASE 
+                    WHEN yc.NgayThucHanh IS NOT NULL THEN 0 
+                    ELSE 1
+                END AS "LoaiYeuCau"
+            FROM YEU_CAU_XEP_LICH yc
+            JOIN HOC_PHAN hp ON hp.MaHocPhan = yc.MaHocPhan
+            JOIN PHAN_MEM pm ON pm.MaPhanMem = yc.MaPhanMem
+            JOIN GIANG_VIEN gv ON gv.MaGiangVien = yc.MaGiangVien
+            LEFT JOIN QUAN_TRI_VIEN qtv ON qtv.MaQuanTriVien = yc.MaQuanTriVien
+            LEFT JOIN TUAN_HOC tbd ON tbd.MaTuanHoc = yc.MaTuanBatDau
+            LEFT JOIN TUAN_HOC tkt ON tkt.MaTuanHoc = yc.MaTuanKetThuc
+            LEFT JOIN YEU_CAU_THU yct ON yct.MaYeuCau = yc.MaYeuCau
+            WHERE (%s IS NULL OR %s = '' OR yc.NgayYeuCau::date >= %s::date)
+                AND (%s IS NULL OR %s = '' OR yc.NgayYeuCau::date <= %s::date)
+                AND (%s IS NULL OR yc.TrangThai = %s)
+            GROUP BY
+                yc.MaYeuCau
+                , yc.NgayYeuCau
+                , yc.BuoiThucHanh
+                , yc.SoLuongMay
+                , yc.TrangThai
+                , yc.GhiChu
+                , yc.NgayThucHanh
+                , hp.TenHocPhan
+                , hp.MaHocPhan
+                , pm.TenPhanMem
+                , gv.TenGiangVien
+                , qtv.TenQuanTriVien
+                , tbd.TenTuanHoc
+                , tkt.TenTuanHoc
+            ORDER BY yc.NgayYeuCau DESC
+            LIMIT %s OFFSET %s
+        """,
+        (
+            date_from_val,
+            date_from_val,
+            date_from_val,
+            date_to_val,
+            date_to_val,
+            date_to_val,
+            status_val,
+            status_val,
+            per_page,
+            offset,
+        ),
+    )
+
+    required = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return required
+
+
+def get_sum_required(created_date_from, created_date_to, status):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    status_val = int(status) if status is not None and str(status).isdigit() else None
+    date_from_val = (
+        created_date_from.strip()
+        if created_date_from and created_date_from.strip()
+        else None
+    )
+    date_to_val = (
+        created_date_to.strip()
+        if created_date_to and created_date_to.strip()
+        else date_from_val
+    )
+
+    cursor.execute(
+        """
+            SELECT COUNT(DISTINCT yc.MaYeuCau)
+            FROM YEU_CAU_XEP_LICH yc
+            JOIN HOC_PHAN hp ON hp.MaHocPhan = yc.MaHocPhan
+            WHERE (%s IS NULL OR %s = '' OR yc.NgayYeuCau::date >= %s::date)
+                AND (%s IS NULL OR %s = '' OR yc.NgayYeuCau::date <= %s::date)
+                AND (%s IS NULL OR yc.TrangThai = %s)
+        """,
+        (
+            date_from_val,
+            date_from_val,
+            date_from_val,
+            date_to_val,
+            date_to_val,
+            date_to_val,
+            status_val,
+            status_val,
+        ),
+    )
+    amount = cursor.fetchone()[0]
+    cursor.close()
+    conn.close()
+    return amount
+
+
+def get_semester_current():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+            SELECT MaHocKy, TenHocKy, NamHoc
+            FROM HOC_KY
+            WHERE CURRENT_DATE BETWEEN NgayBatDau AND NgayKetThuc
+            LIMIT 1
+        """,
+    )
+    semester = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return semester
+
+
+@router.get("/admin/accept")
+def show_accept(
+    request: Request,
+    page: int = 1,
+    created_date_from: str = "",
+    created_date_to: str = "",
+    status: Optional[str] = Query(None),
+):
+    role = request.session.get("role")
+    if role != 2:
+        return RedirectResponse(url="/login", status_code=303)
+
+    account_id = request.session.get("accountId")
+    user = get_user_by_id(account_id)
+    avt = request.session.get("avt")
+
+    per_page = 10
+    offset = (page - 1) * per_page
+
+    status_int = int(status) if (status is not None and status != "") else None
+    amount = get_sum_required(created_date_from, created_date_to, status_int)
+    required = get_required(
+        per_page, offset, created_date_from, created_date_to, status_int
+    )
+    semester = get_semester_current()
+
+    success = request.session.pop("success", None)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/accept.html",
+        context={
+            "user": user,
+            "avt": avt,
+            "required": required,
+            "per_page": per_page,
+            "page": page,
+            "amount": amount,
+            "created_date_from": created_date_from,
+            "created_date_to": created_date_to,
+            "status": status,
+            "semester": semester,
+            "success": success,
+        },
+    )
+
+
+@router.post("/admin/accept/{required_id}/accept")
+def accept_required(
+    required_id: int,
+    request: Request,
+):
+    role = request.session.get("role")
+    if role != 2:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            UPDATE YEU_CAU_XEP_LICH
+            SET TrangThai = 1
+            WHERE MaYeuCau = %s AND TrangThai = 0
+            RETURNING MaYeuCau
+            """,
+            (required_id,),
+        )
+        conn.commit()
+        return {"success": True, "message": "Đã duyệt yêu cầu thành công."}
+    except Exception:
+        conn.rollback()
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "message": "Có lỗi khi cập nhật trạng thái."},
+        )
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@router.post("/admin/accept/{required_id}/refuse")
+def refuse_required(
+    required_id: int,
+    request: Request,
+    reason: str = Body(..., embed=True),
+):
+    role = request.session.get("role")
+    if role != 2:
+        return RedirectResponse(url="/login", status_code=303)
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            UPDATE YEU_CAU_XEP_LICH
+            SET TrangThai = 3
+            , LyDo = %s
+            WHERE MaYeuCau = %s AND TrangThai = 0
+            RETURNING MaYeuCau
+            """,
+            (
+                reason,
+                required_id,
+            ),
+        )
+        conn.commit()
+        return {"success": True, "message": "Đã từ chối yêu cầu thành công."}
+    except Exception:
+        conn.rollback()
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "message": "Có lỗi khi cập nhật trạng thái."},
+        )
+    finally:
+        cursor.close()
+        conn.close()
