@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Giảng viên | Yêu cầu xếp lịch</title>
+    <title>Quản trị viên | Duyệt yêu cầu</title>
     <link rel="stylesheet" href="/static/css/Nhap.css" />
     <link
       rel="stylesheet"
@@ -164,15 +164,15 @@
       data-success="{{ success or '' }}"
     >
       <div class="direction">
-        <a href="/teacher">Trang chủ</a>
+        <a href="/admin">Trang chủ</a>
         <i class="fa-solid fa-angle-right"></i>
-        <a href="/teacher/accept">Yêu cầu xếp lịch</a>
+        <a href="/admin/accept">Duyệt yêu cầu</a>
       </div>
 
       <!-- search -->
 
       <div class="accept-search-box">
-        <form method="get" action="/teacher/accept">
+        <form method="get" action="/admin/accept">
           <input
             type="text"
             name="keyword"

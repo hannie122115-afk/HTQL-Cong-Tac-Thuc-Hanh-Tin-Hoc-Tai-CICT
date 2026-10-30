@@ -7,6 +7,7 @@ from datetime import date
 from datetime import datetime, timedelta
 from psycopg2.extras import RealDictCursor
 import re, secrets, string, hashlib, os
+from datetime import datetime, date, timedelta
 
 from email_service import send_account_email
 from database import get_connection
@@ -2549,3 +2550,364 @@ def refuse_required(
     finally:
         cursor.close()
         conn.close()
+
+
+# ================================XEP LICH THUC HANH =================
+
+
+def get_all_year():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+            SELECT DISTINCT NamHoc
+            FROM HOC_KY
+            ORDER BY NamHoc DESC
+        """,
+    )
+    years = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return years
+
+
+def get_all_room():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            p.MaPhong,
+            p.TenPhong,
+            p.TinhTrangPhong,
+            COUNT(DISTINCT mt.MaMayTinh) AS TongSoMay,
+            p.MaCauHinh,
+            COALESCE(
+                ARRAY_AGG(DISTINCT cpm.MaPhanMem)
+                FILTER (WHERE cpm.MaPhanMem IS NOT NULL),
+                ARRAY[]::integer[]
+            ) AS DanhSachPhanMem
+        FROM PHONG p
+        LEFT JOIN MAY_TINH mt
+            ON p.MaPhong = mt.MaPhong
+        LEFT JOIN CAU_HINH_PHAN_MEM cpm
+            ON p.MaCauHinh = cpm.MaCauHinh
+        GROUP BY
+            p.MaPhong,
+            p.TenPhong,
+            p.TinhTrangPhong,
+            p.MaCauHinh
+        ORDER BY p.TenPhong;
+    """)
+
+    rooms = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return rooms
+
+
+def check_room_suitable(room, required):
+    if room[2] != 1:
+        return False
+
+    if room[4] is None:
+        return False
+
+    if room[3] < required["SoLuongMay"]:
+        return False
+
+    if required["MaPhanMem"] not in room[5]:
+        return False
+
+    return True
+
+
+def get_weeks_by_semester(semester_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT MaTuanHoc, TenTuanHoc, NgayBatDau, NgayKetThuc
+        FROM TUAN_HOC
+        WHERE MaHocKy = %s
+        ORDER BY NgayBatDau ASC
+        """,
+        (semester_id,),
+    )
+
+    rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    weeks = []
+    for row in rows:
+        weeks.append(
+            {
+                "id": row[0],
+                "name": row[1],
+                "start": row[2].strftime("%Y-%m-%d"),
+                "end": row[3].strftime("%Y-%m-%d"),
+            }
+        )
+
+    return weeks
+
+
+def get_required_for_waiting():
+    conn = get_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+    cursor.execute("""
+        SELECT
+            yc.MaYeuCau AS "MaYeuCau"
+            , yc.BuoiThucHanh AS "BuoiThucHanh"
+            , yc.SoLuongMay AS "SoLuongMay"
+            , yc.MaPhanMem AS "MaPhanMem"
+            , yc.MaPhong AS "MaPhong"
+            , yc.NgayThucHanh AS "NgayThucHanh"
+            , yc.MaTuanBatDau AS "MaTuanBatDau"
+            , yc.MaTuanKetThuc AS "MaTuanKetThuc"
+            , tbd.TenTuanHoc AS "TuanBatDau"
+            , tkt.TenTuanHoc AS "TuanKetThuc"
+            , yc.TrangThai AS "TrangThai"
+            , hp.TenHocPhan AS "TenHocPhan"
+            , gv.TenGiangVien AS "TenGiangVien"
+            , STRING_AGG(
+                yct.thu::text,
+                ',' ORDER BY yct.thu
+            ) AS "DanhSachThu"
+            , CASE 
+                WHEN yc.NgayThucHanh IS NOT NULL THEN 0 
+                ELSE 1
+            END AS "LoaiYeuCau"
+        FROM YEU_CAU_XEP_LICH yc
+        JOIN HOC_PHAN hp
+            ON hp.MaHocPhan = yc.MaHocPhan
+        JOIN GIANG_VIEN gv
+            ON gv.MaGiangVien = yc.MaGiangVien
+        LEFT JOIN YEU_CAU_THU yct
+            ON yct.MaYeuCau = yc.MaYeuCau
+        LEFT JOIN TUAN_HOC tbd 
+            ON tbd.MaTuanHoc = yc.MaTuanBatDau
+        LEFT JOIN TUAN_HOC tkt 
+            ON tkt.MaTuanHoc = yc.MaTuanKetThuc
+        WHERE yc.TrangThai = 1
+        GROUP BY
+            yc.MaYeuCau
+            , hp.TenHocPhan
+            , gv.TenGiangVien
+            , tbd.TenTuanHoc
+            , tkt.TenTuanHoc
+        ORDER BY yc.NgayYeuCau DESC
+    """)
+
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return result
+
+
+def get_scheduled_requests():
+    conn = get_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+    cursor.execute("""
+        SELECT
+            yc.MaYeuCau AS "MaYeuCau",
+            yc.MaPhong AS "MaPhong",
+            yc.BuoiThucHanh AS "BuoiThucHanh",
+            TO_CHAR(yc.NgayThucHanh, 'YYYY-MM-DD') AS "NgayThucHanh",
+            yc.MaTuanBatDau AS "MaTuanBatDau",
+            yc.MaTuanKetThuc AS "MaTuanKetThuc",
+            yc.SoLuongMay AS "SoLuongMay",
+            yc.MaPhanMem AS "MaPhanMem",
+            hp.TenHocPhan AS "TenHocPhan",
+            gv.TenGiangVien AS "TenGiangVien",
+            STRING_AGG(
+                yct.thu::text,
+                ',' ORDER BY yct.thu
+            ) AS "DanhSachThu"
+
+        FROM YEU_CAU_XEP_LICH yc
+        JOIN HOC_PHAN hp
+            ON hp.MaHocPhan = yc.MaHocPhan
+        JOIN GIANG_VIEN gv
+            ON gv.MaGiangVien = yc.MaGiangVien
+        LEFT JOIN YEU_CAU_THU yct
+            ON yct.MaYeuCau = yc.MaYeuCau
+        WHERE yc.TrangThai = 2
+          AND yc.MaPhong IS NOT NULL
+        GROUP BY
+            yc.MaYeuCau,
+            yc.MaPhong,
+            yc.BuoiThucHanh,
+            yc.NgayThucHanh,
+            yc.MaTuanBatDau,
+            yc.MaTuanKetThuc,
+            yc.SoLuongMay,
+            yc.MaPhanMem,
+            hp.TenHocPhan,
+            gv.TenGiangVien
+        ORDER BY yc.MaYeuCau
+    """)
+
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return result
+
+
+@router.get("/admin/calendar")
+def show_calendar(
+    request: Request,
+    page: int = 1,
+    created_date_from: str = "",
+    created_date_to: str = "",
+    status: Optional[str] = Query(None),
+):
+    role = request.session.get("role")
+    if role != 2:
+        return RedirectResponse(url="/login", status_code=303)
+
+    account_id = request.session.get("accountId")
+    user = get_user_by_id(account_id)
+    avt = request.session.get("avt")
+
+    per_page = 10
+    offset = (page - 1) * per_page
+
+    status_int = int(status) if (status is not None and status != "") else None
+    amount = get_sum_required(created_date_from, created_date_to, status_int)
+    required = get_required(
+        per_page, offset, created_date_from, created_date_to, status_int
+    )
+    semester_current = get_semester_current()
+    all_year = get_all_year()
+    all_room = get_all_room()
+    all_scheduled = get_scheduled_requests()
+    all_required_waiting = get_required_for_waiting()
+
+    weeks = []
+    if semester_current:
+        weeks = get_weeks_by_semester(semester_current[0])
+
+    success = request.session.pop("success", None)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/calendar.html",
+        context={
+            "user": user,
+            "avt": avt,
+            "required": required,
+            "per_page": per_page,
+            "page": page,
+            "amount": amount,
+            "created_date_from": created_date_from,
+            "created_date_to": created_date_to,
+            "status": status,
+            "semester_current": semester_current,
+            "all_year": all_year,
+            "all_room": all_room,
+            "weeks": weeks,
+            "all_scheduled": all_scheduled,
+            "all_required_waiting": all_required_waiting,
+            "success": success,
+        },
+    )
+
+
+def get_weekday_index(value):
+    return int(value) - 2
+
+
+def get_week_id_by_date(target_date):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT MaTuanHoc
+        FROM TUAN_HOC
+        WHERE %s BETWEEN NgayBatDau AND NgayKetThuc
+    """,
+        (target_date,),
+    )
+
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result[0] if result else None
+
+
+# kiem tra trung o lich voi yeu cau
+def check_room_conflict(
+    room_id,
+    session,
+    day,
+    week_id,
+    target_date,
+    scheduled_requests,  # danh sách lịch đã xếp
+):
+
+    if isinstance(target_date, str):
+        target_date = date.fromisoformat(target_date)
+
+    for item in scheduled_requests:
+        if item["MaPhong"] != room_id:
+            continue
+
+        if item["BuoiThucHanh"] != session:
+            continue
+
+        if item["NgayThucHanh"]:
+            scheduled_date = date.fromisoformat(item["NgayThucHanh"])
+
+            if scheduled_date == target_date:
+                return True
+            continue
+
+        start_week = item["MaTuanBatDau"]
+        end_week = item["MaTuanKetThuc"]
+
+        if not (start_week <= week_id <= end_week):
+            continue
+
+        scheduled_days = [
+            get_weekday_index(d) for d in (item["DanhSachThu"] or "").split(",") if d
+        ]
+
+        if day in scheduled_days:
+            return True
+
+    return False
+
+
+# Kiem tra all phong
+def get_available_rooms(required, day, week_id, target_date, rooms, scheduled_requests):
+    available_rooms = []
+
+    for room in rooms:
+        room_id = room[0]
+
+        if not check_room_suitable(room, required):
+            continue
+
+        is_conflict = check_room_conflict(
+            room_id=room_id,
+            session=required["BuoiThucHanh"],
+            day=day,
+            week_id=week_id,
+            target_date=target_date,
+            scheduled_requests=scheduled_requests,
+        )
+
+        if not is_conflict:
+            available_rooms.append(room_id)
+
+    return available_rooms

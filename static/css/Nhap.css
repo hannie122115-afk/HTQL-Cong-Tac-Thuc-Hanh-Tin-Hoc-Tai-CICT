@@ -2273,7 +2273,9 @@
   color: #333;
   background-color: #ffffff;
   outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 /* Độ rộng riêng cho từng ô */
@@ -2318,7 +2320,6 @@
 .submit-required-search:hover {
   background-color: #0056b3;
 }
-
 
 /* ==================DUYET YEU CAU */
 /* POPUP XÁC NHẬN */
@@ -2401,3 +2402,70 @@
   cursor: not-allowed;
 }
 
+/* ============================== xep lich thuc hanh ======== */
+.required-item {
+  cursor: grab;
+  user-select: none;
+}
+
+.required-item:active {
+  cursor: grabbing;
+}
+
+.required-item.dragging {
+  opacity: 0.45;
+}
+
+.schedule-cell {
+  min-width: 120px;
+  min-height: 65px;
+  height: 65px;
+  border: 1px solid #e2e8f0;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+}
+
+.schedule-cell.drag-over {
+  background-color: #efedff;
+  border: 2px dashed #6558d3;
+}
+
+.scheduled-item {
+  padding: 6px;
+  border-radius: 6px;
+  background: #e0e7ff;
+  color: #3730a3;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.scheduled-item {
+  padding: 6px;
+  border-radius: 6px;
+  background: #e0e7ff;
+  color: #3730a3;
+  font-size: 12px;
+}
+.schedule-cell.disabled {
+  background: #f1f1f1;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.schedule-cell.drag-over {
+  background: #efedff;
+  border: 2px dashed #6558d3;
+}
+
+.invalid-cell {
+  background-color: #eeeeee !important;
+  opacity: 0.4;
+  pointer-events: none;
+}
+.calendar-table {
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: auto;
+}
