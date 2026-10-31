@@ -353,6 +353,28 @@
       </div>
     </div>
 
+    <!-- popup xác nhận khi kéo lịch về danh sách -->
+    <div class="popup-error" id="popup-confirm-delete">
+      <div class="popup" style="max-width: 420px">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-question"></i>
+        </div>
+        <div class="popup-error-message">
+          Thứ đang kéo được xếp qua nhiều tuần. Bạn muốn xóa thứ này ở phạm vi
+          nào?
+        </div>
+        <div>
+          <button type="button" id="btn-delete-all">
+            Xóa thứ này ở tất cả các tuần
+          </button>
+          <button type="button" id="btn-delete-one">
+            Chỉ xóa thứ này trong tuần hiện tại
+          </button>
+          <button type="button" id="btn-delete-cancel">Hủy</button>
+        </div>
+      </div>
+    </div>
+
     <!-- truyen du lieu tu python => javascript -->
     <script id="weeks-data" type="application/json">
       {{ weeks | tojson }}

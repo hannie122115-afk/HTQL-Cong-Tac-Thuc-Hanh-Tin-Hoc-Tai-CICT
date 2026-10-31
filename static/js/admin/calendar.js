@@ -1,20 +1,30 @@
 const weeks = JSON.parse(document.getElementById("weeks-data").textContent);
-
 const scheduledRequests = JSON.parse(
   document.getElementById("scheduled-data").textContent,
 );
 
-// Các lịch mới được kéo thả, chưa lưu xuống database
 let temporarySchedules = [];
 
-// Các mã yêu cầu đã được kéo từ lịch database về danh sách
-let removedScheduleIds = new Set();
+let removedScheduleDays = new Set(); // lưu các thứ trong 1 yêu cầu
+function getScheduleDayKey(requiredId, day) {
+  return `${String(requiredId)}:${Number(day)}`;
+}
 
-const weekName = document.getElementById("weekName");
-const weekSpace = document.getElementById("week-space");
-const previousWeek = document.getElementById("previousWeek");
-const nextWeek = document.getElementById("nextWeek");
-const dayElements = document.querySelectorAll(".day-of-week");
+let removedScheduleDayWeeks = new Set(); //lưu cho trường hợp xóa 1 yêu cầu dài hạn nhưng chỉ xóa của 1 tuần
+function getScheduleDayWeekKey(requiredId, day, weekId) {
+  return `${getScheduleDayKey(requiredId, day)}:${Number(weekId)}`;
+}
+
+function clearRemovedScheduleDay(requiredId, day) {
+  const dayKey = getScheduleDayKey(requiredId, day);
+
+  removedScheduleDays.delete(dayKey);
+  removedScheduleDayWeeks.forEach((key) => {
+    if (key.startsWith(`${dayKey}:`)) {
+      removedScheduleDayWeeks.delete(key);
+    }
+  });
+}
 
 const today = new Date();
 
@@ -50,27 +60,20 @@ function toDateString(date) {
   ].join("-");
 }
 
-let currentIndex = -1;
-let currentSession = "1";
-
 // ================= LẤY DANH SÁCH LỊCH =================
 
 function getAllSchedules() {
-  // Lịch lấy từ database, bỏ qua các yêu cầu đã kéo về danh sách
-  const databaseSchedules = scheduledRequests
-    .filter((item) => !removedScheduleIds.has(String(item.MaYeuCau)))
-    .map((item) => ({
-      source: "database",
-      requiredId: String(item.MaYeuCau),
-      roomId: Number(item.MaPhong),
-      session: Number(item.BuoiThucHanh),
-      date: item.NgayThucHanh || "",
-      days: item.DanhSachThu || "",
-      weekStart: Number(item.MaTuanBatDau),
-      weekEnd: Number(item.MaTuanKetThuc),
-    }));
+  const databaseSchedules = scheduledRequests.map((item) => ({
+    source: "database",
+    requiredId: String(item.MaYeuCau),
+    roomId: Number(item.MaPhong),
+    session: Number(item.BuoiThucHanh),
+    date: item.NgayThucHanh || "",
+    days: item.DanhSachThu || "",
+    weekStart: Number(item.MaTuanBatDau),
+    weekEnd: Number(item.MaTuanKetThuc),
+  }));
 
-  // Lịch mới được kéo thả
   const newSchedules = temporarySchedules.map((item) => ({
     source: "temporary",
     requiredId: String(item.requiredId),
@@ -89,6 +92,8 @@ function getAllSchedules() {
 
 // ================= VẼ LỊCH =================
 
+let currentIndex = -1;
+let currentSession = "1";
 function renderScheduledRequests() {
   // Xóa lịch đang hiển thị trước khi vẽ lại
   document.querySelectorAll(".schedule-cell").forEach((cell) => {
@@ -100,14 +105,10 @@ function renderScheduledRequests() {
   if (currentIndex < 0 || !weeks.length) return;
 
   const currentWeek = weeks[currentIndex];
-
-  // Lấy cả lịch database và lịch tạm
   const allSchedules = getAllSchedules();
 
   allSchedules.forEach((schedule) => {
     let days = [];
-
-    // Lấy dữ liệu gốc nếu là lịch database
     const databaseItem =
       schedule.source === "database"
         ? scheduledRequests.find(
@@ -126,7 +127,7 @@ function renderScheduledRequests() {
 
     if (!item) return;
 
-    // Kiểm tra lịch có thuộc tuần đang xem không
+    // co hien thi dung tuan k
     if (schedule.date) {
       if (
         schedule.date < currentWeek.start ||
@@ -143,7 +144,6 @@ function renderScheduledRequests() {
       }
     }
 
-    // Xác định các ngày thực hành
     if (schedule.date) {
       const date = parseDate(schedule.date);
       days = [(date.getDay() + 6) % 7];
@@ -154,14 +154,18 @@ function renderScheduledRequests() {
         .map((day) => Number(day.trim()) - 2);
     }
 
-    // Với lịch tạm, chỉ hiển thị ở đúng tuần và đúng ngày đã xếp
+    // Lịch tạm lặp lại ngày đã chọn trong toàn bộ khoảng tuần yêu cầu.
     if (schedule.source === "temporary") {
       days = [schedule.day];
-
-      if (Number(schedule.weekId) !== Number(currentWeek.id)) {
-        return;
-      }
     }
+
+    days = days.filter(
+      (day) =>
+        !removedScheduleDays.has(getScheduleDayKey(schedule.requiredId, day)) &&
+        !removedScheduleDayWeeks.has(
+          getScheduleDayWeekKey(schedule.requiredId, day, currentWeek.id),
+        ),
+    );
 
     days.forEach((day) => {
       if (day < 0 || day > 6) return;
@@ -177,6 +181,7 @@ function renderScheduledRequests() {
       const card = document.createElement("div");
       card.className = "scheduled-item";
       card.draggable = true;
+      card.dataset.day = String(day);
 
       const course = item.TenHocPhan || item.course || "";
       const teacher = item.TenGiangVien || item.teacher || "";
@@ -193,12 +198,9 @@ function renderScheduledRequests() {
       card.dataset.days = schedule.days;
       card.dataset.weekStart = schedule.weekStart || "";
       card.dataset.weekEnd = schedule.weekEnd || "";
-
-      // Lưu tên tuần nếu dữ liệu có sẵn
       card.dataset.weekStartName = item.TuanBatDau || item.weekStartName || "";
       card.dataset.weekEndName = item.TuanKetThuc || item.weekEndName || "";
 
-      // Giữ tham chiếu đến phần tử yêu cầu nếu là lịch tạm
       if (temporaryItem) {
         card.requiredItem = temporaryItem.requiredItem || null;
       }
@@ -211,6 +213,12 @@ function renderScheduledRequests() {
 }
 
 // ================= HIỂN THỊ TUẦN =================
+
+const dayElements = document.querySelectorAll(".day-of-week");
+const previousWeek = document.getElementById("previousWeek");
+const nextWeek = document.getElementById("nextWeek");
+const weekName = document.getElementById("weekName");
+const weekSpace = document.getElementById("week-space");
 
 function renderCalendarWeek() {
   if (weeks.length === 0 || currentIndex < 0) {
@@ -243,18 +251,6 @@ function renderCalendarWeek() {
   nextWeek.disabled = currentIndex === weeks.length - 1;
 }
 
-function findCurrentWeek() {
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-
-  return weeks.findIndex((week) => {
-    const start = parseDate(week.start);
-    const end = parseDate(week.end);
-
-    return now >= start && now <= end;
-  });
-}
-
 // ================= CHUYỂN TUẦN =================
 
 previousWeek.addEventListener("click", () => {
@@ -272,6 +268,30 @@ nextWeek.addEventListener("click", () => {
     renderScheduledRequests();
   }
 });
+
+function findCurrentWeek() {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  return weeks.findIndex((week) => {
+    const start = parseDate(week.start);
+    const end = parseDate(week.end);
+
+    return now >= start && now <= end;
+  });
+}
+
+function findCurrentWeek() {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  return weeks.findIndex((week) => {
+    const start = parseDate(week.start);
+    const end = parseDate(week.end);
+
+    return now >= start && now <= end;
+  });
+}
 
 currentIndex = findCurrentWeek();
 
@@ -318,14 +338,208 @@ popupErrorClose.addEventListener("click", () => {
   popupError.classList.remove("show");
 });
 
-// ================= KÉO THẢ ITEM =================
+// ================= KIỂM TRA NGÀY YÊU CẦU =================
 
-const requiredItems = document.querySelectorAll(".required-item");
-const scheduleCells = document.querySelectorAll(".schedule-cell");
+function checkRequestDate(item, day, weekId, targetDate) {
+  if (item.dataset.date) {
+    return item.dataset.date === targetDate;
+  }
+
+  const startWeek = Number(item.dataset.weekStart);
+  const endWeek = Number(item.dataset.weekEnd);
+
+  if (weekId < startWeek || weekId > endWeek) {
+    return false;
+  }
+
+  const requiredDays = (item.dataset.days || "")
+    .split(",")
+    .filter(Boolean)
+    .map((d) => Number(d.trim()) - 2);
+
+  return requiredDays.includes(day);
+}
+
+// ================= KIỂM TRA PHÒNG =================
+
+function checkRoomSuitableJS(room, item) {
+  const roomStatus = Number(room.dataset.roomStatus);
+  const machineCount = Number(room.dataset.machineCount);
+  const configId = room.dataset.configId;
+
+  const softwareList = JSON.parse(room.dataset.software || "[]");
+
+  if (roomStatus !== 1) return false;
+  if (!configId) return false;
+
+  if (machineCount < Number(item.dataset.machines)) {
+    return false;
+  }
+
+  if (!softwareList.includes(Number(item.dataset.software))) {
+    return false;
+  }
+
+  return true;
+}
+
+// ================= KIỂM TRA XUNG ĐỘT =================
 
 let draggedItem = null;
 
-// ================= KHÔI PHỤC YÊU CẦU =================
+function checkConflictJS(roomId, session, day, weekId, targetDate) {
+  const allSchedules = getAllSchedules();
+
+  for (const item of allSchedules) {
+    if (
+      draggedItem &&
+      String(item.requiredId) === String(draggedItem.dataset.requiredId)
+    ) {
+      continue;
+    }
+
+    if (
+      Number(item.roomId) !== Number(roomId) ||
+      Number(item.session) !== Number(session)
+    ) {
+      continue;
+    }
+
+    if (
+      removedScheduleDays.has(getScheduleDayKey(item.requiredId, day)) ||
+      removedScheduleDayWeeks.has(
+        getScheduleDayWeekKey(item.requiredId, day, weekId),
+      )
+    ) {
+      continue;
+    }
+
+    if (item.date) {
+      if (item.date === targetDate) {
+        return true;
+      }
+      continue;
+    }
+
+    if (weekId < item.weekStart || weekId > item.weekEnd) {
+      continue;
+    }
+
+    const scheduledDays = item.days
+      ? item.days
+          .split(",")
+          .filter(Boolean)
+          .map((d) => Number(d.trim()) - 2)
+      : [];
+
+    if (scheduledDays.includes(day) || item.source === "temporary") {
+      if (item.source === "temporary") {
+        if (Number(item.day) === Number(day)) return true;
+      } else {
+        return true;
+      }
+    }
+  }
+
+  for (const item of temporarySchedules) {
+    if (
+      draggedItem &&
+      String(item.requiredId) === String(draggedItem.dataset.requiredId)
+    ) {
+      continue;
+    }
+
+    if (
+      Number(item.roomId) !== Number(roomId) ||
+      Number(item.session) !== Number(session)
+    ) {
+      continue;
+    }
+
+    if (
+      removedScheduleDays.has(getScheduleDayKey(item.requiredId, day)) ||
+      removedScheduleDayWeeks.has(
+        getScheduleDayWeekKey(item.requiredId, day, weekId),
+      )
+    ) {
+      continue;
+    }
+
+    const start = Number(item.weekStart || item.weekId);
+    const end = Number(item.weekEnd || item.weekId);
+
+    if (weekId >= start && weekId <= end) {
+      if (Number(item.day) === Number(day)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+// ================= LÀM MỜ CÁC Ô LỊCH KHÔNG HỢP LỆ =================
+
+const scheduleCells = document.querySelectorAll(".schedule-cell");
+
+function highlightInvalidCells(item) {
+  const week = weeks[currentIndex];
+
+  if (!week) return;
+
+  scheduleCells.forEach((cell) => {
+    const room = cell.closest("tr");
+    const day = Number(cell.dataset.day);
+
+    const targetDate = parseDate(week.start);
+    targetDate.setDate(targetDate.getDate() + day);
+
+    const dateString = toDateString(targetDate);
+
+    const correctDate = checkRequestDate(
+      item,
+      day,
+      Number(week.id),
+      dateString,
+    );
+
+    const roomSuitable = checkRoomSuitableJS(room, item);
+
+    const conflict = checkConflictJS(
+      room.dataset.room,
+      Number(item.dataset.session),
+      day,
+      Number(week.id),
+      dateString,
+    );
+
+    const correctSession = String(item.dataset.session) === currentSession;
+
+    const valid = correctSession && correctDate && roomSuitable && !conflict;
+
+    cell.classList.toggle("invalid-cell", !valid);
+    cell.dataset.invalid = valid ? "false" : "true";
+  });
+}
+
+// ===========KHÔI PHỤC YÊU CẦU =============
+
+function getRequiredDays(item) {
+  if (item.dataset.date) {
+    return [(parseDate(item.dataset.date).getDay() + 6) % 7];
+  }
+
+  return (item.dataset.days || "")
+    .split(",")
+    .filter(Boolean)
+    .map((day) => Number(day.trim()) - 2);
+}
+
+function setRequestDragEffect(event, item) {
+  event.dataTransfer.effectAllowed =
+    getRequiredDays(item).length > 1 ? "copyMove" : "move";
+  event.dataTransfer.setData("text/plain", item.dataset.requiredId);
+}
 
 function restoreRequiredItem(card) {
   const item = document.createElement("div");
@@ -380,7 +594,6 @@ function restoreRequiredItem(card) {
     scheduleText = `${days} | Tuần ${weekStart} - Tuần ${weekEnd}`;
   }
 
-  // Tạo nội dung an toàn bằng textContent
   const courseElement = document.createElement("div");
   courseElement.className = "required-item-course";
   courseElement.textContent = card.dataset.course || "";
@@ -399,8 +612,7 @@ function restoreRequiredItem(card) {
   item.addEventListener("dragstart", (event) => {
     draggedItem = item;
 
-    event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("text/plain", item.dataset.requiredId);
+    setRequestDragEffect(event, item);
 
     item.classList.add("dragging");
     highlightInvalidCells(item);
@@ -420,13 +632,15 @@ function restoreRequiredItem(card) {
   return item;
 }
 
-// Gắn sự kiện kéo cho các yêu cầu ban đầu
+// ================= KÉO THẢ ITEM =================
+
+const requiredItems = document.querySelectorAll(".required-item");
+
 requiredItems.forEach((item) => {
   item.addEventListener("dragstart", (event) => {
     draggedItem = item;
 
-    event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("text/plain", item.dataset.requiredId);
+    setRequestDragEffect(event, item);
 
     item.classList.add("dragging");
     highlightInvalidCells(item);
@@ -446,10 +660,57 @@ requiredItems.forEach((item) => {
 
 // ================= KÉO YÊU CẦU VÀO LỊCH =================
 
+// kiem tra sau khi keo thi con bao nhieu thu trong yc
+function getAssignedDays(requiredId, weekId = Number(weeks[currentIndex]?.id)) {
+  return new Set(
+    temporarySchedules
+      .filter((item) => {
+        const day = Number(item.day);
+        const matchesRequest = String(item.requiredId) === String(requiredId);
+        const isRemoved =
+          removedScheduleDays.has(getScheduleDayKey(requiredId, day)) ||
+          removedScheduleDayWeeks.has(
+            getScheduleDayWeekKey(requiredId, day, weekId),
+          );
+
+        return matchesRequest && !isRemoved;
+      })
+      .map((item) => Number(item.day)),
+  );
+}
+
+// kiem tra phai thu cuoi cung cua yeu cau k
+function completesPlacement(item, day) {
+  const assignedDays = getAssignedDays(item.dataset.requiredId);
+  assignedDays.add(Number(day));
+
+  return getRequiredDays(item).every((requiredDay) =>
+    assignedDays.has(requiredDay),
+  );
+}
+
 scheduleCells.forEach((cell) => {
   cell.addEventListener("dragover", (event) => {
     event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
+
+    const day = Number(cell.dataset.day);
+    const assignedDays = draggedItem
+      ? getAssignedDays(draggedItem.dataset.requiredId)
+      : new Set();
+
+    if (
+      !draggedItem ||
+      cell.dataset.invalid === "true" ||
+      cell.dataset.occupied === "true" ||
+      assignedDays.has(day)
+    ) {
+      event.dataTransfer.dropEffect = "none";
+    } else {
+      event.dataTransfer.dropEffect = completesPlacement(draggedItem, day)
+        ? "move"
+        : "copy";
+    }
+
     cell.classList.add("drag-over");
   });
 
@@ -463,31 +724,10 @@ scheduleCells.forEach((cell) => {
 
     if (!draggedItem) return;
 
-    if (cell.dataset.invalid === "true") {
-      showErrorPopup("Phòng hoặc thời gian thực hành không phù hợp.");
-      return;
-    }
+    const isFinalPlacement = completesPlacement(draggedItem, day);
 
-    if (draggedItem.dataset.session !== currentSession) {
-      showErrorPopup("Yêu cầu này không thuộc buổi đang chọn.");
-      return;
-    }
-
-    if (cell.dataset.occupied === "true") {
-      showErrorPopup("Ô lịch này đã có yêu cầu.");
-      return;
-    }
-
-    const requiredId = String(draggedItem.dataset.requiredId);
-
-    // Nếu kéo lại một yêu cầu đã có trong database,
-    // bỏ đánh dấu đã xóa để lịch có thể được xếp lại
-    removedScheduleIds.delete(requiredId);
-
-    // Nếu đã tồn tại lịch tạm của yêu cầu này thì xóa bản cũ
-    temporarySchedules = temporarySchedules.filter(
-      (item) => String(item.requiredId) !== requiredId,
-    );
+    // coa yc khoi mang neu truoc do no tung bi keo ra
+    clearRemovedScheduleDay(requiredId, day);
 
     const card = document.createElement("div");
 
@@ -496,6 +736,7 @@ scheduleCells.forEach((cell) => {
     card.textContent = `${draggedItem.dataset.course} - ${draggedItem.dataset.teacher}`;
 
     card.dataset.requiredId = requiredId;
+    card.dataset.day = String(day);
     card.dataset.course = draggedItem.dataset.course;
     card.dataset.teacher = draggedItem.dataset.teacher;
     card.dataset.session = draggedItem.dataset.session;
@@ -515,7 +756,7 @@ scheduleCells.forEach((cell) => {
     temporarySchedules.push({
       requiredId,
       roomId: Number(cell.dataset.room),
-      day: Number(cell.dataset.day),
+      day,
       session: Number(draggedItem.dataset.session),
       weekId: Number(weeks[currentIndex].id),
 
@@ -538,13 +779,59 @@ scheduleCells.forEach((cell) => {
     cell.dataset.occupied = "true";
     cell.dataset.requiredId = requiredId;
 
-    draggedItem.remove();
+    if (isFinalPlacement) {
+      draggedItem.remove();
+    }
   });
 });
 
-// ================= KÉO LỊCH VỀ DANH SÁCH =================
+// ================= THUC THI XOA LICH =================
 
 const requiredList = document.querySelector(".required-list");
+
+function executeDeleteSchedule(requiredId, mode, day) {
+  const currentWeekId = weeks[currentIndex]
+    ? Number(weeks[currentIndex].id)
+    : null;
+
+  if (mode === "all") {
+    const scheduledCards = document.querySelectorAll(
+      `.scheduled-item[data-required-id="${requiredId}"]`,
+    );
+
+    if (scheduledCards.length > 0) {
+      const firstCard = scheduledCards[0];
+      const originalItem =
+        firstCard.requiredItem || restoreRequiredItem(firstCard);
+      requiredList.appendChild(originalItem);
+    }
+
+    temporarySchedules = temporarySchedules.filter(
+      (item) =>
+        String(item.requiredId) !== requiredId || Number(item.day) !== day,
+    );
+    removedScheduleDays.add(getScheduleDayKey(requiredId, day));
+    removedScheduleDayWeeks.forEach((key) => {
+      if (key.startsWith(`${getScheduleDayKey(requiredId, day)}:`)) {
+        removedScheduleDayWeeks.delete(key);
+      }
+    });
+
+    renderScheduledRequests();
+  } else if (mode === "current_week") {
+    removedScheduleDayWeeks.add(
+      getScheduleDayWeekKey(requiredId, day, currentWeekId),
+    );
+
+    renderScheduledRequests();
+  }
+}
+
+// ================= KÉO LỊCH VỀ DANH SÁCH =================
+
+let pendingDeleteRequiredId = null; //ma yc cho xoa
+let pendingDeleteDay = null; //thu cho xoa
+let draggedScheduleDay = null; //thu cua the dang keo
 
 requiredList.addEventListener("dragover", (event) => {
   event.preventDefault();
@@ -555,8 +842,6 @@ requiredList.addEventListener("drop", (event) => {
   event.preventDefault();
 
   const requiredId = String(event.dataTransfer.getData("text/plain"));
-
-  // Tìm tất cả thẻ lịch có cùng mã yêu cầu
   const scheduledCards = document.querySelectorAll(
     `.scheduled-item[data-required-id="${requiredId}"]`,
   );
@@ -564,38 +849,56 @@ requiredList.addEventListener("drop", (event) => {
   if (scheduledCards.length === 0) return;
 
   const firstCard = scheduledCards[0];
+  const draggedDay = draggedScheduleDay;
 
-  const originalItem = firstCard.requiredItem || restoreRequiredItem(firstCard);
+  if (!Number.isInteger(draggedDay)) return;
 
-  requiredList.appendChild(originalItem);
+  // Kiểm tra xem yêu cầu này có kéo dài nhiều tuần không
+  const weekStart = Number(firstCard.dataset.weekStart);
+  const weekEnd = Number(firstCard.dataset.weekEnd);
+  const spansMultipleWeeks = weekStart && weekEnd && weekStart !== weekEnd;
 
-  // Kiểm tra yêu cầu này có phải lịch tạm không
-  const isTemporary = temporarySchedules.some(
-    (item) => String(item.requiredId) === requiredId,
-  );
+  pendingDeleteRequiredId = requiredId;
+  pendingDeleteDay = draggedDay;
 
-  if (isTemporary) {
-    // Xóa lịch tạm khỏi danh sách
-    temporarySchedules = temporarySchedules.filter(
-      (item) => String(item.requiredId) !== requiredId,
-    );
+  if (spansMultipleWeeks) {
+    popupConfirmDelete.classList.add("show");
   } else {
-    // Đánh dấu lịch database đã được kéo về danh sách
-    removedScheduleIds.add(requiredId);
+    executeDeleteSchedule(requiredId, "all", draggedDay);
   }
-
-  // Xóa toàn bộ thẻ lịch cùng mã yêu cầu đang hiển thị
-  scheduledCards.forEach((card) => {
-    const cell = card.closest(".schedule-cell");
-
-    card.remove();
-
-    if (cell) {
-      delete cell.dataset.occupied;
-      delete cell.dataset.requiredId;
-    }
-  });
 });
+
+// ===============CAC BTN ==============
+
+const btnDeleteAll = document.getElementById("btn-delete-all");
+btnDeleteAll.addEventListener("click", () => {
+  if (pendingDeleteRequiredId) {
+    executeDeleteSchedule(pendingDeleteRequiredId, "all", pendingDeleteDay);
+  }
+  closeConfirmPopup();
+});
+
+const btnDeleteOne = document.getElementById("btn-delete-one");
+btnDeleteOne.addEventListener("click", () => {
+  if (pendingDeleteRequiredId) {
+    executeDeleteSchedule(
+      pendingDeleteRequiredId,
+      "current_week",
+      pendingDeleteDay,
+    );
+  }
+  closeConfirmPopup();
+});
+
+const popupConfirmDelete = document.getElementById("popup-confirm-delete");
+function closeConfirmPopup() {
+  popupConfirmDelete.classList.remove("show");
+  pendingDeleteRequiredId = null;
+  pendingDeleteDay = null;
+}
+
+const btnDeleteCancel = document.getElementById("btn-delete-cancel");
+btnDeleteCancel.addEventListener("click", closeConfirmPopup);
 
 // ================= KÉO THẺ LỊCH =================
 
@@ -604,173 +907,14 @@ document.addEventListener("dragstart", (event) => {
 
   if (!card) return;
 
+  draggedScheduleDay = Number(card.dataset.day);
   event.dataTransfer.effectAllowed = "move";
   event.dataTransfer.setData("text/plain", card.dataset.requiredId);
 });
 
-// ================= KIỂM TRA PHÒNG =================
-
-function checkRoomSuitableJS(room, item) {
-  const roomStatus = Number(room.dataset.roomStatus);
-  const machineCount = Number(room.dataset.machineCount);
-  const configId = room.dataset.configId;
-
-  const softwareList = JSON.parse(room.dataset.software || "[]");
-
-  if (roomStatus !== 1) return false;
-  if (!configId) return false;
-
-  if (machineCount < Number(item.dataset.machines)) {
-    return false;
-  }
-
-  if (!softwareList.includes(Number(item.dataset.software))) {
-    return false;
-  }
-
-  return true;
-}
-
-// ================= KIỂM TRA XUNG ĐỘT =================
-
-function checkConflictJS(roomId, session, day, weekId, targetDate) {
-  const allSchedules = getAllSchedules();
-
-  for (const item of allSchedules) {
-    // Không xét chính yêu cầu đang được kéo
-    if (
-      draggedItem &&
-      String(item.requiredId) === String(draggedItem.dataset.requiredId)
-    ) {
-      continue;
-    }
-
-    // Phải cùng phòng và cùng buổi mới có xung đột
-    if (
-      Number(item.roomId) !== Number(roomId) ||
-      Number(item.session) !== Number(session)
-    ) {
-      continue;
-    }
-
-    // Lịch thực hành theo ngày cụ thể
-    if (item.date) {
-      if (item.date === targetDate) {
-        return true;
-      }
-
-      continue;
-    }
-
-    // Lịch thực hành định kỳ
-    if (weekId < item.weekStart || weekId > item.weekEnd) {
-      continue;
-    }
-
-    // Kiểm tra thứ thực hành
-    const scheduledDays = item.days
-      .split(",")
-      .filter(Boolean)
-      .map((d) => Number(d.trim()) - 2);
-
-    if (scheduledDays.includes(day)) {
-      return true;
-    }
-  }
-
-  // Kiểm tra thêm các lịch tạm
-  for (const item of temporarySchedules) {
-    // Bỏ qua chính yêu cầu đang được kéo
-    if (
-      draggedItem &&
-      String(item.requiredId) === String(draggedItem.dataset.requiredId)
-    ) {
-      continue;
-    }
-
-    if (
-      Number(item.roomId) !== Number(roomId) ||
-      Number(item.session) !== Number(session)
-    ) {
-      continue;
-    }
-
-    // Lịch tạm chỉ được xếp vào tuần cụ thể
-    if (Number(item.weekId) !== Number(weekId)) {
-      continue;
-    }
-
-    if (Number(item.day) === Number(day)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-// ================= KIỂM TRA NGÀY YÊU CẦU =================
-
-function checkRequestDate(item, day, weekId, targetDate) {
-  if (item.dataset.date) {
-    return item.dataset.date === targetDate;
-  }
-
-  const startWeek = Number(item.dataset.weekStart);
-  const endWeek = Number(item.dataset.weekEnd);
-
-  if (weekId < startWeek || weekId > endWeek) {
-    return false;
-  }
-
-  const requiredDays = (item.dataset.days || "")
-    .split(",")
-    .filter(Boolean)
-    .map((d) => Number(d.trim()) - 2);
-
-  return requiredDays.includes(day);
-}
-
-// ================= LÀM MỜ CÁC Ô LỊCH KHÔNG HỢP LỆ =================
-
-function highlightInvalidCells(item) {
-  const week = weeks[currentIndex];
-
-  if (!week) return;
-
-  scheduleCells.forEach((cell) => {
-    const room = cell.closest("tr");
-    const day = Number(cell.dataset.day);
-
-    const targetDate = parseDate(week.start);
-    targetDate.setDate(targetDate.getDate() + day);
-
-    const dateString = toDateString(targetDate);
-
-    const correctDate = checkRequestDate(
-      item,
-      day,
-      Number(week.id),
-      dateString,
-    );
-
-    const roomSuitable = checkRoomSuitableJS(room, item);
-
-    const conflict = checkConflictJS(
-      room.dataset.room,
-      Number(item.dataset.session),
-      day,
-      Number(week.id),
-      dateString,
-    );
-
-    const correctSession = String(item.dataset.session) === currentSession;
-
-    const valid = correctSession && correctDate && roomSuitable && !conflict;
-
-    cell.classList.toggle("invalid-cell", !valid);
-    cell.dataset.invalid = valid ? "false" : "true";
-  });
-}
+document.addEventListener("dragend", () => {
+  draggedScheduleDay = null;
+});
 
 // ================= AUTO SCROLL KHI KÉO =================
 
@@ -778,27 +922,49 @@ const calendarTable = document.querySelector(".calendar-table");
 
 let autoScrollInterval = null;
 
-document.addEventListener("dragover", function (e) {
-  if (!draggedItem || !calendarTable) return;
+document.addEventListener("dragover", function (event) {
+  const isDraggingCalendarItem =
+    draggedItem || Number.isInteger(draggedScheduleDay);
+
+  if (
+    !isDraggingCalendarItem ||
+    !calendarTable ||
+    calendarTable.scrollHeight <= calendarTable.clientHeight
+  ) {
+    stopAutoScroll();
+    return;
+  }
 
   const rect = calendarTable.getBoundingClientRect();
-  const mouseY = e.clientY;
+  const visibleTop = Math.max(rect.top, 0);
+  const visibleBottom = Math.min(rect.bottom, window.innerHeight);
+  const mouseY = event.clientY;
 
-  const edgeSize = 80;
-  const scrollSpeed = 12;
+  const edgeSize = 80; // vung kich hoat ham
+  const scrollSpeed = 12; // toc do cuon
 
   clearInterval(autoScrollInterval);
   autoScrollInterval = null;
 
   // Kéo gần mép dưới: cuộn xuống
-  if (mouseY > rect.bottom - edgeSize && mouseY < rect.bottom) {
+  if (
+    mouseY > visibleBottom - edgeSize &&
+    mouseY < visibleBottom &&
+    event.clientX >= rect.left &&
+    event.clientX <= rect.right
+  ) {
     autoScrollInterval = setInterval(() => {
       calendarTable.scrollTop += scrollSpeed;
     }, 16);
   }
 
   // Kéo gần mép trên: cuộn lên
-  else if (mouseY < rect.top + edgeSize && mouseY > rect.top) {
+  else if (
+    mouseY < visibleTop + edgeSize &&
+    mouseY > visibleTop &&
+    event.clientX >= rect.left &&
+    event.clientX <= rect.right
+  ) {
     autoScrollInterval = setInterval(() => {
       calendarTable.scrollTop -= scrollSpeed;
     }, 16);
