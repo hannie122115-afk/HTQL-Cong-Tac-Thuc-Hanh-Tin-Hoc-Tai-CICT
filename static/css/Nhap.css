@@ -2408,6 +2408,19 @@
   user-select: none;
 }
 
+.required-list {
+  transition:
+    opacity 0.2s ease,
+    filter 0.2s ease;
+}
+
+.required-list.is-locked {
+  opacity: 0.45;
+  filter: blur(1px);
+  pointer-events: none;
+  user-select: none;
+}
+
 .required-item:active {
   cursor: grabbing;
 }

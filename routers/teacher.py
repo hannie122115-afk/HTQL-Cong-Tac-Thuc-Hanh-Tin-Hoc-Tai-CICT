@@ -3,6 +3,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 from psycopg2.extras import RealDictCursor
 from database import get_connection
+from datetime import date
 from typing import List, Optional
 
 templates = Jinja2Templates(directory="templates")
@@ -70,7 +71,10 @@ def get_required(per_page, offset, keyword, teacherId, created_date, status):
                 , yc.TrangThai AS "TrangThai"
                 , yc.GhiChu AS "GhiChu"
                 , TO_CHAR(yc.NgayThucHanh, 'DD/MM/YYYY') AS "NgayThucHanh"
-                , STRING_AGG(yct.thu::text, ', ' ORDER BY yct.thu) AS "DanhSachThu"
+                , STRING_AGG(
+                    DISTINCT yct.thu::text,
+                    ', ' ORDER BY yct.thu::text
+                ) AS "DanhSachThu"
                 , hp.TenHocPhan AS "TenHocPhan"
                 , hp.MaHocPhan AS "MaHocPhan"
                 , pm.TenPhanMem AS "TenPhanMem"
@@ -397,6 +401,19 @@ def add_required(
                     rwd,
                 ),
             )
+    elif practice_day:
+        practice_weekday = date.fromisoformat(practice_day).isoweekday() + 1
+        cursor.execute(
+            """
+                INSERT INTO YEU_CAU_THU (MaYeuCau, Thu, NgayThucHanh)
+                VALUES (%s, %s, %s)
+            """,
+            (
+                required_id,
+                practice_weekday,
+                practice_day,
+            ),
+        )
 
     conn.commit()
     cursor.close()
