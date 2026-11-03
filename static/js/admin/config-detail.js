@@ -68,18 +68,16 @@ popupCancelYes.addEventListener("click", function () {
 
 const popupSuccess = document.getElementById("popup-success");
 const popupSuccessMessage = document.getElementById("popup-success-message");
-const popupSuccessClose = document.getElementById("popup-success-close");
 const configPage = document.getElementById("config-page");
 const successMessage = configPage.dataset.success;
 
 if (successMessage) {
   popupSuccessMessage.textContent = successMessage;
   popupSuccess.classList.add("show");
+  setTimeout(() => {
+    window.location.reload();
+  }, 300);
 }
-
-popupSuccessClose.addEventListener("click", function () {
-  popupSuccess.classList.remove("show");
-});
 
 // ADD PROGRAM DETAIL
 const addProgramBtn = document.getElementById("config-detail-add-act");

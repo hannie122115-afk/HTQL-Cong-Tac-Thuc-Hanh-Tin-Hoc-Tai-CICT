@@ -2309,6 +2309,7 @@ def get_required(per_page, offset, created_date_from, created_date_to, status):
                 , TO_CHAR(yc.NgayYeuCau, 'DD/MM/YYYY') AS "NgayYeuCau"
                 , yc.BuoiThucHanh AS "BuoiThucHanh"
                 , yc.SoLuongMay AS "SoLuongMay"
+                , yc.NhomHocPhan AS "NhomHocPhan"
                 , yc.TrangThai AS "TrangThai"
                 , yc.GhiChu AS "GhiChu"
                 , TO_CHAR(yc.NgayThucHanh, 'DD/MM/YYYY') AS "NgayThucHanh"
@@ -2343,6 +2344,7 @@ def get_required(per_page, offset, created_date_from, created_date_to, status):
                 , yc.NgayYeuCau
                 , yc.BuoiThucHanh
                 , yc.SoLuongMay
+                , yc.NhomHocPhan
                 , yc.TrangThai
                 , yc.GhiChu
                 , yc.NgayThucHanh
@@ -2676,6 +2678,7 @@ def get_required_for_waiting():
             , tkt.TenTuanHoc AS "TuanKetThuc"
             , yc.TrangThai AS "TrangThai"
             , hp.TenHocPhan AS "TenHocPhan"
+            , yc.NhomHocPhan AS "NhomHocPhan"
             , gv.TenGiangVien AS "TenGiangVien"
             , STRING_AGG(
                 DISTINCT yct.thu::text,
@@ -2700,6 +2703,7 @@ def get_required_for_waiting():
         GROUP BY
             yc.MaYeuCau
             , hp.TenHocPhan
+            , yc.NhomHocPhan
             , gv.TenGiangVien
             , tbd.TenTuanHoc
             , tkt.TenTuanHoc
@@ -2728,6 +2732,7 @@ def get_scheduled_requests():
             yc.SoLuongMay AS "SoLuongMay",
             yc.MaPhanMem AS "MaPhanMem",
             hp.TenHocPhan AS "TenHocPhan",
+            yc.NhomHocPhan AS "NhomHocPhan", 
             gv.TenGiangVien AS "TenGiangVien",
             STRING_AGG(
                 DISTINCT yct.thu::text,
@@ -2745,7 +2750,7 @@ def get_scheduled_requests():
             ON gv.MaGiangVien = yc.MaGiangVien
         JOIN YEU_CAU_THU yct
             ON yct.MaYeuCau = yc.MaYeuCau
-        WHERE yc.TrangThai = 2
+        WHERE yc.TrangThai IN (1, 2)
           AND yct.MaPhong IS NOT NULL
         GROUP BY
             yc.MaYeuCau,
@@ -2757,6 +2762,7 @@ def get_scheduled_requests():
             yc.SoLuongMay,
             yc.MaPhanMem,
             hp.TenHocPhan,
+            yc.NhomHocPhan,
             gv.TenGiangVien
         ORDER BY yc.MaYeuCau
     """)

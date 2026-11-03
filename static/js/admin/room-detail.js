@@ -127,7 +127,6 @@ deleteYesBtn.addEventListener("click", function () {
 const successInfo = document.getElementById("room-page");
 const popupSuccess = document.getElementById("popup-success");
 const popupSuccessMessage = document.getElementById("popup-success-message");
-const popupSuccessClose = document.getElementById("popup-success-close");
 
 if (successInfo && popupSuccess) {
   const successMessage = successInfo.dataset.success;
@@ -138,11 +137,8 @@ if (successInfo && popupSuccess) {
     }
 
     popupSuccess.classList.add("show");
+    setTimeout(() => {
+      window.location.reload();
+    }, 300);
   }
-}
-
-if (popupSuccessClose && popupSuccess) {
-  popupSuccessClose.addEventListener("click", function () {
-    popupSuccess.classList.remove("show");
-  });
 }

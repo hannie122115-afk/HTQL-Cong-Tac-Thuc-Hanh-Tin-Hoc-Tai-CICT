@@ -2461,6 +2461,22 @@
   color: #3730a3;
   font-size: 12px;
 }
+
+.scheduled-item-group,
+.required-item-group {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.scheduled-item-group {
+  margin-top: 2px;
+}
+
+.required-item-group {
+  margin: 2px 0;
+  color: #4b5563;
+}
+
 .schedule-cell.disabled {
   background: #f1f1f1;
   opacity: 0.45;
@@ -2481,4 +2497,98 @@
   max-height: 600px;
   overflow-y: auto;
   overflow-x: auto;
+}
+
+/* ==============================  lich thuc hanh giang vien ======== */
+#calendar-page .calendar-table table {
+  min-width: 100%;
+}
+
+#calendar-page .calendar-table thead th {
+  background: #f0f6ff;
+  color: #355b91;
+  text-align: center;
+  white-space: nowrap;
+}
+
+#calendar-page .session-btn-group {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+#calendar-page .session-btn {
+  display: flex;
+  min-width: 130px;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 16px;
+  border: 1px solid #d6e2f1;
+  border-radius: 8px;
+  background: #fff;
+  color: #355b91;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+#calendar-page .session-btn.active {
+  border-color: #6558d3;
+  background: #efedff;
+  color: #3730a3;
+}
+
+#calendar-page .session-btn:hover {
+  transform: translateY(-2px);
+}
+
+#calendar-page .session-btn small {
+  font-size: 11px;
+}
+
+#calendar-page .room-name {
+  min-width: 120px;
+  text-align: center;
+}
+
+#calendar-page .calendar-empty {
+  color: #7b8794;
+  text-align: center;
+}
+
+#calendar-page .schedule-cell {
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+#calendar-page .scheduled-item {
+  border-left: 3px solid #6558d3;
+  cursor: default;
+  animation: teacher-schedule-appear 0.25s ease both;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+#calendar-page .previous-week,
+#calendar-page .next-week {
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+@keyframes teacher-schedule-appear {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

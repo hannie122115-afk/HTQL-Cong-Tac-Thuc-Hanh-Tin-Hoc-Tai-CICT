@@ -49,17 +49,15 @@ popupErrorClose.addEventListener("click", function () {
 
 // pop up success
 const popupSuccess = document.getElementById("popup-success");
-const popupSuccessClose = document.getElementById("popup-success-close");
 const configPage = document.getElementById("config-page");
 const success = configPage.dataset.success;
 
 if (success) {
   popupSuccess.classList.add("show");
+  setTimeout(() => {
+    window.location.reload();
+  }, 300);
 }
-
-popupSuccessClose.addEventListener("click", function () {
-  popupSuccess.classList.remove("show");
-});
 
 // popup delete
 const deleteConfigPopup = document.getElementById("popup-delete-config");

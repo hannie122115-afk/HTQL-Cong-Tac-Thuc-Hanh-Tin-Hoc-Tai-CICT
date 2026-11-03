@@ -98,7 +98,10 @@ function getAllSchedules() {
 // ================= VẼ LỊCH =================
 
 let currentIndex = -1;
-let currentSession = "1";
+const savedSession = sessionStorage.getItem("adminCalendarSession");
+let currentSession = ["1", "2", "3"].includes(savedSession)
+  ? savedSession
+  : "1";
 function renderScheduledRequests() {
   // Xóa lịch đang hiển thị trước khi vẽ lại
   document.querySelectorAll(".schedule-cell").forEach((cell) => {
@@ -210,12 +213,29 @@ function renderScheduledRequests() {
       card.dataset.day = String(day);
 
       const course = item.TenHocPhan || item.course || "";
+      const group = item.NhomHocPhan || item.group || "";
       const teacher = item.TenGiangVien || item.teacher || "";
 
-      card.textContent = `${course} - ${teacher}`;
+      const courseElement = document.createElement("div");
+      courseElement.className = "scheduled-item-course";
+      courseElement.textContent = course;
+      card.appendChild(courseElement);
+
+      if (group) {
+        const groupElement = document.createElement("div");
+        groupElement.className = "scheduled-item-group";
+        groupElement.textContent = `Nhóm: ${group}`;
+        card.appendChild(groupElement);
+      }
+
+      const teacherElement = document.createElement("div");
+      teacherElement.className = "scheduled-item-teacher";
+      teacherElement.textContent = teacher;
+      card.appendChild(teacherElement);
 
       card.dataset.requiredId = schedule.requiredId;
       card.dataset.course = course;
+      card.dataset.group = group;
       card.dataset.teacher = teacher;
       card.dataset.session = schedule.session;
       card.dataset.machines = item.SoLuongMay || item.machines || "";
@@ -332,6 +352,7 @@ const calendarBody = document.getElementById("calendar-body");
 
 function changeSession(session) {
   currentSession = session;
+  sessionStorage.setItem("adminCalendarSession", session);
 
   sessionBtn.forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.session === session);
@@ -346,7 +367,7 @@ sessionBtn.forEach((btn) => {
   });
 });
 
-changeSession("1");
+changeSession(currentSession);
 renderCalendarWeek();
 
 // ================= POPUP =================
@@ -370,17 +391,15 @@ popupErrorClose?.addEventListener("click", () => {
 
 const popupSuccess = document.getElementById("popup-success");
 const popupSuccessMessage = document.getElementById("popup-success-message");
-const popupSuccessClose = document.getElementById("popup-success-close");
 const calendarPage = document.getElementById("accept-page");
 
 if (calendarPage?.dataset.success) {
   popupSuccessMessage.textContent = calendarPage.dataset.success;
   popupSuccess.classList.add("show");
+  setTimeout(() => {
+    window.location.reload();
+  }, 300);
 }
-
-popupSuccessClose?.addEventListener("click", () => {
-  popupSuccess.classList.remove("show");
-});
 
 // ================= KIỂM TRA NGÀY YÊU CẦU =================
 
@@ -608,6 +627,7 @@ function restoreRequiredItem(card) {
 
   item.dataset.requiredId = card.dataset.requiredId;
   item.dataset.course = card.dataset.course;
+  item.dataset.group = card.dataset.group || "";
   item.dataset.teacher = card.dataset.teacher;
   item.dataset.session = card.dataset.session;
   item.dataset.machines = card.dataset.machines;
@@ -657,6 +677,13 @@ function restoreRequiredItem(card) {
   courseElement.className = "required-item-course";
   courseElement.textContent = card.dataset.course || "";
 
+  if (card.dataset.group) {
+    const groupElement = document.createElement("div");
+    groupElement.className = "required-item-group";
+    groupElement.textContent = `Nhóm: ${card.dataset.group}`;
+    item.appendChild(groupElement);
+  }
+
   const teacherElement = document.createElement("div");
   teacherElement.className = "required-item-teacher";
   teacherElement.textContent = card.dataset.teacher || "";
@@ -665,7 +692,8 @@ function restoreRequiredItem(card) {
   timeElement.className = "required-item-time";
   timeElement.textContent = `${sessionText} | ${scheduleText}`;
 
-  item.append(courseElement, teacherElement, timeElement);
+  item.prepend(courseElement);
+  item.append(teacherElement, timeElement);
 
   // Gắn sự kiện kéo thả cho phần tử được khôi phục
   item.addEventListener("dragstart", (event) => {
@@ -779,11 +807,27 @@ function placeRequestOnCalendar(cell, item, day, weekId, currentWeekOnly) {
   const card = document.createElement("div");
   card.className = "scheduled-item";
   card.draggable = isEditing;
-  card.textContent = `${item.dataset.course} - ${item.dataset.teacher}`;
+  const courseElement = document.createElement("div");
+  courseElement.className = "scheduled-item-course";
+  courseElement.textContent = item.dataset.course || "";
+  card.appendChild(courseElement);
+
+  if (item.dataset.group) {
+    const groupElement = document.createElement("div");
+    groupElement.className = "scheduled-item-group";
+    groupElement.textContent = `Nhóm: ${item.dataset.group}`;
+    card.appendChild(groupElement);
+  }
+
+  const teacherElement = document.createElement("div");
+  teacherElement.className = "scheduled-item-teacher";
+  teacherElement.textContent = item.dataset.teacher || "";
+  card.appendChild(teacherElement);
 
   card.dataset.requiredId = requiredId;
   card.dataset.day = String(day);
   card.dataset.course = item.dataset.course;
+  card.dataset.group = item.dataset.group || "";
   card.dataset.teacher = item.dataset.teacher;
   card.dataset.session = item.dataset.session;
   card.dataset.machines = item.dataset.machines;
@@ -804,6 +848,7 @@ function placeRequestOnCalendar(cell, item, day, weekId, currentWeekOnly) {
     weekId,
     currentWeekOnly,
     course: item.dataset.course,
+    group: item.dataset.group || "",
     teacher: item.dataset.teacher,
     machines: Number(item.dataset.machines),
     software: Number(item.dataset.software),

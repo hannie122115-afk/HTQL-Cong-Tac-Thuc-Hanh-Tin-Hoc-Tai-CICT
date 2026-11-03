@@ -19,7 +19,6 @@ const closeSuccessAccountBtn = document.getElementById(
 
 const successPopup = document.getElementById("popup-success");
 const successMessage = document.getElementById("popup-success-message");
-const closeSuccessBtn = document.getElementById("popup-success-close");
 
 const errorPopup = document.getElementById("popup-error");
 const errorMessage = document.getElementById("popup-error-message");
@@ -245,9 +244,6 @@ sendMailBtn?.addEventListener("click", async () => {
   }
 });
 
-closeSuccessBtn?.addEventListener("click", () => {
-  successPopup.classList.remove("show");
-});
 closeSuccessAccountBtn?.addEventListener("click", () => {
   successAccountPopup.classList.remove("show");
 });
@@ -259,6 +255,9 @@ closeErrorBtn?.addEventListener("click", () => {
 if (pageData?.dataset.success && pageData?.dataset.account === "false") {
   successMessage.textContent = pageData.dataset.success;
   successPopup.classList.add("show");
+  setTimeout(() => {
+    window.location.reload();
+  }, 300);
 } else {
   successPopup.classList.remove("show");
 }

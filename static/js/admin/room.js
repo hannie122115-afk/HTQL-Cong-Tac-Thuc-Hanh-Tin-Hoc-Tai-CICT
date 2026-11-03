@@ -59,17 +59,15 @@ popupErrorClose.addEventListener("click", function () {
 
 // success popup
 const popupSuccess = document.getElementById("popup-success");
-const popupSuccessClose = document.getElementById("popup-success-close");
 const roomPage = document.getElementById("config-page");
 const success = roomPage.dataset.success;
 
 if (success && success.trim() !== "") {
   popupSuccess.classList.add("show");
+  setTimeout(() => {
+    window.location.reload();
+  }, 300);
 }
-popupSuccessClose.addEventListener("click", function () {
-  popupSuccess.classList.remove("show");
-});
-
 // popup confirm delete
 const deleteRoomPopup = document.getElementById("popup-delete-room");
 const deleteRoomForm = document.getElementById("delete-room-form");

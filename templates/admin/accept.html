@@ -240,7 +240,12 @@
             <tr>
               <td>{{ start_index + loop.index }}</td>
               <td>YC{{ re.MaYeuCau }}</td>
-              <td>{{ re.TenHocPhan }}</td>
+              <td>
+                {{ re.TenHocPhan }}
+                {% if re.NhomHocPhan %}
+                <br /><small>Nhóm: {{ re.NhomHocPhan }}</small>
+                {% endif %}
+              </td>
               <td>{{ re.TenGiangVien }}</td>
 
               <!-- loai yeu cau  -->
@@ -270,6 +275,7 @@
                   data-id="{{ re.MaYeuCau }}"
                   data-course="{{ re.TenHocPhan }}"
                   data-course-id="{{ re.MaHocPhan }}"
+                  data-group="{{ re.NhomHocPhan or '' }}"
                   data-program="{{ re.TenPhanMem }}"
                   data-amount="{{ re.SoLuongMay }}"
                   data-lesson="{{ re.BuoiThucHanh }}"
@@ -313,6 +319,14 @@
           <div class="required-detail-info-item">
             <div class="required-detail-info-title">Tên học phần</div>
             <div class="required-detail-info-describe" id="detail-course"></div>
+          </div>
+          <div
+            class="required-detail-info-item"
+            id="detail-group-box"
+            style="display: none"
+          >
+            <div class="required-detail-info-title">Nhóm học phần</div>
+            <div class="required-detail-info-describe" id="detail-group"></div>
           </div>
           <div class="required-detail-info-item">
             <div class="required-detail-info-title">Tên phần mềm</div>

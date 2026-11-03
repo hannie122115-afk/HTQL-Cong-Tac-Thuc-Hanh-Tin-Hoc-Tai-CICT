@@ -11,6 +11,10 @@ document.querySelectorAll(".see-detail-act").forEach(function (button) {
     document.getElementById("detail-id").textContent = `YC${data.id}`;
     document.getElementById("detail-course").textContent =
       `${data.courseId} - ${data.course}`;
+    const detailGroupBox = document.getElementById("detail-group-box");
+    const detailGroup = document.getElementById("detail-group");
+    detailGroup.textContent = data.group || "";
+    detailGroupBox.style.display = data.group ? "flex" : "none";
     document.getElementById("detail-program").textContent = data.program;
     document.getElementById("detail-amount").textContent = `${data.amount} máy`;
     document.getElementById("detail-note").textContent =
@@ -89,19 +93,12 @@ if (closeDetailBtn && detailContainer) {
 // POPUP SUCCESS
 const popupSuccess = document.getElementById("popup-success");
 const popupSuccessMessage = document.getElementById("popup-success-message");
-const popupSuccessClose = document.getElementById("popup-success-close");
 
 function showSuccessPopup(message) {
   if (popupSuccess && popupSuccessMessage) {
     popupSuccessMessage.textContent = message;
     popupSuccess.classList.add("show");
   }
-}
-
-if (popupSuccess && popupSuccessClose) {
-  popupSuccessClose.addEventListener("click", function () {
-    popupSuccess.classList.remove("show");
-  });
 }
 
 // ACCEPT REQUIRED

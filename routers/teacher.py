@@ -68,6 +68,7 @@ def get_required(per_page, offset, keyword, teacherId, created_date, status):
                 , TO_CHAR(yc.NgayYeuCau, 'DD/MM/YYYY') AS "NgayYeuCau"
                 , yc.BuoiThucHanh AS "BuoiThucHanh"
                 , yc.SoLuongMay AS "SoLuongMay"
+                , yc.NhomHocPhan AS "NhomHocPhan"
                 , yc.TrangThai AS "TrangThai"
                 , yc.GhiChu AS "GhiChu"
                 , TO_CHAR(yc.NgayThucHanh, 'DD/MM/YYYY') AS "NgayThucHanh"
@@ -104,6 +105,7 @@ def get_required(per_page, offset, keyword, teacherId, created_date, status):
                 , yc.NgayYeuCau
                 , yc.BuoiThucHanh
                 , yc.SoLuongMay
+                , yc.NhomHocPhan
                 , yc.TrangThai
                 , yc.GhiChu
                 , yc.NgayThucHanh
@@ -186,6 +188,180 @@ def get_semester_current():
     cursor.close()
     conn.close()
     return semester
+
+
+def get_weeks_by_semester(semester_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+            SELECT MaTuanHoc, TenTuanHoc, NgayBatDau, NgayKetThuc
+            FROM TUAN_HOC
+            WHERE MaHocKy = %s
+            ORDER BY NgayBatDau
+        """,
+        (semester_id,),
+    )
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return [
+        {
+            "id": row[0],
+            "name": row[1],
+            "start": row[2].strftime("%Y-%m-%d"),
+            "end": row[3].strftime("%Y-%m-%d"),
+        }
+        for row in rows
+    ]
+
+
+def get_scheduled_requests_for_teacher(teacher_id, semester_id):
+    conn = get_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    cursor.execute(
+        """
+            SELECT
+                yc.MaYeuCau AS "MaYeuCau",
+                yct.MaPhong AS "MaPhong",
+                yc.BuoiThucHanh AS "BuoiThucHanh",
+                (yc.NgayThucHanh IS NULL) AS "LaLichDinhKy",
+                yc.MaTuanBatDau AS "MaTuanBatDau",
+                yc.MaTuanKetThuc AS "MaTuanKetThuc",
+                yc.SoLuongMay AS "SoLuongMay",
+                yc.MaPhanMem AS "MaPhanMem",
+                hp.TenHocPhan AS "TenHocPhan",
+                yc.NhomHocPhan AS "NhomHocPhan",
+                STRING_AGG(
+                    DISTINCT yct.thu::text,
+                    ',' ORDER BY yct.thu::text
+                ) FILTER (
+                    WHERE yct.NgayThucHanh IS NULL
+                      AND yct.MaPhong IS NOT NULL
+                ) AS "DanhSachThu",
+                STRING_AGG(
+                    DISTINCT TO_CHAR(yct.NgayThucHanh, 'YYYY-MM-DD'),
+                    ',' ORDER BY TO_CHAR(yct.NgayThucHanh, 'YYYY-MM-DD')
+                ) FILTER (
+                    WHERE yct.NgayThucHanh BETWEEN hk.NgayBatDau AND hk.NgayKetThuc
+                      AND yct.MaPhong IS NOT NULL
+                ) AS "DanhSachNgay"
+            FROM YEU_CAU_XEP_LICH yc
+            JOIN HOC_PHAN hp ON hp.MaHocPhan = yc.MaHocPhan
+            JOIN YEU_CAU_THU yct ON yct.MaYeuCau = yc.MaYeuCau
+            LEFT JOIN TUAN_HOC tbd ON tbd.MaTuanHoc = yc.MaTuanBatDau
+            LEFT JOIN TUAN_HOC tkt ON tkt.MaTuanHoc = yc.MaTuanKetThuc
+            JOIN HOC_KY hk ON hk.MaHocKy = %s
+            WHERE yc.MaGiangVien = %s
+              AND yc.TrangThai = 2
+              AND yct.MaPhong IS NOT NULL
+              AND (
+                    (
+                        yc.NgayThucHanh IS NULL
+                        AND tbd.NgayBatDau <= hk.NgayKetThuc
+                        AND tkt.NgayKetThuc >= hk.NgayBatDau
+                    )
+                    OR (
+                        yc.NgayThucHanh BETWEEN hk.NgayBatDau AND hk.NgayKetThuc
+                    )
+                    OR EXISTS (
+                        SELECT 1
+                        FROM YEU_CAU_THU yct_date
+                        WHERE yct_date.MaYeuCau = yc.MaYeuCau
+                          AND yct_date.MaPhong IS NOT NULL
+                          AND yct_date.NgayThucHanh
+                              BETWEEN hk.NgayBatDau AND hk.NgayKetThuc
+                    )
+              )
+            GROUP BY
+                yc.MaYeuCau,
+                yct.MaPhong,
+                yc.BuoiThucHanh,
+                (yc.NgayThucHanh IS NULL),
+                yc.MaTuanBatDau,
+                yc.MaTuanKetThuc,
+                yc.SoLuongMay,
+                yc.MaPhanMem,
+                yc.NhomHocPhan,
+                hp.TenHocPhan
+            ORDER BY yc.MaYeuCau
+        """,
+        (semester_id, teacher_id),
+    )
+    schedules = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return schedules
+
+
+def get_rooms_by_ids(room_ids=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+            SELECT
+                p.MaPhong,
+                p.TenPhong,
+                p.TinhTrangPhong,
+                COUNT(DISTINCT mt.MaMayTinh) AS TongSoMay,
+                p.MaCauHinh,
+                COALESCE(
+                    ARRAY_AGG(DISTINCT cpm.MaPhanMem)
+                    FILTER (WHERE cpm.MaPhanMem IS NOT NULL),
+                    ARRAY[]::integer[]
+                ) AS DanhSachPhanMem
+            FROM PHONG p
+            LEFT JOIN MAY_TINH mt ON mt.MaPhong = p.MaPhong
+            LEFT JOIN CAU_HINH_PHAN_MEM cpm ON cpm.MaCauHinh = p.MaCauHinh
+            WHERE (%s IS NULL OR p.MaPhong = ANY(%s))
+            GROUP BY
+                p.MaPhong,
+                p.TenPhong,
+                p.TinhTrangPhong,
+                p.MaCauHinh
+            ORDER BY p.TenPhong
+        """,
+        (room_ids, room_ids),
+    )
+    rooms = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return rooms
+
+
+@router.get("/teacher/calendar")
+def show_teacher_calendar(request: Request):
+    if request.session.get("role") != 1:
+        return RedirectResponse(url="/login", status_code=303)
+
+    user = get_user_by_id(request.session.get("accountId"))
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+
+    semester = get_semester_current()
+    weeks = get_weeks_by_semester(semester[0]) if semester else []
+    schedules = (
+        get_scheduled_requests_for_teacher(user[0], semester[0])
+        if semester
+        else []
+    )
+    all_room = get_rooms_by_ids()
+    success = request.session.pop("success", None)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="teacher/calendar.html",
+        context={
+            "user": user,
+            "avt": request.session.get("avt"),
+            "semester": semester,
+            "weeks": weeks,
+            "all_scheduled": schedules,
+            "all_room": all_room,
+            "success": success,
+        },
+    )
 
 
 @router.get("/teacher/required")
@@ -335,6 +511,7 @@ def add_required(
     required_course_id: int = Form(""),
     required_program_id: int = Form(""),
     required_computer_amount: int = Form(""),
+    required_group: Optional[str] = Form(None, max_length=100),
     required_lesson: int = Form(""),
     required_type: int = Form(1),
     required_week_start_id: Optional[int] = Form(None),
@@ -358,12 +535,14 @@ def add_required(
         if (required_type == 0 and required_practice_day)
         else None
     )
+    group_name = required_group.strip() if required_group else None
 
     cursor.execute(
         """
             INSERT INTO YEU_CAU_XEP_LICH
             (BuoiThucHanh
             , SoLuongMay
+            , NhomHocPhan
             , GhiChu
             , MaPhanMem
             , MaHocPhan
@@ -371,12 +550,13 @@ def add_required(
             , MaTuanBatDau
             , MaTuanKetThuc
             , NgayThucHanh)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING MaYeuCau
         """,
         (
             required_lesson,
             required_computer_amount,
+            group_name,
             required_note,
             required_program_id,
             required_course_id,

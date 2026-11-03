@@ -179,6 +179,7 @@
             draggable="true"
             data-required-id="{{ re.MaYeuCau }}"
             data-course="{{ re.TenHocPhan }}"
+            data-group="{{ re.NhomHocPhan or '' }}"
             data-teacher="{{ re.TenGiangVien }}"
             data-session="{{ re.BuoiThucHanh }}"
             data-machines="{{ re.SoLuongMay }}"
@@ -189,6 +190,9 @@
             data-week-end="{{ re.MaTuanKetThuc or '' }}"
           >
             <div class="required-item-course">{{ re.TenHocPhan }}</div>
+            {% if re.NhomHocPhan %}
+            <div class="required-item-group">Nhóm: {{ re.NhomHocPhan }}</div>
+            {% endif %}
             <div class="required-item-teacher">{{ re.TenGiangVien }}</div>
             <div class="required-item-time">
               {% if re.BuoiThucHanh == 1 %} Sáng {% elif re.BuoiThucHanh == 2%}
@@ -344,7 +348,7 @@
     </div>
 
     <!-- popup -->
-    <!-- <div class="popup-error" id="popup-error">
+    <div class="popup-error" id="popup-error">
       <div class="popup">
         <div class="popup-icon">
           <i class="fa-solid fa-circle-exclamation"></i>
@@ -352,7 +356,7 @@
         <div class="popup-error-message" id="popup-error-message"></div>
         <button type="button" id="popup-error-close">Đóng</button>
       </div>
-    </div> -->
+    </div>
 
     <div class="popup-success" id="popup-success">
       <div class="popup">
@@ -362,7 +366,6 @@
         <div class="popup-success-message" id="popup-success-message">
           {{ success }}
         </div>
-        <button type="button" id="popup-success-close">Đóng</button>
       </div>
     </div>
 

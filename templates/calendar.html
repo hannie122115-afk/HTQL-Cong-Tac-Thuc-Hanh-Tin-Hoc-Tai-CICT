@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Giảng viên | Yêu cầu xếp lịch</title>
+    <link rel="stylesheet" href="/static/css/Nhap.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="header-left">
+        <div class="header-left-logo">
+          <div class="header-left-icon">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div class="header-left-title">Edu-LIMS</div>
+        </div>
+        <div class="header-left-describe">
+          Hệ thống công tác thực hành tin học
+        </div>
+      </div>
+    </header>
+
+    <div
+      class="calendar-teacher-container container-web"
+      id="calendar-page"
+      data-success="{{ success or '' }}"
+    >
+
+      <div class="calendar-container">
+        <div class="calendar-info">
+          {% if semester %} Học kỳ {{ semester[1] }} - Năm học {{ semester[2] }}
+          {% else %} Hiện không có học kỳ đang diễn ra {% endif %}
+        </div>
+
+        <!-- chọn buổi -->
+        <div class="session-btn-group">
+          <button type="button" class="session-btn active" data-session="1">
+            <strong>Sáng</strong>
+            <small>07:00 - 11:00</small>
+          </button>
+
+          <button type="button" class="session-btn" data-session="2">
+            <strong>Chiều</strong>
+            <small>13:30 - 17:00</small>
+          </button>
+
+          <button type="button" class="session-btn" data-session="3">
+            <strong>Tối</strong>
+            <small>18:20 - 20:00</small>
+          </button>
+        </div>
+
+        <!-- calendar-title -->
+        <div class="calendar-title-box">
+          <button
+            type="button"
+            class="previous-week"
+            id="previousWeek"
+            aria-label="Tuần trước"
+          >
+            <i class="fa-solid fa-caret-left"></i>
+          </button>
+
+          <div class="week-name" id="weekName"></div>
+          <div class="week-space" id="week-space"></div>
+          <button
+            type="button"
+            class="next-week"
+            id="nextWeek"
+            aria-label="Tuần sau"
+          >
+            <i class="fa-solid fa-caret-right"></i>
+          </button>
+        </div>
+
+        <!-- calendar-table -->
+        <div class="calendar-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Buổi</th>
+                <th>Phòng</th>
+
+                {% for day in range(2, 9) %}
+                <th>
+                  {% if day == 8 %} Chủ nhật {% else %} Thứ {{ day }} {% endif
+                  %}
+
+                  <span class="day-of-week" data-day="{{ day - 2 }}"></span>
+                </th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody id="calendar-body">
+              {% for session in calendar_sessions %} {% if session.rooms %} {%
+              for room in session.rooms %}
+              <tr data-room="{{ room[0] }}" data-session="{{ session.id }}">
+                {% if loop.first %}
+                <td
+                  class="session-label"
+                  rowspan="{{ session.rooms | length }}"
+                >
+                  <i class="fa-solid {{ session.icon }}"></i>
+                  <strong>{{ session.name }}</strong>
+                  <small>({{ session.time }})</small>
+                </td>
+                {% endif %}
+                <td class="room-name">{{ room[1] }}</td>
+
+                {% for day in range(7) %}
+                <td
+                  class="schedule-cell"
+                  data-room="{{ room[0] }}"
+                  data-day="{{ day }}"
+                  data-session="{{ session.id }}"
+                ></td>
+                {% endfor %}
+              </tr>
+              {% endfor %} {% else %}
+              <tr>
+                <td class="session-label">
+                  <i class="fa-solid {{ session.icon }}"></i>
+                  <strong>{{ session.name }}</strong>
+                  <small>({{ session.time }})</small>
+                </td>
+                <td class="calendar-empty" colspan="8">
+                  Chưa có phòng được xếp lịch vào buổi này.
+                </td>
+              </tr>
+              {% endif %} {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <script id="weeks-data" type="application/json">
+      {{ weeks | tojson }}
+    </script>
+    <script id="scheduled-data" type="application/json">
+      {{ all_scheduled | tojson }}
+    </script>
+    <script src="/static/js/teacher/calendar.js"></script>
+    <script src="/static/js/auth/navbar.js"></script>
+  </body>
+</html>

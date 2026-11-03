@@ -97,16 +97,14 @@ cancelYesBtn.addEventListener("click", function () {
 // Popup thành công
 const programPage = document.getElementById("program-page");
 const popupSuccess = document.getElementById("popup-success");
-const popupSuccessClose = document.getElementById("popup-success-close");
 
-if (programPage && popupSuccess && popupSuccessClose) {
+if (programPage && popupSuccess) {
   if (programPage.dataset.success) {
     popupSuccess.classList.add("show");
+    setTimeout(() => {
+      window.location.reload();
+    }, 300);
   }
-
-  popupSuccessClose.addEventListener("click", function () {
-    popupSuccess.classList.remove("show");
-  });
 }
 
 // popup delete
@@ -177,5 +175,4 @@ document.querySelectorAll(".delete-detail-act").forEach(function (button) {
 
 deleteProgramCancel.addEventListener("click", function () {
   deleteProgramPopup.classList.remove("show");
-  popupSuccess.classList.add("show");
 });

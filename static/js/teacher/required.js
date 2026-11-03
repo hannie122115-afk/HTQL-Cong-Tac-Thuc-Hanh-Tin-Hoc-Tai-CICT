@@ -316,16 +316,14 @@ popupErrorClose.addEventListener("click", function () {
 
 const requiredPage = document.getElementById("required-page");
 const popupSuccess = document.getElementById("popup-success");
-const popupSuccessClose = document.getElementById("popup-success-close");
 
-if (requiredPage && popupSuccess && popupSuccessClose) {
+if (requiredPage && popupSuccess) {
   if (requiredPage.dataset.success) {
     popupSuccess.classList.add("show");
+    setTimeout(() => {
+      window.location.reload();
+    }, 300);
   }
-
-  popupSuccessClose.addEventListener("click", function () {
-    popupSuccess.classList.remove("show");
-  });
 }
 
 // CHECK NULL REQUIRED FORM
@@ -430,6 +428,10 @@ document.querySelectorAll(".see-detail-act").forEach(function (button) {
     document.getElementById("detail-id").textContent = `YC${data.id}`;
     document.getElementById("detail-course").textContent =
       `${data.courseId} - ${data.course}`;
+    const detailGroupBox = document.getElementById("detail-group-box");
+    const detailGroup = document.getElementById("detail-group");
+    detailGroup.textContent = data.group || "";
+    detailGroupBox.style.display = data.group ? "flex" : "none";
     document.getElementById("detail-program").textContent = data.program;
     document.getElementById("detail-amount").textContent = `${data.amount} máy`;
     document.getElementById("detail-note").textContent =
