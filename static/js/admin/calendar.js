@@ -70,11 +70,14 @@ function getAllSchedules() {
     roomId: Number(item.MaPhong),
     session: Number(item.BuoiThucHanh),
     date: item.NgayThucHanh || "",
-    days: item.DanhSachThu || "",
+    days: item.MaTuanHoc
+      ? String(item.Thu)
+      : item.DanhSachThu || (item.Thu ? String(item.Thu) : ""),
     dates: (item.DanhSachNgay || "").split(",").filter(Boolean),
     weekStart: Number(item.MaTuanBatDau),
     weekEnd: Number(item.MaTuanKetThuc),
-    currentWeekOnly: false,
+    weekId: Number(item.MaTuanHoc) || null,
+    currentWeekOnly: Boolean(item.MaTuanHoc),
   }));
 
   const newSchedules = temporarySchedules.map((item) => ({
@@ -144,6 +147,9 @@ function renderScheduledRequests() {
         return;
       }
     } else {
+      if (schedule.weekId && schedule.weekId !== Number(currentWeek.id)) {
+        return;
+      }
       if (schedule.currentWeekOnly && schedule.weekId !== currentWeek.id) {
         return;
       }
@@ -168,6 +174,11 @@ function renderScheduledRequests() {
         date: schedule.currentWeekOnly ? toDateString(date) : "",
         day: schedule.day,
       });
+    } else if (schedule.weekId) {
+      const day = Number(schedule.days) - 2;
+      if (day >= 0 && day <= 6) {
+        occurrences.push({ date: "", day });
+      }
     } else {
       const recurringDays = schedule.days
         .split(",")
@@ -488,7 +499,7 @@ function checkConflictJS(roomId, session, day, weekId, targetDate) {
       return true;
     }
 
-    if (item.currentWeekOnly && Number(item.weekId) !== Number(weekId)) {
+    if (item.weekId && Number(item.weekId) !== Number(weekId)) {
       continue;
     }
 

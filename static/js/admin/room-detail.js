@@ -9,7 +9,6 @@ const roomInputs = document.querySelectorAll(".room-input");
 
 // Các trường chọn trong form
 const configSelect = document.getElementById("config-id");
-const staffSelect = document.getElementById("staff-id");
 const roomStatusSelect = document.getElementById("room_status");
 
 // EDIT ROOM

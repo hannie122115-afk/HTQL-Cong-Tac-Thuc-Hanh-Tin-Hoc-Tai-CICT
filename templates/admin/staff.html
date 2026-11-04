@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Giảng viên | Yêu cầu xếp lịch</title>
+    <link rel="stylesheet" href="/static/css/Nhap.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="header-left">
+        <div class="header-left-logo">
+          <div class="header-left-icon">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div class="header-left-title">Edu-LIMS</div>
+        </div>
+        <div class="header-left-describe">
+          Hệ thống công tác thực hành tin học
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="header-label">
+          <i class="fa-solid fa-bell"></i>
+        </div>
+        <div class="header-user" id="headerUser">
+          <div class="header-avt">
+            <img src="{{ user[7] }}" alt="Ảnh đại diện" />
+          </div>
+          <div class="navbar-arrow">
+            <i class="fa-solid fa-caret-down"></i>
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- navbar -->
+    <div class="navbar-container" id="navbarContainer">
+      <div class="navbar-user-container">
+        <a href="">
+          <div class="navbar-user-avt">
+            <img src="{{ user[7] }}" alt="Ảnh đại diện" />
+          </div>
+          <div class="navbar-user-name">
+            <p>{{ user[1] }}</p>
+            <p>{{ user[8] }}</p>
+          </div>
+        </a>
+      </div>
+      <div class="navbar-box">
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user-gear"></i>
+              </div>
+              <div class="navbar-item-title">Lịch thực hành của tôi</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Yêu cầu xếp lịch</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <div class="navbar-item-title">Hồ sơ cá nhân</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <!-- <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-users"></i>
+              </div>
+              <div class="navbar-item-title">Cán bộ</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-chalkboard-user"></i>
+              </div>
+              <div class="navbar-item-title">Giảng viên</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-file-lines"></i>
+              </div>
+              <div class="navbar-item-title">Duyệt yêu cầu</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-regular fa-calendar-days"></i>
+              </div>
+              <div class="navbar-item-title">Lịch thực hành</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div> -->
+      </div>
+      <div class="navbar-logout">
+        <a href="/logout">
+          <div class="navbar-logout-icon">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </div>
+          <div class="navbar-logout-title">Đăng xuất</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- body -->
+
+    <div
+      class="accept-container container-web"
+      id="accept-page"
+      data-success="{{ success or '' }}"
+    >
+      <div class="direction">
+        <a href="/admin">Trang chủ</a>
+        <i class="fa-solid fa-angle-right"></i>
+        <a href="/admin/staff">Xếp lịch cán bộ</a>
+      </div>
+
+      <!-- staff-list -->
+      <div class="required-container">
+        <div class="required-title">Danh sách cán bộ</div>
+        <div class="required-list" id="staff-list">
+          {% for staff in staffs %}
+          <div
+            class="required-item staff-item"
+            draggable="false"
+            data-staff-id="{{ staff.MaCanBo }}"
+          >
+            <div class="required-item-course">{{ staff.TenCanBo }}</div>
+          </div>
+          {% else %}
+          <div class="calendar-empty">Chưa có cán bộ.</div>
+          {% endfor %}
+        </div>
+      </div>
+      <!-- calendar -->
+      <div class="calendar-container">
+        <div class="calendar-info">
+          {% if semester_current %} Học kỳ {{ semester_current[1] }} - Năm học
+          {{ semester_current[2] }} {% else %} Hiện không có học kỳ đang diễn ra
+          {% endif %}
+        </div>
+
+        <!-- calendar-title -->
+        <div class="calendar-title-box">
+          <button
+            type="button"
+            class="previous-week"
+            id="previousWeek"
+            aria-label="Tuần trước"
+          >
+            <i class="fa-solid fa-caret-left"></i>
+          </button>
+
+          <div class="week-name" id="weekName"></div>
+          <div class="week-space" id="week-space"></div>
+          <button
+            type="button"
+            class="next-week"
+            id="nextWeek"
+            aria-label="Tuần sau"
+          >
+            <i class="fa-solid fa-caret-right"></i>
+          </button>
+        </div>
+
+        <!-- Chọn buổi xếp lịch -->
+        <div class="session-btn-group">
+          <button type="button" class="session-btn active" data-session="1">
+            <strong>Sáng</strong>
+            <small>07:00 - 11:00</small>
+          </button>
+
+          <button type="button" class="session-btn" data-session="2">
+            <strong>Chiều</strong>
+            <small>13:30 - 17:00</small>
+          </button>
+
+          <button type="button" class="session-btn" data-session="3">
+            <strong>Tối</strong>
+            <small>18:20 - 20:00</small>
+          </button>
+        </div>
+
+        <div class="action-btn-group">
+          <button type="button" class="action-btn" id="editBtn">
+            <i class="fa-solid fa-pen"></i> Chỉnh sửa
+          </button>
+          <button type="button" class="action-btn" id="cancelBtn" hidden>
+            <i class="fa-solid fa-rotate-left"></i> Hủy
+          </button>
+          <button type="button" class="action-btn" id="saveBtn" hidden>
+            <i class="fa-solid fa-floppy-disk"></i> Lưu
+          </button>
+        </div>
+
+        <!-- calendar-table -->
+        <div class="calendar-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Phòng thực hành</th>
+
+                {% for day in range(2, 9) %}
+                <th>
+                  {% if day == 8 %} Chủ nhật {% else %} Thứ {{ day }} {% endif
+                  %}
+
+                  <span class="day-of-week" data-day="{{ day - 2 }}"></span>
+                </th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody id="calendar-body">
+              {% for room in all_room %}
+              <tr
+                class="staff-room-row"
+                data-room="{{ room[0] }}"
+                data-machine-count="{{ room[3] }}"
+                data-config-id="{{ room[4] or '' }}"
+                data-room-status="{{ room[2] }}"
+                data-software="{{ room[5] | tojson }}"
+              >
+                <td class="room-name">{{ room[1] }}</td>
+
+                {% for day in range(7) %}
+                <td
+                  class="schedule-cell"
+                  data-room="{{ room[0] }}"
+                  data-day="{{ day }}"
+                  data-session="1"
+                ></td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+              <tr id="empty-schedule-row" hidden>
+                <td class="calendar-empty" colspan="8">
+                  Buổi này chưa có phòng nào được xếp lịch trong tuần.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- popup -->
+    <div class="popup-error" id="popup-error">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="popup-error-message" id="popup-error-message"></div>
+        <button type="button" id="popup-error-close">Đóng</button>
+      </div>
+    </div>
+
+    <div class="popup-error" id="popup-cancel-edit">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-question"></i>
+        </div>
+        <div class="popup-error-message">
+          Bạn có chắc chắn muốn hủy chỉnh sửa? Thao tác này sẽ không lưu các thay
+          đổi.
+        </div>
+        <div>
+          <button type="button" id="cancel-edit-stay">
+            Tiếp tục chỉnh sửa
+          </button>
+          <button type="button" id="cancel-edit-discard">
+            Hủy và không lưu
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="popup-success" id="popup-success">
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="popup-success-message" id="popup-success-message">
+          {{ success }}
+        </div>
+      </div>
+    </div>
+
+    
+
+    <!-- truyen du lieu tu python => javascript -->
+    <script id="weeks-data" type="application/json">
+      {{ weeks | tojson }}
+    </script>
+    <script id="scheduled-data" type="application/json">
+      {{ all_scheduled | tojson }}
+    </script>
+    <script id="staff-assignments-data" type="application/json">
+      {{ staff_assignments | tojson }}
+    </script>
+    <script src="/static/js/admin/staff.js"></script>
+    <script src="/static/js/auth/navbar.js"></script>
+  </body>
+</html>

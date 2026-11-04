@@ -25,6 +25,12 @@ function isWithinWeek(dateString, week) {
 
 function getOccurrences(schedule, week) {
   const occurrences = new Map();
+  if (
+    schedule.MaTuanHoc &&
+    Number(schedule.MaTuanHoc) !== Number(week.id)
+  ) {
+    return occurrences;
+  }
   const addOccurrence = (date) => {
     if (date && isWithinWeek(date, week)) {
       occurrences.set(date, getDayIndex(date));

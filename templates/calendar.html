@@ -30,7 +30,6 @@
       id="calendar-page"
       data-success="{{ success or '' }}"
     >
-
       <div class="calendar-container">
         <div class="calendar-info">
           {% if semester %} Học kỳ {{ semester[1] }} - Năm học {{ semester[2] }}
@@ -83,7 +82,6 @@
           <table>
             <thead>
               <tr>
-                <th>Buổi</th>
                 <th>Phòng</th>
 
                 {% for day in range(2, 9) %}
@@ -99,17 +97,18 @@
             <tbody id="calendar-body">
               {% for session in calendar_sessions %} {% if session.rooms %} {%
               for room in session.rooms %}
-              <tr data-room="{{ room[0] }}" data-session="{{ session.id }}">
-                {% if loop.first %}
-                <td
-                  class="session-label"
-                  rowspan="{{ session.rooms | length }}"
-                >
-                  <i class="fa-solid {{ session.icon }}"></i>
-                  <strong>{{ session.name }}</strong>
-                  <small>({{ session.time }})</small>
-                </td>
-                {% endif %}
+              <tr
+                class="session-row"
+                data-room="{{ room[0] }}"
+                data-session="{{ session.id }}"
+                {%
+                if
+                session.id
+                !="1"
+                %}hidden{%
+                endif
+                %}
+              >
                 <td class="room-name">{{ room[1] }}</td>
 
                 {% for day in range(7) %}
@@ -122,14 +121,19 @@
                 {% endfor %}
               </tr>
               {% endfor %} {% else %}
-              <tr>
-                <td class="session-label">
-                  <i class="fa-solid {{ session.icon }}"></i>
-                  <strong>{{ session.name }}</strong>
-                  <small>({{ session.time }})</small>
-                </td>
+              <tr
+                class="session-row"
+                data-session="{{ session.id }}"
+                {%
+                if
+                session.id
+                !="1"
+                %}hidden{%
+                endif
+                %}
+              >
                 <td class="calendar-empty" colspan="8">
-                  Chưa có phòng được xếp lịch vào buổi này.
+                  Chưa có phòng thực hành.
                 </td>
               </tr>
               {% endif %} {% endfor %}
@@ -139,14 +143,13 @@
       </div>
     </div>
 
-
     <script id="weeks-data" type="application/json">
       {{ weeks | tojson }}
     </script>
     <script id="scheduled-data" type="application/json">
       {{ all_scheduled | tojson }}
     </script>
-    <script src="/static/js/teacher/calendar.js"></script>
+    <script src="/static/js/auth/calendar.js"></script>
     <script src="/static/js/auth/navbar.js"></script>
   </body>
 </html>

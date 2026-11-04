@@ -2488,6 +2488,7 @@
   border: 2px dashed #6558d3;
 }
 
+
 .invalid-cell {
   background-color: #eeeeee !important;
   opacity: 0.4;
@@ -2591,4 +2592,49 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ============PHAN CONG CAN BO ================= */
+
+.staff-item {
+  cursor: grab;
+}
+
+.staff-item:active {
+  cursor: grabbing;
+}
+
+.staff-item.dragging {
+  opacity: 0.45;
+}
+
+.staff-scheduled-slot {
+  background-color: #e0f2e9;
+}
+
+.staff-scheduled-slot.staff-drag-over {
+  background-color: #c6ead5;
+  border: 2px dashed #23834f;
+}
+
+.staff-assigned-name {
+  display: block;
+  padding: 5px;
+  color: #17613a;
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.staff-assigned-name[draggable="true"] {
+  cursor: grab;
+}
+
+.staff-assigned-name.dragging {
+  opacity: 0.45;
+}
+
+.required-list.staff-drop-target {
+  outline: 2px dashed #23834f;
+  outline-offset: -2px;
 }

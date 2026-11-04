@@ -225,6 +225,7 @@ def get_scheduled_requests_for_teacher(teacher_id, semester_id):
             SELECT
                 yc.MaYeuCau AS "MaYeuCau",
                 yct.MaPhong AS "MaPhong",
+                yct.MaTuanHoc AS "MaTuanHoc",
                 yc.BuoiThucHanh AS "BuoiThucHanh",
                 (yc.NgayThucHanh IS NULL) AS "LaLichDinhKy",
                 yc.MaTuanBatDau AS "MaTuanBatDau",
@@ -277,6 +278,7 @@ def get_scheduled_requests_for_teacher(teacher_id, semester_id):
             GROUP BY
                 yc.MaYeuCau,
                 yct.MaPhong,
+                yct.MaTuanHoc,
                 yc.BuoiThucHanh,
                 (yc.NgayThucHanh IS NULL),
                 yc.MaTuanBatDau,
