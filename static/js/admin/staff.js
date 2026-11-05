@@ -52,6 +52,7 @@ function getDayIndex(dateString) {
   return (parseDate(dateString).getDay() + 6) % 7;
 }
 
+// lich co xuat hien trong tuan dang xem k
 function getOccurrences(schedule, week) {
   const occurrences = new Set();
   if (schedule.MaTuanHoc !== null && schedule.MaTuanHoc !== undefined) {

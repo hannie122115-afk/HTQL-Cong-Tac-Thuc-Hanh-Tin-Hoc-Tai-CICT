@@ -54,19 +54,6 @@
       </div>
       <div class="navbar-box">
         <div class="navbar-item">
-          <a href="">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-solid fa-user"></i>
-              </div>
-              <div class="navbar-item-title">Hồ sơ cá nhân</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </a>
-        </div>
-        <div class="navbar-item">
           <a href="/admin/program">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
@@ -111,7 +98,7 @@
               <div class="navbar-item-icon">
                 <i class="fa-solid fa-users"></i>
               </div>
-              <div class="navbar-item-title">Tài khoản</div>
+              <div class="navbar-item-title">Tài khoản quản trị</div>
             </div>
             <div class="navbar-item-arrow">
               <i class="fa-solid fa-chevron-right"></i>
@@ -158,6 +145,19 @@
           </a>
         </div>
       </div>
+      <div class="navbar-item">
+        <a href="">
+          <div class="navbar-item-name">
+            <div class="navbar-item-icon">
+              <i class="fa-solid fa-user"></i>
+            </div>
+            <div class="navbar-item-title">Hồ sơ cá nhân</div>
+          </div>
+          <div class="navbar-item-arrow">
+            <i class="fa-solid fa-chevron-right"></i>
+          </div>
+        </a>
+      </div>
       <div class="navbar-logout">
         <a href="/logout">
           <div class="navbar-logout-icon">
@@ -193,31 +193,31 @@
         <div class="dashboard-item-icon">
           <i class="fa-solid fa-user-gear"></i>
         </div>
-        <div class="dashboard-item-title">Tài khoản</div>
+        <div class="dashboard-item-title">Tài khoản quản trị</div>
       </a>
-      <!-- <a href="">
-        <div class="dashboard-item-icon">
-          <i class="fa-solid fa-users"></i>
-        </div>
-        <div class="dashboard-item-title">Cán bộ</div>
-      </a>
-      <a href="">
-        <div class="dashboard-item-icon">
-          <i class="fa-solid fa-chalkboard-user"></i>
-        </div>
-        <div class="dashboard-item-title">Giảng viên</div>
-      </a> -->
       <a href="/admin/accept">
         <div class="dashboard-item-icon">
           <i class="fa-solid fa-file-lines"></i>
         </div>
         <div class="dashboard-item-title">Duyệt yêu cầu</div>
       </a>
+      <a href="/admin/calendar">
+        <div class="dashboard-item-icon">
+          <i class="fa-solid fa-user-gear"></i>
+        </div>
+        <div class="dashboard-item-title">Xếp lịch thực hành</div>
+      </a>
+      <a href="/admin/staff">
+        <div class="dashboard-item-icon">
+          <i class="fa-solid fa-user-gear"></i>
+        </div>
+        <div class="dashboard-item-title">Xếp lịch cán bộ</div>
+      </a>
       <a href="">
         <div class="dashboard-item-icon">
-          <i class="fa-regular fa-calendar-days"></i>
+          <i class="fa-solid fa-user-gear"></i>
         </div>
-        <div class="dashboard-item-title">Lịch thực hành</div>
+        <div class="dashboard-item-title">Hồ sơ cá nhân</div>
       </a>
     </div>
     <script src="/static/js/auth/navbar.js"></script>
