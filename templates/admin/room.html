@@ -173,7 +173,7 @@
       <div class="direction">
         <a href="/admin">Trang chủ</a>
         <i class="fa-solid fa-angle-right"></i>
-        <a href="/admin/config">Phòng thực hành</a>
+        <a href="/admin/room">Phòng thực hành</a>
       </div>
 
       <!-- search -->
@@ -271,7 +271,6 @@
               <th>Mã phòng</th>
               <th>Tên phòng</th>
               <th>Số lượng máy</th>
-              <th>Cán bộ quản lý</th>
               <th>Tình trạng phòng</th>
               <th colspan="2">Thao tác</th>
             </tr>
@@ -285,7 +284,6 @@
               <td>P{{ room[0] }}</td>
               <td>Phòng {{ room[1] }}</td>
               <td>{{ room[2] }}</td>
-              <td>{{ room[3] or 'Chưa phân công' }}</td>
 
               {% if room[4] == -1 %}
               <td>Ngừng hoạt động</td>

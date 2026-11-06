@@ -2488,7 +2488,6 @@
   border: 2px dashed #6558d3;
 }
 
-
 .invalid-cell {
   background-color: #eeeeee !important;
   opacity: 0.4;
@@ -2637,4 +2636,133 @@
 .required-list.staff-drop-target {
   outline: 2px dashed #23834f;
   outline-offset: -2px;
+}
+
+/* staff room */
+.staff-week-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: #263449;
+  font-weight: 600;
+}
+
+.staff-week-filter select {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.report-room-act {
+  margin-left: 8px;
+  padding: 8px 11px;
+  border: 0;
+  border-radius: 6px;
+  background: #fee2e2;
+  color: #b91c1c;
+  cursor: pointer;
+  font: inherit;
+}
+
+.computer-report {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.6);
+  box-sizing: border-box;
+}
+
+.computer-report.show {
+  display: flex;
+}
+
+.computer-report-panel {
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 26px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+}
+
+.computer-report-title {
+  margin-bottom: 20px;
+  color: #1e293b;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.computer-report-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+  color: #334155;
+}
+
+.computer-report-item-title {
+  font-weight: 600;
+}
+
+.computer-report-item-value textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font: inherit;
+  resize: vertical;
+}
+
+.computer-report-item-value textarea:focus,
+.staff-week-filter select:focus {
+  border-color: #2563eb;
+  outline: 2px solid rgba(37, 99, 235, 0.15);
+}
+
+.computer-report-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.computer-report-actions button {
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+
+.submit-computer-report {
+  background: #2563eb;
+  color: #fff;
+}
+
+.cancel-computer-report {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+@media (max-width: 520px) {
+  .staff-week-filter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .computer-report-panel {
+    padding: 20px;
+  }
 }
