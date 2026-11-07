@@ -64,6 +64,9 @@
             <div class="navbar-item-arrow">
               <i class="fa-solid fa-chevron-right"></i>
             </div>
+            {% if has_unread_schedule %}
+            <span class="notification-dot" aria-label="Lịch vừa được cập nhật"></span>
+            {% endif %}
           </a>
         </div>
 
@@ -126,7 +129,10 @@
         <div class="dashboard-item-icon">
           <i class="fa-solid fa-users"></i>
         </div>
-        <div class="dashboard-item-title">Lịch thực hành</div>
+        <div class="dashboard-item-title">Lịch thực hành của tôi</div>
+        {% if has_unread_schedule %}
+        <span class="notification-dot" aria-label="Lịch vừa được cập nhật"></span>
+        {% endif %}
       </a>
 
       <a href="/teacher/required">

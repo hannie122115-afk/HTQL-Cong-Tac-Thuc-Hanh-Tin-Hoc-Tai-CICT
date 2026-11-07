@@ -92,6 +92,7 @@
             </div>
           </a>
         </div>
+        </div>
         <div class="navbar-item">
           <a href="/admin/account">
             <div class="navbar-item-name">
@@ -116,6 +117,9 @@
             <div class="navbar-item-arrow">
               <i class="fa-solid fa-circle-check"></i>
             </div>
+            {% if has_unread_reports %}
+            <span class="notification-dot" aria-label="Báo cáo mới chưa xem"></span>
+            {% endif %}
           </a>
         </div>
         <div class="navbar-item">
@@ -129,6 +133,9 @@
             <div class="navbar-item-arrow">
               <i class="fa-solid fa-circle-check"></i>
             </div>
+            {% if has_unread_requests %}
+            <span class="notification-dot" aria-label="Yêu cầu mới chưa xem"></span>
+            {% endif %}
           </a>
         </div>
         <div class="navbar-item">
@@ -208,11 +215,23 @@
         </div>
         <div class="dashboard-item-title">Tài khoản quản trị</div>
       </a>
+      <a href="/admin/report">
+        <div class="dashboard-item-icon">
+          <i class="fa-solid fa-file-lines"></i>
+        </div>
+        <div class="dashboard-item-title">Báo cáo tình trạng</div>
+        {% if has_unread_reports %}
+        <span class="notification-dot" aria-label="Báo cáo mới chưa xem"></span>
+        {% endif %}
+      </a>
       <a href="/admin/accept">
         <div class="dashboard-item-icon">
           <i class="fa-solid fa-file-lines"></i>
         </div>
         <div class="dashboard-item-title">Duyệt yêu cầu</div>
+        {% if has_unread_requests %}
+        <span class="notification-dot" aria-label="Yêu cầu mới chưa xem"></span>
+        {% endif %}
       </a>
       <a href="/admin/calendar">
         <div class="dashboard-item-icon">

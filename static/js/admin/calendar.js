@@ -567,6 +567,64 @@ function checkConflictJS(roomId, session, day, weekId, targetDate) {
   return false;
 }
 
+function validateScheduleDrop(cell, item, sourceCard = null) {
+  const week = weeks[currentIndex];
+  if (!week) {
+    return { valid: false, message: "Không xác định được tuần đang xếp lịch." };
+  }
+
+  const day = Number(cell.dataset.day);
+  const weekId = Number(week.id);
+  const targetDate = parseDate(week.start);
+  targetDate.setDate(targetDate.getDate() + day);
+  const dateString = toDateString(targetDate);
+  const isSourceCell = sourceCard?.parentElement === cell;
+
+  if (isSourceCell) {
+    return { valid: false, message: "Đây là vị trí hiện tại của lịch." };
+  }
+  if (String(item.dataset.session) !== String(currentSession)) {
+    return {
+      valid: false,
+      message: "Hãy chọn đúng buổi thực hành của yêu cầu.",
+    };
+  }
+  if (!checkRequestDate(item, day, weekId, dateString)) {
+    return { valid: false, message: "Ngày hoặc thứ này không thuộc yêu cầu." };
+  }
+  if (!checkRoomSuitableJS(cell.closest("tr"), item)) {
+    return {
+      valid: false,
+      message: "Phòng không đáp ứng tình trạng, số máy hoặc phần mềm yêu cầu.",
+    };
+  }
+  if (cell.dataset.occupied === "true") {
+    return { valid: false, message: "Ô lịch này đã có yêu cầu khác." };
+  }
+  if (
+    !sourceCard &&
+    getAssignedDays(item.dataset.requiredId, weekId).has(day)
+  ) {
+    return {
+      valid: false,
+      message: "Yêu cầu này đã được xếp vào thứ đó trong tuần hiện tại.",
+    };
+  }
+  if (
+    checkConflictJS(
+      cell.dataset.room,
+      Number(item.dataset.session),
+      day,
+      weekId,
+      dateString,
+    )
+  ) {
+    return { valid: false, message: "Phòng đã có lịch vào buổi này." };
+  }
+
+  return { valid: true, message: "" };
+}
+
 // ================= LÀM MỜ CÁC Ô LỊCH KHÔNG HỢP LỆ =================
 
 const scheduleCells = document.querySelectorAll(".schedule-cell");
@@ -577,35 +635,7 @@ function highlightInvalidCells(item) {
   if (!week) return;
 
   scheduleCells.forEach((cell) => {
-    const room = cell.closest("tr");
-    const day = Number(cell.dataset.day);
-
-    const targetDate = parseDate(week.start);
-    targetDate.setDate(targetDate.getDate() + day);
-
-    const dateString = toDateString(targetDate);
-
-    const correctDate = checkRequestDate(
-      item,
-      day,
-      Number(week.id),
-      dateString,
-    );
-
-    const roomSuitable = checkRoomSuitableJS(room, item);
-
-    const conflict = checkConflictJS(
-      room.dataset.room,
-      Number(item.dataset.session),
-      day,
-      Number(week.id),
-      dateString,
-    );
-
-    const correctSession = String(item.dataset.session) === currentSession;
-
-    const valid = correctSession && correctDate && roomSuitable && !conflict;
-
+    const { valid } = validateScheduleDrop(cell, item, draggedScheduleCard);
     cell.classList.toggle("invalid-cell", !valid);
     cell.dataset.invalid = valid ? "false" : "true";
   });
@@ -914,45 +944,17 @@ scheduleCells.forEach((cell) => {
 
     const day = Number(cell.dataset.day);
     const activeItem = draggedItem || draggedScheduleCard;
-    const assignedDays = activeItem
-      ? getAssignedDays(activeItem.dataset.requiredId)
-      : new Set();
-    const isSourceCell = draggedScheduleCard?.parentElement === cell;
+    const validation = activeItem
+      ? validateScheduleDrop(cell, activeItem, draggedScheduleCard)
+      : { valid: false };
 
-    if (
-      !activeItem ||
-      cell.dataset.invalid === "true" ||
-      (cell.dataset.occupied === "true" && !isSourceCell) ||
-      (draggedItem && !draggedScheduleCard && assignedDays.has(day))
-    ) {
+    if (!validation.valid) {
       event.dataTransfer.dropEffect = "none";
     } else {
-      const week = weeks[currentIndex];
-      const targetDate = parseDate(week.start);
-      targetDate.setDate(targetDate.getDate() + day);
-      const dateString = toDateString(targetDate);
-      const validDestination =
-        !draggedScheduleCard ||
-        (checkRequestDate(
-          draggedScheduleCard,
-          day,
-          Number(week.id),
-          dateString,
-        ) &&
-          checkRoomSuitableJS(cell.closest("tr"), draggedScheduleCard) &&
-          !checkConflictJS(
-            cell.dataset.room,
-            Number(activeItem.dataset.session),
-            day,
-            Number(week.id),
-            dateString,
-          ));
-
-      event.dataTransfer.dropEffect = validDestination
-        ? draggedScheduleCard || completesPlacement(activeItem, day)
+      event.dataTransfer.dropEffect =
+        draggedScheduleCard || completesPlacement(activeItem, day)
           ? "move"
-          : "copy"
-        : "none";
+          : "copy";
     }
 
     cell.classList.add("drag-over");
@@ -973,25 +975,8 @@ scheduleCells.forEach((cell) => {
       const day = Number(cell.dataset.day);
       const week = weeks[currentIndex];
       const weekId = Number(week?.id);
-      const targetDate = parseDate(week.start);
-      targetDate.setDate(targetDate.getDate() + day);
-      const dateString = toDateString(targetDate);
-      const isSourceCell = sourceCard.parentElement === cell;
-
-      if (
-        isSourceCell ||
-        cell.dataset.invalid === "true" ||
-        (cell.dataset.occupied === "true" && !isSourceCell) ||
-        !checkRequestDate(sourceCard, day, weekId, dateString) ||
-        !checkRoomSuitableJS(cell.closest("tr"), sourceCard) ||
-        checkConflictJS(
-          cell.dataset.room,
-          Number(sourceCard.dataset.session),
-          day,
-          weekId,
-          dateString,
-        )
-      ) {
+      const validation = validateScheduleDrop(cell, sourceCard, sourceCard);
+      if (!validation.valid) {
         return;
       }
 
@@ -1016,6 +1001,12 @@ scheduleCells.forEach((cell) => {
     if (!draggedItem) return;
 
     const item = draggedItem;
+    const validation = validateScheduleDrop(cell, item);
+    if (!validation.valid) {
+      showErrorPopup(validation.message);
+      return;
+    }
+
     const day = Number(cell.dataset.day);
     const weekId = Number(weeks[currentIndex]?.id);
     const startWeek = Number(item.dataset.weekStart);

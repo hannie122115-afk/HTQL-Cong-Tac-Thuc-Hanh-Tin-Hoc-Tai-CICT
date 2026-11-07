@@ -204,7 +204,7 @@
 
           <tbody>
             {% if reports %} {% for report in reports %}
-            <tr>
+            <tr class="report-row {% if report[7] %}is-read{% else %}is-unread{% endif %}">
               <td>{{ loop.index }}</td>
               <td>BC{{ report[0] }}</td>
               <td>{{ report[1] }}</td>
@@ -224,6 +224,7 @@
                   data-description="{{ report[5] }}"
                   data-current-status="{{ report[6] }}"
                   data-reporter="{{ report[3] }}"
+                  data-read="{{ 'true' if report[7] else 'false' }}"
                 >
                   <i class="fa-solid fa-eye"></i>
                   Xem chi tiết

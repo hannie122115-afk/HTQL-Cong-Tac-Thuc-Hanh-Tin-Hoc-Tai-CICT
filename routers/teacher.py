@@ -3,6 +3,13 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 from psycopg2.extras import RealDictCursor
 from database import get_connection
+from notification_service import (
+    NOTIFICATION_TYPE_SCHEDULE,
+    NOTIFICATION_TYPE_SCHEDULE_REQUEST,
+    get_unread_notification_types,
+    insert_notification,
+    mark_notifications_read,
+)
 from datetime import date
 from typing import List, Optional
 
@@ -40,6 +47,9 @@ def show_admin(request: Request):
 
     user = get_user_by_id(request.session.get("accountId"))
     avt = request.session.get("avt")
+    unread_notifications = get_unread_notification_types(
+        request.session.get("accountId")
+    )
 
     return templates.TemplateResponse(
         request=request,
@@ -47,6 +57,7 @@ def show_admin(request: Request):
         context={
             "user": user,
             "avt": avt,
+            "has_unread_schedule": NOTIFICATION_TYPE_SCHEDULE in unread_notifications,
         },
     )
 
@@ -341,6 +352,10 @@ def show_teacher_calendar(request: Request):
     if not user:
         return RedirectResponse(url="/login", status_code=303)
 
+    mark_notifications_read(
+        request.session.get("accountId"),
+        NOTIFICATION_TYPE_SCHEDULE,
+    )
     semester = get_semester_current()
     weeks = get_weeks_by_semester(semester[0]) if semester else []
     schedules = (
@@ -570,7 +585,12 @@ def add_required(
     )
 
     required_id = cursor.fetchone()[0]
-
+    insert_notification(
+        cursor,
+        1,
+        NOTIFICATION_TYPE_SCHEDULE_REQUEST,
+        required_id,
+    )
     if required_week_day:
         for rwd in required_week_day:
             cursor.execute(

@@ -22,6 +22,26 @@ function closeReport() {
   reportModal.setAttribute("aria-hidden", "true");
 }
 
+function markReportAsRead(button) {
+  if (button.dataset.read === "true") {
+    return;
+  }
+
+  fetch(`/admin/report/${button.dataset.reportId}/read`, { method: "POST" })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Could not mark report as read (${response.status}).`);
+      }
+
+      button.dataset.read = "true";
+      button.closest("tr").classList.remove("is-unread");
+      button.closest("tr").classList.add("is-read");
+    })
+    .catch((error) => {
+      console.error("Unable to save report read state:", error);
+    });
+}
+
 if (successPopup.dataset.show === "true") {
   successPopup.classList.add("show");
   window.setTimeout(() => successPopup.classList.remove("show"), 300);
@@ -29,12 +49,13 @@ if (successPopup.dataset.show === "true") {
 
 document.querySelectorAll(".report-detail-act").forEach((button) => {
   button.addEventListener("click", () => {
+    markReportAsRead(button);
+
     const computerId = button.dataset.computerId;
     const isComputerReport = computerId !== "";
     const statuses = isComputerReport ? machineStatuses : roomStatuses;
 
     button.classList.add("is-viewed");
-    button.closest("tr").classList.add("is-selected");
 
     document.getElementById("report-type").textContent = isComputerReport
       ? "Tình trạng máy tính"

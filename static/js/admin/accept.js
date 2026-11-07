@@ -4,7 +4,7 @@ const acceptDetailBtn = document.getElementById("accept-detail-btn");
 const refuseDetailBtn = document.getElementById("refuse-detail-btn");
 
 document.querySelectorAll(".see-detail-act").forEach(function (button) {
-  button.addEventListener("click", function () {
+  button.addEventListener("click", async function () {
     const data = button.dataset;
     currentRequiredId = data.id;
 
@@ -81,6 +81,27 @@ document.querySelectorAll(".see-detail-act").forEach(function (button) {
       String(data.status) === "0" ? "block" : "none";
 
     detailContainer.classList.add("show");
+
+    const requestRow = button.closest(".request-row");
+    if (requestRow && requestRow.classList.contains("is-unread")) {
+      try {
+        const response = await fetch(`/admin/accept/${data.id}/read`, {
+          method: "POST",
+          headers: { Accept: "application/json" },
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.message || "Không thể đánh dấu yêu cầu đã xem.");
+        }
+
+        requestRow.classList.remove("is-unread");
+        requestRow.classList.add("is-read");
+        requestRow.querySelector(".request-new-badge")?.remove();
+      } catch (error) {
+        console.error("Lỗi đánh dấu yêu cầu đã xem:", error);
+        alert("Không thể cập nhật trạng thái đã xem của yêu cầu.");
+      }
+    }
   });
 });
 

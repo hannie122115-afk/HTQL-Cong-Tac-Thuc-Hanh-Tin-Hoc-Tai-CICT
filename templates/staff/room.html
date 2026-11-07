@@ -180,18 +180,7 @@
         <label for="week-id">Tuần được phân công</label>
         <select id="week-id" name="week_id" onchange="this.form.submit()">
           {% for week in weeks %}
-          <option
-            value="{{ week.id }}"
-            {%
-            if
-            selected_week
-            and
-            week.id=""
-            ="selected_week.id"
-            %}selected{%
-            endif
-            %}
-          >
+          <option value="{{ week.id }}" {% if selected_week and week.id == selected_week.id %}selected{% endif %}>
             Tuần {{ week.name }} ({{ week.start }} - {{ week.end }})
           </option>
           {% endfor %}

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, Form, Query, Body, HTTPException
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from pwdlib import PasswordHash
 from typing import List, Optional
 from datetime import date
@@ -11,6 +11,16 @@ from datetime import datetime, date, timedelta
 
 from email_service import send_account_email
 from database import get_connection
+from notification_service import (
+    NOTIFICATION_TYPE_SCHEDULE,
+    NOTIFICATION_TYPE_SCHEDULE_REQUEST,
+    NOTIFICATION_TYPE_STATUS_REPORT,
+    get_unread_notification_types,
+    get_schedule_notification_accounts,
+    mark_notifications_read,
+    notify_schedule_recipients,
+    insert_notification,
+)
 
 router = APIRouter()
 
@@ -50,6 +60,9 @@ def show_admin(request: Request):
 
     user = get_user_by_id(request.session.get("accountId"))
     avt = request.session.get("avt")
+    unread_notifications = get_unread_notification_types(
+        request.session.get("accountId")
+    )
 
     return templates.TemplateResponse(
         request=request,
@@ -57,9 +70,12 @@ def show_admin(request: Request):
         context={
             "user": user,
             "avt": avt,
+            "has_unread_reports": NOTIFICATION_TYPE_STATUS_REPORT
+            in unread_notifications,
+            "has_unread_requests": NOTIFICATION_TYPE_SCHEDULE_REQUEST
+            in unread_notifications,
         },
     )
-
 
 
 # ====================================Cau hinh may========================
@@ -2273,7 +2289,14 @@ def update_account_status(
 # ====================================Duyet yeu cau========================
 
 
-def get_required(per_page, offset, created_date_from, created_date_to, status):
+def get_required(
+    per_page,
+    offset,
+    created_date_from,
+    created_date_to,
+    status,
+    account_id=None,
+):
     conn = get_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
 
@@ -2315,6 +2338,14 @@ def get_required(per_page, offset, created_date_from, created_date_to, status):
                     WHEN yc.NgayThucHanh IS NOT NULL THEN 0 
                     ELSE 1
                 END AS "LoaiYeuCau"
+                , EXISTS (
+                    SELECT 1
+                    FROM THONG_BAO tb
+                    WHERE tb.MaTaiKhoan = %s
+                      AND tb.LoaiThongBao = %s
+                      AND tb.MaDoiTuong = yc.MaYeuCau
+                      AND tb.DaXem = FALSE
+                ) AS "ChuaXem"
             FROM YEU_CAU_XEP_LICH yc
             JOIN HOC_PHAN hp ON hp.MaHocPhan = yc.MaHocPhan
             JOIN PHAN_MEM pm ON pm.MaPhanMem = yc.MaPhanMem
@@ -2346,6 +2377,8 @@ def get_required(per_page, offset, created_date_from, created_date_to, status):
             LIMIT %s OFFSET %s
         """,
         (
+            account_id,
+            NOTIFICATION_TYPE_SCHEDULE_REQUEST,
             date_from_val,
             date_from_val,
             date_from_val,
@@ -2448,7 +2481,12 @@ def show_accept(
     status_int = int(status) if (status is not None and status != "") else None
     amount = get_sum_required(created_date_from, created_date_to, status_int)
     required = get_required(
-        per_page, offset, created_date_from, created_date_to, status_int
+        per_page,
+        offset,
+        created_date_from,
+        created_date_to,
+        status_int,
+        account_id,
     )
     semester = get_semester_current()
 
@@ -2471,6 +2509,19 @@ def show_accept(
             "success": success,
         },
     )
+
+
+@router.post("/admin/accept/{required_id}/read")
+def mark_required_as_read(request: Request, required_id: int):
+    if request.session.get("role") != 2:
+        return RedirectResponse(url="/login", status_code=303)
+
+    mark_notifications_read(
+        request.session.get("accountId"),
+        NOTIFICATION_TYPE_SCHEDULE_REQUEST,
+        required_id,
+    )
+    return {"success": True}
 
 
 @router.post("/admin/accept/{required_id}/accept")
@@ -2877,7 +2928,15 @@ def save_calendar_schedule(request: Request, payload: dict = Body(...)):
     conn = get_connection()
     cursor = conn.cursor()
     touched_requests = set()  # luu thay doi loai bo trung
+    requested_ids = {required_id for required_id, _, _ in removals} | {
+        item["required_id"] for item in placements
+    }
     try:
+        previous_recipients = get_schedule_notification_accounts(
+            cursor,
+            requested_ids,
+        )
+
         # =========== Phần xóa yc ========
         # duyet tung yc can xoa
         for required_id, day, week_id in removals:
@@ -2927,7 +2986,8 @@ def save_calendar_schedule(request: Request, payload: dict = Body(...)):
                     """,
                     (required_id, day + 2, week_id),
                 )
-            touched_requests.add(required_id)
+            if cursor.rowcount:
+                touched_requests.add(required_id)
 
         # ============= Phần xếp lịch mới ==========
         slot_rooms = {}
@@ -3088,6 +3148,8 @@ def save_calendar_schedule(request: Request, payload: dict = Body(...)):
                             END,
                             MaPhong = EXCLUDED.MaPhong,
                             NgayThucHanh = EXCLUDED.NgayThucHanh
+                        WHERE YEU_CAU_THU.MaPhong IS DISTINCT FROM EXCLUDED.MaPhong
+                           OR YEU_CAU_THU.NgayThucHanh IS DISTINCT FROM EXCLUDED.NgayThucHanh
                     """,
                     (
                         required_id,
@@ -3097,7 +3159,8 @@ def save_calendar_schedule(request: Request, payload: dict = Body(...)):
                         target_week_id,
                     ),
                 )
-                touched_requests.add(required_id)
+                if cursor.rowcount:
+                    touched_requests.add(required_id)
 
         for required_id in touched_requests:
             cursor.execute(
@@ -3114,6 +3177,11 @@ def save_calendar_schedule(request: Request, payload: dict = Body(...)):
                 (status, required_id),
             )
 
+        notify_schedule_recipients(
+            cursor,
+            touched_requests,
+            previous_recipients,
+        )
         conn.commit()
         return {"success": True}
     except Exception:
@@ -3204,9 +3272,7 @@ def assign_staff_to_schedule(request: Request, payload: dict = Body(...)):
         day = int(payload["day"])
         session = int(payload["session"])
         staff_id = (
-            int(payload["staffId"])
-            if payload.get("staffId") is not None
-            else None
+            int(payload["staffId"]) if payload.get("staffId") is not None else None
         )
         if (
             min(required_id, room_id, week_id) <= 0
@@ -3252,9 +3318,11 @@ def assign_staff_to_schedule(request: Request, payload: dict = Body(...)):
 
         cursor.execute(
             """
-                SELECT 1
+                SELECT yct.MaCanBo, gv.MaTaiKhoan, old_cb.MaTaiKhoan
                 FROM YEU_CAU_XEP_LICH yc
                 JOIN YEU_CAU_THU yct ON yct.MaYeuCau = yc.MaYeuCau
+                JOIN GIANG_VIEN gv ON gv.MaGiangVien = yc.MaGiangVien
+                LEFT JOIN CAN_BO old_cb ON old_cb.MaCanBo = yct.MaCanBo
                 WHERE yc.MaYeuCau = %s
                   AND yc.TrangThai = 2
                   AND yc.BuoiThucHanh = %s
@@ -3281,7 +3349,8 @@ def assign_staff_to_schedule(request: Request, payload: dict = Body(...)):
                 week_id,
             ),
         )
-        if not cursor.fetchone():
+        assignment = cursor.fetchone()
+        if not assignment:
             return JSONResponse(
                 status_code=400,
                 content={
@@ -3290,10 +3359,12 @@ def assign_staff_to_schedule(request: Request, payload: dict = Body(...)):
                 },
             )
 
+        old_staff_id, teacher_account_id, old_staff_account_id = assignment
         staff_name = None
+        new_staff_account_id = None
         if staff_id is not None:
             cursor.execute(
-                "SELECT TenCanBo FROM CAN_BO WHERE MaCanBo = %s",
+                "SELECT TenCanBo, MaTaiKhoan FROM CAN_BO WHERE MaCanBo = %s",
                 (staff_id,),
             )
             staff = cursor.fetchone()
@@ -3306,6 +3377,7 @@ def assign_staff_to_schedule(request: Request, payload: dict = Body(...)):
                     },
                 )
             staff_name = staff[0]
+            new_staff_account_id = staff[1]
 
         cursor.execute(
             """
@@ -3327,6 +3399,19 @@ def assign_staff_to_schedule(request: Request, payload: dict = Body(...)):
                 },
             )
 
+        if old_staff_id != staff_id:
+            for account_id in {
+                teacher_account_id,
+                old_staff_account_id,
+                new_staff_account_id,
+            } - {None}:
+                insert_notification(
+                    cursor,
+                    account_id,
+                    NOTIFICATION_TYPE_SCHEDULE,
+                    required_id,
+                )
+
         conn.commit()
         return {
             "success": True,
@@ -3342,7 +3427,6 @@ def assign_staff_to_schedule(request: Request, payload: dict = Body(...)):
     finally:
         cursor.close()
         conn.close()
-
 
 
 # ====================================Bao cao tinh trang========================
@@ -3372,17 +3456,22 @@ def show_admin_reports(
                     CASE
                         WHEN bc.MaMayTinh IS NULL THEN p.TinhTrangPhong
                         ELSE mt.TinhTrangMay
-                    END AS TinhTrangHienTai
+                    END AS TinhTrangHienTai,
+                    COALESCE(tb.DaXem, TRUE) AS DaXem
                 FROM Bao_cao_tinh_trang bc
                 JOIN PHONG p ON p.MaPhong = bc.MaPhong
                 JOIN CAN_BO cb ON cb.MaCanBo = bc.MaCanBo
                 LEFT JOIN MAY_TINH mt
                     ON mt.MaMayTinh = bc.MaMayTinh
                    AND mt.MaPhong = bc.MaPhong
+                LEFT JOIN THONG_BAO tb
+                    ON tb.MaDoiTuong = bc.MaBaoCao
+                   AND tb.MaTaiKhoan = %s
+                   AND tb.LoaiThongBao = 'BAO_CAO_TINH_TRANG'
                 WHERE bc.NgayGui = %s
                 ORDER BY bc.MaBaoCao DESC
             """,
-            (selected_date,),
+            (request.session.get("accountId"), selected_date),
         )
         reports = cursor.fetchall()
         cursor.close()
@@ -3400,6 +3489,20 @@ def show_admin_reports(
             "success": request.session.pop("success", None),
         },
     )
+
+
+@router.post("/admin/report/{report_id}/read")
+def mark_report_as_read(request: Request, report_id: int):
+    if request.session.get("role") != 2:
+        return RedirectResponse(url="/login", status_code=303)
+
+    account_id = request.session.get("accountId")
+    mark_notifications_read(
+        account_id,
+        NOTIFICATION_TYPE_STATUS_REPORT,
+        report_id,
+    )
+    return {"success": True}
 
 
 @router.post("/admin/report/{report_id}/status")

@@ -237,9 +237,17 @@
           {% if required %}
           <tbody>
             {% set start_index = (page - 1) * per_page %} {%for re in required%}
-            <tr>
+            <tr
+              class="request-row {% if re.ChuaXem %}is-unread{% else %}is-read{% endif %}"
+              data-id="{{ re.MaYeuCau }}"
+            >
               <td>{{ start_index + loop.index }}</td>
-              <td>YC{{ re.MaYeuCau }}</td>
+              <td>
+                YC{{ re.MaYeuCau }}
+                {% if re.ChuaXem %}
+                <span class="request-new-badge">Mới</span>
+                {% endif %}
+              </td>
               <td>
                 {{ re.TenHocPhan }}
                 {% if re.NhomHocPhan %}

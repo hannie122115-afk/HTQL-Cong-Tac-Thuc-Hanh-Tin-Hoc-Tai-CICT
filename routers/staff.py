@@ -3,6 +3,13 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 from psycopg2.extras import RealDictCursor
 from database import get_connection
+from notification_service import (
+    NOTIFICATION_TYPE_SCHEDULE,
+    NOTIFICATION_TYPE_STATUS_REPORT,
+    get_unread_notification_types,
+    insert_notification,
+    mark_notifications_read,
+)
 from datetime import date
 from typing import List, Optional
 
@@ -180,6 +187,12 @@ def save_status_report(staff_id, room_id, week_id, computer_id, current_status):
                 status_code=403,
                 detail="Bạn không được phân công phòng hoặc máy tính này trong tuần đã chọn.",
             )
+        insert_notification(
+            cursor,
+            1,
+            NOTIFICATION_TYPE_STATUS_REPORT,
+            report[0],
+        )
         conn.commit()
         cursor.close()
     finally:
@@ -196,6 +209,9 @@ def show_admin(request: Request):
 
     user = get_user_by_id(request.session.get("accountId"))
     avt = request.session.get("avt")
+    unread_notifications = get_unread_notification_types(
+        request.session.get("accountId")
+    )
 
     return templates.TemplateResponse(
         request=request,
@@ -203,6 +219,7 @@ def show_admin(request: Request):
         context={
             "user": user,
             "avt": avt,
+            "has_unread_schedule": NOTIFICATION_TYPE_SCHEDULE in unread_notifications,
         },
     )
 
@@ -364,6 +381,10 @@ def show_staff_calendar(request: Request):
     if not user:
         return RedirectResponse(url="/login", status_code=303)
 
+    mark_notifications_read(
+        request.session.get("accountId"),
+        NOTIFICATION_TYPE_SCHEDULE,
+    )
     semester = get_semester_current()
     weeks = get_weeks_by_semester(semester[0]) if semester else []
     assignments = get_staff_assignments(user[0], semester[0]) if semester else []

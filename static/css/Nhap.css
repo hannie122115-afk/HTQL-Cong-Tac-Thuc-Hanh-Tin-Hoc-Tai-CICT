@@ -2028,6 +2028,26 @@
   display: none !important;
 }
 
+.accept-table .request-row.is-unread > td {
+  background: #eff6ff;
+  font-weight: 600;
+}
+
+.accept-table .request-row.is-read > td {
+  background: #fff;
+}
+
+.request-new-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  color: #1d4ed8;
+  background: #dbeafe;
+  font-size: 11px;
+  font-weight: 700;
+}
+
 /* =========================================================
    2. ẨN / HIỆN FORM THÊM YÊU CẦU
    ========================================================= */
@@ -2747,7 +2767,42 @@
 }
 
 /*  bao cáo tình trạng admin */
+/* navbar */
 
+a[href="/admin/accept"],
+a[href="/admin/report"],
+a[href="/staff/calendar"],
+a[href="/teacher/calendar"],
+.grid-dashboard a {
+  position: relative;
+}
+
+.notification-dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 1;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #dc2626;
+  pointer-events: none;
+}
+
+.grid-dashboard .notification-dot {
+  top: 10px;
+  right: 10px;
+}
+
+.report-row.is-unread {
+  background: #eff6ff;
+}
+
+.report-row.is-read {
+  background: #fff;
+}
+
+/* =============== */
 .report-detail-act {
   border: 0;
   cursor: pointer;
