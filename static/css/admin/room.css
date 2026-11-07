@@ -1,0 +1,4 @@
+/* admin/room.css */
+.room-table table { min-width: 720px; }
+.room-table td:nth-child(2) { color: #1d4ed8; font-weight: 600; }
+.room-add-container > form { max-width: 540px; }

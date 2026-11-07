@@ -1,0 +1,6 @@
+/* staff/room-detail.css */
+@import url("../shared/detail.css");
+.computer-room-table table { min-width: 680px; }
+.room-detail-info-container { border-top: 3px solid #2563eb; }
+.computer-report-item-title span { color: var(--danger); }
+.submit-computer-report { background: var(--primary); color: #fff; }

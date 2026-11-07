@@ -1,0 +1,25 @@
+.ui-date { position: relative; display: inline-block; min-width: 155px; max-width: 100%; }
+.ui-native-date { position: absolute !important; width: 1px !important; height: 1px !important; min-height: 0 !important; padding: 0 !important; border: 0 !important; opacity: 0; pointer-events: none; }
+button.ui-date-trigger, button.ui-date-trigger:hover { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 42px; gap: 16px; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #334155; font-weight: 400; }
+.ui-date-trigger::after { content: "▦"; color: #64748b; font-size: 20px; line-height: 1; }
+.ui-date-trigger[aria-expanded="true"] { border-color: #2563eb; box-shadow: 0 0 0 3px rgb(37 99 235 / 10%); }
+.ui-date-trigger[aria-invalid="true"] { border-color: #dc2626; }
+.date-search > .ui-date { flex: 1; }
+.account-add-item > .ui-date, .required-add-item-box-input > .ui-date { width: 100%; }
+.ui-date-popover { position: fixed; inset: auto; z-index: 2500; max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); overflow-y: auto; margin: 0; padding: 14px; border: 1px solid #cbd5e1; border-radius: 14px; background: #fff; color: #1e293b; box-shadow: 0 12px 32px rgb(15 23 42 / 16%); font: 14px/1.5 "Segoe UI", Arial, sans-serif; }
+.ui-date-popover::backdrop { background: transparent; }
+.ui-date-header { display: grid; grid-template-columns: 34px 1fr 34px; align-items: center; gap: 8px; margin-bottom: 12px; text-align: center; }
+.ui-date-caption { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.ui-date-popover .ui-date-caption input.ui-date-year { width: 82px; min-height: 32px; padding: 4px 6px; border-color: #e2e8f0; font-size: 13px; font-weight: 650; }
+.ui-date-header .ui-date-nav { min-height: 32px; padding: 0; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #334155; font-size: 24px; }
+.ui-date-header .ui-date-nav:hover { background: #eff6ff; color: #1d4ed8; }
+.ui-date-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.ui-date-weekday { padding: 6px 0; color: #64748b; text-align: center; font-size: 11px; font-weight: 600; }
+.ui-date-popover .ui-date-day { width: 100%; height: 34px; min-height: 34px; padding: 0; border: 1px solid transparent; border-radius: 7px; background: #fff; color: #334155; font-size: 13px; font-weight: 500; }
+.ui-date-popover .ui-date-day:hover { background: #eff6ff; color: #1d4ed8; }
+.ui-date-popover .ui-date-day.is-outside { color: #94a3b8; }
+.ui-date-popover .ui-date-day.is-today { border-color: #60a5fa; color: #1d4ed8; font-weight: 700; }
+.ui-date-popover .ui-date-day.is-selected { border-color: #2563eb; background: #2563eb; color: #fff; font-weight: 700; }
+.ui-date-day:focus-visible { outline: 2px solid #93c5fd; outline-offset: 1px; }
+.ui-date-footer { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #e2e8f0; }
+.ui-date-footer .ui-date-action { min-height: 32px; padding: 5px 10px; border: 0; background: #eff6ff; color: #1d4ed8; font-size: 12px; }

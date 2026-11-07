@@ -4,20 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Edu-LIMS | Đăng nhập</title>
+    <link rel="stylesheet" href="/static/css/auth/header.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
+    <link rel="stylesheet" href="/static/css/shared/base.css" />
+    <link rel="stylesheet" href="/static/css/auth/popup.css" />
+    <link rel="stylesheet" href="/static/css/auth/login.css" />
+    <link rel="stylesheet" href="/static/css/shared/ui.css" />
   </head>
   <body>
     <header>
       <div class="header-left">
-        <div class="header-left-logo">
-          <div class="header-left-icon">
-            <i class="fa-solid fa-graduation-cap"></i>
-          </div>
-          <div class="header-left-title">Edu-LIMS</div>
-        </div>
+        {% include "partials/header-brand.html" %}
         <div class="header-left-describe">
           Hệ thống công tác thực hành tin học
         </div>
@@ -34,7 +34,7 @@
             <i class="fa-regular fa-user"></i>
           </div>
           <div class="login-username-input login-input">
-            <input type="text" name="username" id="" />
+            <input type="text" name="username" id="username" placeholder="Tên đăng nhập" aria-label="Tên đăng nhập" autocomplete="username" required />
           </div>
         </div>
         <div class="login-password">
@@ -42,7 +42,7 @@
             <i class="fa-solid fa-lock"></i>
           </div>
           <div class="login-password-input login-input">
-            <input type="password" name="password" id="password-input" />
+            <input type="password" name="password" id="password-input" placeholder="Mật khẩu" aria-label="Mật khẩu" autocomplete="current-password" required />
             <span class="toggle-password" id="toggle-password">
               <i class="fa-regular fa-eye-slash" id="eye-icon"></i>
             </span>
@@ -55,5 +55,6 @@
     </div>
 
     <script src="/static/js/auth/login.js"></script>
+    <script src="/static/js/auth/ui.js"></script>
   </body>
 </html>

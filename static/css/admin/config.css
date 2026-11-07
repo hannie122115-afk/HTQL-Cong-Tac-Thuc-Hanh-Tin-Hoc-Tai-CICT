@@ -1,0 +1,5 @@
+/* admin/config.css */
+@import url("../shared/detail.css");
+.config-table table { min-width: 850px; }
+.config-add-container > form { max-width: 620px; }
+.config-add-container .config-room-box { max-height: 180px; overflow-y: auto; }

@@ -1,0 +1,1 @@
+{% set account_role = request.session.get('role') if request is defined else user[8] %}{{ {0: 'Cán bộ', 1: 'Giảng viên', 2: 'Quản trị viên'}.get(account_role, 'Người dùng') }}

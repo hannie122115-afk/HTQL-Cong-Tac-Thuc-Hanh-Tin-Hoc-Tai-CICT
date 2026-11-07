@@ -1,0 +1,45 @@
+/* teacher/required.css */
+.required-table table { min-width: 950px; }
+.required-add-container { display: none; padding: 26px; margin-bottom: 24px; border: 1px solid #bfdbfe; border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); }
+.required-add-container.active { display: block; }
+.required-add-container form > .required-add-title { display: block; margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid var(--border); color: #1d4ed8; font-size: 17px; }
+.required-add-item { position: relative; display: flex; align-items: center; flex-wrap: wrap; gap: 10px 16px; margin-bottom: 20px; }
+.required-add-title { flex-basis: 100%; color: #475569; font-weight: 600; }
+.required-add-item > input:not([type="hidden"]) { width: 100%; }
+.required-add-item label { display: inline-flex; align-items: center; gap: 6px; }
+.required-add-item-box { display: grid; gap: 14px; width: 100%; }
+.required-week-day-box { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.required-week-day-box label { padding: 6px 10px; border: 1px solid var(--border); border-radius: 7px; }
+.required-type, .required-type-item, .required-add-item-box-item { position: relative; }
+.required-type-title, .required-add-item-box-title { display: block; margin-bottom: 7px; color: var(--muted); font-size: 13px; }
+.required-type-item > input:not([type="hidden"]), .required-add-item-box-input input { width: 100%; }
+.required-type-item > span:last-child, .required-add-item-box-item > span:last-child { color: var(--muted); font-size: 12px; }
+.course-suggestions, .program-suggestions, .week-start-suggestions, .week-end-suggestions { position: absolute; top: 100%; left: 0; right: 0; z-index: 20; max-height: 240px; overflow-y: auto; border-radius: 8px; background: #fff; box-shadow: 0 8px 24px rgb(15 23 42 / 15%); }
+:is(.course-suggestions, .program-suggestions, .week-start-suggestions, .week-end-suggestions):empty { display: none; }
+.course-suggestion-item, .program-suggestion-item, .week-suggestion-item { padding: 10px 14px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.course-suggestion-item:hover, .program-suggestion-item:hover, .week-suggestion-item:hover { background: var(--primary-soft); color: var(--primary); }
+.course-suggestion-empty, .program-suggestion-empty, .week-suggestion-empty { padding: 12px; color: var(--muted); }
+@media (max-width: 600px) { .required-add-container { padding: 18px; } }
+.required-add-container form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; }
+.required-add-container form > .required-add-title, .required-add-container .add-required-btn { grid-column: 1 / -1; margin: 0; }
+.required-add-container .required-add-item { min-width: 0; margin: 0; align-content: start; }
+.required-add-item:has(input[name="required_lesson"]), .required-add-item:has(.required-add-item-box), .required-add-item:has(input[name="required_note"]) { grid-column: 1 / -1; }
+.required-add-item-box { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.required-add-item > .required-type-box { flex-basis: 100%; width: 100%; }
+.required-type-box { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+#week-day-field { grid-column: 1 / -1; }
+@media (max-width: 600px) {
+  .required-add-container form, .required-add-item-box, .required-type-box { grid-template-columns: minmax(0, 1fr); }
+}
+.required-detail-info-container { border-top: 4px solid var(--primary); }
+.required-detail-info-item { align-items: center; padding: 13px 12px; border-radius: 8px; }
+.required-detail-info-item:nth-child(even) { background: #f8fafc; }
+.required-detail-info-title { color: #475569; font-weight: 600; }
+.required-detail-info-describe { color: #0f172a; font-weight: 650; }
+.required-detail-send-container { padding: 16px; border: 1px solid #bfdbfe; border-radius: 12px; background: #eff6ff; }
+.required-detail-send-item { border-color: #dbeafe; }
+.required-detail-send-item:last-child { border-bottom: 0; }
+#detail-teacher { color: #1d4ed8; font-size: 17px; font-weight: 750; }
+.required-detail-info-container > .close-detail-btn { display: flex; width: fit-content; min-width: 130px; margin: 24px auto 0; background: var(--primary); color: #fff; border-color: var(--primary); }
+.required-detail-info-container .btn-box { justify-content: center; }
+.required-detail-info-container .close-detail-btn:hover { background: var(--primary-dark); }

@@ -1,0 +1,7 @@
+/* admin/account.css */
+.account-table table { min-width: 900px; }
+.account-filter-act { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.account-role-title, .account-status-title { color: var(--muted); font-weight: 500; }
+.account-popup-content { max-width: 600px; }
+#account-add-form label { display: inline-flex; align-items: center; gap: 6px; }
+#popup-success-account-send { color: #fff; background: var(--primary); }

@@ -4,21 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Giảng viên | Yêu cầu xếp lịch</title>
-    <link rel="stylesheet" href="/static/css/Nhap.css" />
+    <link rel="stylesheet" href="/static/css/auth/header.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
+    <link rel="stylesheet" href="/static/css/shared/base.css" />
+    <link rel="stylesheet" href="/static/css/auth/popup.css" />
+    <link rel="stylesheet" href="/static/css/auth/calendar.css" />
+    <link rel="stylesheet" href="/static/css/shared/ui.css" />
   </head>
   <body>
     <header>
       <div class="header-left">
-        <div class="header-left-logo">
-          <div class="header-left-icon">
-            <i class="fa-solid fa-graduation-cap"></i>
-          </div>
-          <div class="header-left-title">Edu-LIMS</div>
-        </div>
+        {% include "partials/header-brand.html" %}
         <div class="header-left-describe">
           Hệ thống công tác thực hành tin học
         </div>
@@ -151,5 +150,6 @@
     </script>
     <script src="/static/js/auth/calendar.js"></script>
     <script src="/static/js/auth/navbar.js"></script>
+    <script src="/static/js/auth/ui.js"></script>
   </body>
 </html>

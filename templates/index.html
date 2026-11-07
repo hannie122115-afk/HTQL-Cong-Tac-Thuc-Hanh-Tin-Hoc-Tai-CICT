@@ -1,20 +1,31 @@
 <!doctype html>
-<html>
+<html lang="vi">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Edu-LIMS | Quản lý thực hành tin học</title>
+    <link rel="stylesheet" href="/static/css/shared/base.css" />
+    <link rel="stylesheet" href="/static/css/auth/header.css" />
+    <link rel="stylesheet" href="/static/css/auth/index.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   </head>
 
   <body>
-    <div class="container-index">
-      <div class="index-title">Edu-LIMS</div>
-      <div class="index-describe">
-        Hệ thống quản lý công tác thực hành tin học tại CICT
+    <header>
+      <div class="header-left">
+        {% include "partials/header-brand.html" %}
+        <div class="header-left-describe">Hệ thống công tác thực hành tin học</div>
       </div>
+    </header>
+    <main class="container-index">
+      <div class="index-eyebrow">QUẢN LÝ THỰC HÀNH TIN HỌC</div>
+      <h1 class="index-title">Edu-LIMS</h1>
+      <p class="index-describe">Hệ thống quản lý công tác thực hành tin học tại CICT</p>
+      <p class="index-note">Tra cứu lịch thực hành, gửi yêu cầu và quản lý phòng máy trong cùng một hệ thống.</p>
       <div class="container-act">
-        <div class="login-button"><a href="/login">Đăng nhập</a></div>
-        <div class="calender"><a href="/calendar">Xem lịch thực hành</a></div>
+        <div class="login-button"><a href="/login"><i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i> Đăng nhập</a></div>
+        <div class="calender"><a href="/calendar"><i class="fa-regular fa-calendar-days" aria-hidden="true"></i> Xem lịch thực hành</a></div>
       </div>
-    </div>
+    </main>
   </body>
 </html>

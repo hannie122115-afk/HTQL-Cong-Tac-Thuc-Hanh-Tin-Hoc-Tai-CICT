@@ -3,37 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Phòng thực hành | Quản trị viên</title>
-    <link rel="stylesheet" href="/static/css/Nhap.css" />
+    <link rel="stylesheet" href="/static/css/shared/base.css" />
+    <title>Quản trị viên</title>
+    <link rel="stylesheet" href="/static/css/auth/header.css" />
+    <link rel="stylesheet" href="/static/css/auth/navbar.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
+    <link rel="stylesheet" href="/static/css/auth/popup.css?v=a080a9d621" />
+    <link rel="stylesheet" href="/static/css/admin/room.css" />
+    <link rel="stylesheet" href="/static/css/shared/ui.css" />
   </head>
   <body>
     <header>
       <div class="header-left">
-        <div class="header-left-logo">
-          <div class="header-left-icon">
-            <i class="fa-solid fa-graduation-cap"></i>
-          </div>
-          <div class="header-left-title">Edu-LIMS</div>
-        </div>
+        {% include "partials/header-brand.html" %}
         <div class="header-left-describe">
           Hệ thống công tác thực hành tin học
         </div>
       </div>
 
       <div class="header-right">
-        <div class="header-label">
-          <i class="fa-solid fa-bell"></i>
-        </div>
         <div class="header-user" id="headerUser">
           <div class="header-avt">
             <img src="{{avt}}" alt="" />
           </div>
           <div class="navbar-arrow">
-            <i class="fa-solid fa-caret-down"></i>
+            <i class="fa-solid fa-chevron-down"></i>
           </div>
         </div>
       </div>
@@ -47,26 +44,26 @@
           </div>
           <div class="navbar-user-name">
             <p>{{ user[1] }}</p>
-            <p>Quản trị viên</p>
+            <p>{% include "partials/role-label.html" %}</p>
+          </div>
+        </a>
+      </div>
+      <div class="navbar-item">
+        <a href="/admin/config">
+          <div class="navbar-item-name">
+            <div class="navbar-item-icon">
+              <i class="fa-solid fa-display"></i>
+            </div>
+            <div class="navbar-item-title">Cấu hình máy</div>
+          </div>
+          <div class="navbar-item-arrow">
+            <i class="fa-solid fa-chevron-right"></i>
           </div>
         </a>
       </div>
       <div class="navbar-box">
         <div class="navbar-item">
-          <a href="">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-solid fa-user"></i>
-              </div>
-              <div class="navbar-item-title">Hồ sơ cá nhân</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </a>
-        </div>
-        <div class="navbar-item">
-          <a href="">
+          <a href="/admin/program">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
                 <i class="fa-solid fa-display"></i>
@@ -78,26 +75,14 @@
             </div>
           </a>
         </div>
+
         <div class="navbar-item">
-          <a href="">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-solid fa-display"></i>
-              </div>
-              <div class="navbar-item-title">Cấu hình máy</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </a>
-        </div>
-        <div class="navbar-item">
-          <a href="">
+          <a href="/admin/room">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
                 <i class="fa-solid fa-user-gear"></i>
               </div>
-              <div class="navbar-item-title">Tài khoản</div>
+              <div class="navbar-item-title">Phòng thực hành</div>
             </div>
             <div class="navbar-item-arrow">
               <i class="fa-solid fa-chevron-right"></i>
@@ -105,12 +90,12 @@
           </a>
         </div>
         <div class="navbar-item">
-          <a href="">
+          <a href="/admin/account">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
                 <i class="fa-solid fa-users"></i>
               </div>
-              <div class="navbar-item-title">Cán bộ</div>
+              <div class="navbar-item-title">Tài khoản quản trị</div>
             </div>
             <div class="navbar-item-arrow">
               <i class="fa-solid fa-chevron-right"></i>
@@ -118,44 +103,82 @@
           </a>
         </div>
         <div class="navbar-item">
-          <a href="">
+          <a href="/admin/report">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
                 <i class="fa-solid fa-chalkboard-user"></i>
               </div>
-              <div class="navbar-item-title">Giảng viên</div>
+              <div class="navbar-item-title">Báo cáo tình trạng</div>
             </div>
             <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
+              <i class="fa-solid fa-circle-check"></i>
             </div>
+            {% if has_unread_reports %}
+            <span
+              class="notification-dot"
+              aria-label="Báo cáo mới chưa xem"
+            ></span>
+            {% endif %}
           </a>
         </div>
         <div class="navbar-item">
-          <a href="">
+          <a href="/admin/accept">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
-                <i class="fa-solid fa-file-lines"></i>
+                <i class="fa-solid fa-chalkboard-user"></i>
               </div>
               <div class="navbar-item-title">Duyệt yêu cầu</div>
             </div>
             <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
+              <i class="fa-solid fa-circle-check"></i>
             </div>
+            {% if has_unread_requests %}
+            <span
+              class="notification-dot"
+              aria-label="Yêu cầu mới chưa xem"
+            ></span>
+            {% endif %}
           </a>
         </div>
         <div class="navbar-item">
-          <a href="">
+          <a href="/admin/calendar">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
-                <i class="fa-regular fa-calendar-days"></i>
+                <i class="fa-solid fa-file-lines"></i>
               </div>
-              <div class="navbar-item-title">Lịch thực hành</div>
+              <div class="navbar-item-title">Xếp lịch thực hành</div>
             </div>
             <div class="navbar-item-arrow">
               <i class="fa-solid fa-chevron-right"></i>
             </div>
           </a>
         </div>
+        <div class="navbar-item">
+          <a href="/admin/staff">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-regular fa-calendar-days"></i>
+              </div>
+              <div class="navbar-item-title">Xếp lịch cán bộ</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="navbar-item">
+        <a href="admin/profile">
+          <div class="navbar-item-name">
+            <div class="navbar-item-icon">
+              <i class="fa-solid fa-user"></i>
+            </div>
+            <div class="navbar-item-title">Hồ sơ cá nhân</div>
+          </div>
+          <div class="navbar-item-arrow">
+            <i class="fa-solid fa-chevron-right"></i>
+          </div>
+        </a>
       </div>
       <div class="navbar-logout">
         <a href="/logout">
@@ -169,7 +192,7 @@
 
     <!-- body -->
 
-    <div class="config-container container-web">
+    <div class="config-container container-web" id="room-page" data-success="{{ success or '' }}" data-error="{{ error or '' }}">
       <div class="direction">
         <a href="/admin">Trang chủ</a>
         <i class="fa-solid fa-angle-right"></i>
@@ -285,14 +308,14 @@
               <td>Phòng {{ room[1] }}</td>
               <td>{{ room[2] }}</td>
 
-              {% if room[4] == -1 %}
-              <td>Ngừng hoạt động</td>
-              {% elif room[4] == 1 %}
-              <td>Đang hoạt động</td>
-              {% elif room[4] == 0 %}
-              <td>Bảo trì</td>
+              {% if room[3] == -1 %}
+              <td><span class="status-badge status-danger">Ngừng hoạt động</span></td>
+              {% elif room[3] == 1 %}
+              <td><span class="status-badge status-success">Đang hoạt động</span></td>
+              {% elif room[3] == 0 %}
+              <td><span class="status-badge status-warning">Bảo trì</span></td>
               {% else %}
-              <td>Chưa xác định</td>
+              <td><span class="status-badge status-muted">Chưa xác định</span></td>
               {% endif %}
 
               <td>
@@ -307,6 +330,7 @@
                   type="button"
                   class="delete-detail-act"
                   data-id="{{ room[0] }}"
+                  data-room-name="{{ room[1] }}"
                 >
                   <i class="fa-solid fa-trash-can"></i>
                   Xóa
@@ -315,7 +339,7 @@
             </tr>
             {% endfor %} {% else %}
             <tr>
-              <td colspan="8" class="empty-room-message">
+              <td colspan="7" class="empty-room-message">
                 <i class="fa-solid fa-door-open"></i>
                 Không tìm thấy phòng thực hành nào.
               </td>
@@ -336,21 +360,21 @@
         <div class="pagination">
           <div class="room-previous-page">
             {% if (page - 1) > 0 %}
-            <a href="/admin/room?page={{ page - 1 }}&keyword={{ keyword }}"
+            <a aria-label="Trang trước" href="/admin/room?page={{ page - 1 }}&keyword={{ keyword }}"
               ><i class="fa-solid fa-chevron-left"></i
             ></a>
             {% else %}
-            <span><i class="fa-solid fa-chevron-left"></i></span>
+            <span role="link" aria-disabled="true" aria-label="Trang trước"><i class="fa-solid fa-chevron-left"></i></span>
             {% endif %}
           </div>
           <div class="room-number-page">{{ page }}</div>
-          {% if amount > (page * per_page) %}
           <div class="room-next-page">
-            <a href="/admin/room?page={{ page + 1 }}&keyword={{ keyword }}"
+          {% if amount > (page * per_page) %}
+            <a aria-label="Trang sau" href="/admin/room?page={{ page + 1 }}&keyword={{ keyword }}"
               ><i class="fa-solid fa-chevron-right"></i
             ></a>
             {% else %}
-            <span><i class="fa-solid fa-chevron-right"></i></span>
+            <span role="link" aria-disabled="true" aria-label="Trang sau"><i class="fa-solid fa-chevron-right"></i></span>
             {% endif %}
           </div>
         </div>
@@ -375,7 +399,6 @@
         <div class="popup-success-message" id="popup-success-message">
           {{ success }}
         </div>
-        <div id="room-page" data-success="{{ success or '' }}"></div>
       </div>
     </div>
 
@@ -385,7 +408,9 @@
           <i class="fa-solid fa-triangle-exclamation"></i>
         </div>
 
-        <h3>Xác nhận xóa phòng thực hành này</h3>
+        <h3>Xác nhận xóa phòng <span id="delete-room-name"></span></h3>
+        <p>Toàn bộ máy tính trong phòng cũng sẽ bị xóa.</p>
+        <p>Phòng có báo cáo hoặc lịch thực hành liên quan cần được xử lý trước khi xóa.</p>
 
         <div class="popup-actions">
           <button type="button" id="delete-room-cancel">Hủy</button>
@@ -396,7 +421,8 @@
         </div>
       </div>
     </div>
-    <script src="/static/js/admin/room.js"></script>
+    <script src="/static/js/admin/room.js?v=2a36720160"></script>
     <script src="/static/js/auth/navbar.js"></script>
+    <script src="/static/js/auth/ui.js"></script>
   </body>
 </html>

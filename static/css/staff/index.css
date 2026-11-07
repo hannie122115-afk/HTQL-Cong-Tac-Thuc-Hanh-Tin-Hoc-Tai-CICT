@@ -1,0 +1,4 @@
+/* staff/index.css */
+.grid-dashboard { max-width: 1080px; }
+.grid-dashboard > a:nth-child(2n) .dashboard-item-icon { color: #059669; background: #ecfdf5; }
+.dashboard-item-title { line-height: 1.5; }

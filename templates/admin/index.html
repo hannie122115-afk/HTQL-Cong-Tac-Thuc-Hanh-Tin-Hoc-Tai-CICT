@@ -3,32 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Trang chủ | Quản trị viên</title>
-
-    <link rel="stylesheet" href="/static/css/Nhap.css" />
+    <link rel="stylesheet" href="/static/css/shared/base.css" />
+    <title>Quản trị viên</title>
+    <link rel="stylesheet" href="/static/css/auth/header.css" />
+    <link rel="stylesheet" href="/static/css/auth/navbar.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
+    <link rel="stylesheet" href="/static/css/auth/popup.css" />
+    <link rel="stylesheet" href="/static/css/admin/index.css" />
+    <link rel="stylesheet" href="/static/css/shared/ui.css" />
   </head>
   <body>
     <header>
       <div class="header-left">
-        <div class="header-left-logo">
-          <div class="header-left-icon">
-            <i class="fa-solid fa-graduation-cap"></i>
-          </div>
-          <div class="header-left-title">Edu-LIMS</div>
-        </div>
+        {% include "partials/header-brand.html" %}
         <div class="header-left-describe">
           Hệ thống công tác thực hành tin học
         </div>
       </div>
 
       <div class="header-right">
-        <div class="header-label">
-          <i class="fa-solid fa-bell"></i>
-        </div>
         <div class="header-user" id="headerUser">
           <div class="header-avt">
             <img src="{{avt}}" alt="" />
@@ -48,7 +44,20 @@
           </div>
           <div class="navbar-user-name">
             <p>{{ user[1] }}</p>
-            <p>Quản trị viên</p>
+            <p>{% include "partials/role-label.html" %}</p>
+          </div>
+        </a>
+      </div>
+      <div class="navbar-item">
+        <a href="/admin/config">
+          <div class="navbar-item-name">
+            <div class="navbar-item-icon">
+              <i class="fa-solid fa-display"></i>
+            </div>
+            <div class="navbar-item-title">Cấu hình máy</div>
+          </div>
+          <div class="navbar-item-arrow">
+            <i class="fa-solid fa-chevron-right"></i>
           </div>
         </a>
       </div>
@@ -66,21 +75,9 @@
             </div>
           </a>
         </div>
+
         <div class="navbar-item">
-          <a href="/admin/config">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-solid fa-display"></i>
-              </div>
-              <div class="navbar-item-title">Cấu hình máy</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </a>
-        </div>
-        <div class="navbar-item">
-          <a href="">
+          <a href="/admin/room">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
                 <i class="fa-solid fa-user-gear"></i>
@@ -91,7 +88,6 @@
               <i class="fa-solid fa-chevron-right"></i>
             </div>
           </a>
-        </div>
         </div>
         <div class="navbar-item">
           <a href="/admin/account">
@@ -118,7 +114,10 @@
               <i class="fa-solid fa-circle-check"></i>
             </div>
             {% if has_unread_reports %}
-            <span class="notification-dot" aria-label="Báo cáo mới chưa xem"></span>
+            <span
+              class="notification-dot"
+              aria-label="Báo cáo mới chưa xem"
+            ></span>
             {% endif %}
           </a>
         </div>
@@ -134,7 +133,10 @@
               <i class="fa-solid fa-circle-check"></i>
             </div>
             {% if has_unread_requests %}
-            <span class="notification-dot" aria-label="Yêu cầu mới chưa xem"></span>
+            <span
+              class="notification-dot"
+              aria-label="Yêu cầu mới chưa xem"
+            ></span>
             {% endif %}
           </a>
         </div>
@@ -166,7 +168,7 @@
         </div>
       </div>
       <div class="navbar-item">
-        <a href="">
+        <a href="admin/profile">
           <div class="navbar-item-name">
             <div class="navbar-item-icon">
               <i class="fa-solid fa-user"></i>
@@ -251,7 +253,14 @@
         </div>
         <div class="dashboard-item-title">Hồ sơ cá nhân</div>
       </a>
+      <a href="/logout">
+        <div class="dashboard-item-icon">
+          <i class="fa-solid fa-chalkboard-user"></i>
+        </div>
+        <div class="dashboard-item-title">Đăng xuất</div>
+      </a>
     </div>
     <script src="/static/js/auth/navbar.js"></script>
+    <script src="/static/js/auth/ui.js"></script>
   </body>
 </html>

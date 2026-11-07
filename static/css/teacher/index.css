@@ -1,0 +1,4 @@
+/* teacher/index.css */
+.grid-dashboard { max-width: 960px; }
+.grid-dashboard > a:nth-child(2n) .dashboard-item-icon { color: #7c3aed; background: #f5f3ff; }
+.dashboard-item-title { line-height: 1.5; }

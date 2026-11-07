@@ -1,0 +1,6 @@
+/* admin/room-detail.css */
+@import url("../shared/detail.css");
+.computer-room-table table { min-width: 680px; }
+.room-add-computer form { display: flex; align-items: end; flex-wrap: wrap; gap: 14px; }
+.room-add-computer input, .room-add-computer select { flex: 1; }
+.room-detail-update-computer form > label { display: block; color: var(--muted); }

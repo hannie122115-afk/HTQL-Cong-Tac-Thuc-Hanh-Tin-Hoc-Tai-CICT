@@ -127,7 +127,7 @@ function renderWeek() {
   }
 
   const week = weeks[currentWeekIndex];
-  weekName.textContent = week.name;
+  weekName.textContent = `Tuần ${week.name}`;
   weekSpace.textContent = `${formatDate(parseDate(week.start))} - ${formatDate(
     parseDate(week.end),
   )}`;

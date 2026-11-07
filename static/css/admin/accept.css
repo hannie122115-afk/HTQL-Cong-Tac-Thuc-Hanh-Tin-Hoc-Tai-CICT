@@ -1,0 +1,7 @@
+/* admin/accept.css */
+.accept-table table { min-width: 900px; }
+.request-row.is-unread td:first-child { border-left: 3px solid var(--primary); }
+.request-new-badge { margin-left: 6px; font-size: 10px; }
+#popup-refuse-required > form { max-width: 520px; }
+#refuse-required-confirm { background: var(--danger); color: #fff; }
+.btn-box .accept-detail-btn { background: #16a34a; }

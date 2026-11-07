@@ -2,7 +2,7 @@ const headerUser = document.getElementById("headerUser");
 const navbarContainer = document.getElementById("navbarContainer");
 const navbarArrow = document.querySelector(".navbar-arrow i");
 
-headerUser.addEventListener("click", function (event) {
+headerUser?.addEventListener("click", function (event) {
   event.stopPropagation();
   navbarContainer.classList.toggle("show");
 

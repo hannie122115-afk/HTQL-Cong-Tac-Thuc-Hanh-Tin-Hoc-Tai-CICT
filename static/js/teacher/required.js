@@ -186,6 +186,8 @@ function setupWeekAutocomplete(input, idInput, suggestionBox, dateSpan) {
     const keyword = this.value.trim();
     idInput.value = "";
     dateSpan.textContent = "";
+    dateSpan.classList.remove("field-error");
+    input.removeAttribute("aria-invalid");
 
     clearTimeout(searchTimeout);
     suggestionBox.replaceChildren();
@@ -220,8 +222,13 @@ function setupWeekAutocomplete(input, idInput, suggestionBox, dateSpan) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             if (startDate >= today) {
+              dateSpan.classList.remove("field-error");
+              input.removeAttribute("aria-invalid");
               dateSpan.textContent = `Từ ngày ${week.NgayBatDau} đến ngày ${week.NgayKetThuc}.`;
             } else {
+              dateSpan.classList.add("field-error");
+              dateSpan.setAttribute("role", "alert");
+              input.setAttribute("aria-invalid", "true");
               dateSpan.textContent =
                 "Không cho phép yêu cầu từ tuần ở quá khứ!";
             }
@@ -453,8 +460,11 @@ document.querySelectorAll(".see-detail-act").forEach(function (button) {
       2: '<i class="fa-solid fa-circle-check"></i> Đã duyệt',
       3: '<i class="fa-regular fa-circle-xmark"></i> Bị từ chối',
     };
-    document.getElementById("detail-status").innerHTML =
-      statuses[data.status] || "";
+    const detailStatus = document.getElementById("detail-status");
+    detailStatus.innerHTML = statuses[data.status] || "";
+    detailStatus.className = `required-detail-status status-${
+      { 0: "warning", 1: "info", 2: "success", 3: "danger" }[data.status] || "muted"
+    }`;
 
     const weekDayBox = document.getElementById("detail-week-day-box");
     const weekStartBox = document.getElementById("detail-week-start-box");

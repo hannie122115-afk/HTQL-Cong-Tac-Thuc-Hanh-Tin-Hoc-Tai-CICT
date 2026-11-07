@@ -1,0 +1,5 @@
+/* teacher/calendar.css */
+@import url("../shared/calendar.css");
+#calendar-page .scheduled-item { cursor: default; }
+#calendar-page .calendar-info { padding: 12px 16px; border-radius: 8px; background: var(--primary-soft); color: #1e40af; }
+#calendar-page .calendar-empty { height: 120px; vertical-align: middle; }

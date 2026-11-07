@@ -3,34 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cán bộ</title>
-    <link rel="stylesheet" href="/static/css/Nhap.css" />
+    <link rel="stylesheet" href="/static/css/shared/base.css" />
+    <title>Cán Bộ</title>
+    <link rel="stylesheet" href="/static/css/auth/header.css" />
+    <link rel="stylesheet" href="/static/css/auth/navbar.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
+    <link rel="stylesheet" href="/static/css/auth/popup.css" />
+    <link rel="stylesheet" href="/static/css/staff/room.css" />
+    <link rel="stylesheet" href="/static/css/shared/ui.css" />
   </head>
   <body>
     <header>
       <div class="header-left">
-        <div class="header-left-logo">
-          <div class="header-left-icon">
-            <i class="fa-solid fa-graduation-cap"></i>
-          </div>
-          <div class="header-left-title">Edu-LIMS</div>
-        </div>
+        {% include "partials/header-brand.html" %}
         <div class="header-left-describe">
           Hệ thống công tác thực hành tin học
         </div>
       </div>
 
       <div class="header-right">
-        <div class="header-label">
-          <i class="fa-solid fa-bell"></i>
-        </div>
         <div class="header-user" id="headerUser">
           <div class="header-avt">
-            <img src="{{avt}}" alt="" />
+            <img src="{{ user[7] }}" alt="Ảnh đại diện" />
           </div>
           <div class="navbar-arrow">
             <i class="fa-solid fa-caret-down"></i>
@@ -41,115 +38,69 @@
     <!-- navbar -->
     <div class="navbar-container" id="navbarContainer">
       <div class="navbar-user-container">
-        <a href="">
+        <a href="/staff/calendar">
           <div class="navbar-user-avt">
-            <img src="{{avt}}" alt="" />
+            <img src="{{ user[7] }}" alt="Ảnh đại diện" />
           </div>
           <div class="navbar-user-name">
             <p>{{ user[1] }}</p>
-            <p>Quản trị viên</p>
+            <p>{% include "partials/role-label.html" %}</p>
           </div>
         </a>
       </div>
       <div class="navbar-box">
         <div class="navbar-item">
-          <a href="">
+          <a href="/staff/calendar">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user-gear"></i>
+              </div>
+              <div class="navbar-item-title">Lịch thực hành của tôi</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+            {% if has_unread_schedule %}
+            <span class="notification-dot" aria-label="Lịch vừa được cập nhật"></span>
+            {% endif %}
+          </a>
+        </div>
+
+        <div class="navbar-item">
+          <a href="/staff/room">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Phòng thực hành</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+
+        <div class="navbar-item">
+          <a href="staff/report">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Xem báo cáo</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+
+        <div class="navbar-item">
+          <a href="staff/profile">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
                 <i class="fa-solid fa-user"></i>
               </div>
               <div class="navbar-item-title">Hồ sơ cá nhân</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </a>
-        </div>
-        <div class="navbar-item">
-          <a href="">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-solid fa-display"></i>
-              </div>
-              <div class="navbar-item-title">Phần mềm</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-download"></i>
-            </div>
-          </a>
-        </div>
-        <div class="navbar-item">
-          <a href="">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-solid fa-display"></i>
-              </div>
-              <div class="navbar-item-title">Cấu hình máy</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </a>
-        </div>
-        <div class="navbar-item">
-          <a href="">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-solid fa-user-gear"></i>
-              </div>
-              <div class="navbar-item-title">Tài khoản</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </a>
-        </div>
-        <div class="navbar-item">
-          <a href="">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-solid fa-users"></i>
-              </div>
-              <div class="navbar-item-title">Cán bộ</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </a>
-        </div>
-        <div class="navbar-item">
-          <a href="">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-solid fa-chalkboard-user"></i>
-              </div>
-              <div class="navbar-item-title">Giảng viên</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </a>
-        </div>
-        <div class="navbar-item">
-          <a href="">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-solid fa-file-lines"></i>
-              </div>
-              <div class="navbar-item-title">Duyệt yêu cầu</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </a>
-        </div>
-        <div class="navbar-item">
-          <a href="">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-regular fa-calendar-days"></i>
-              </div>
-              <div class="navbar-item-title">Lịch thực hành</div>
             </div>
             <div class="navbar-item-arrow">
               <i class="fa-solid fa-chevron-right"></i>
@@ -197,7 +148,7 @@
               <th>Tên phòng</th>
               <th>Số lượng máy</th>
               <th>Tình trạng phòng</th>
-              <th>Thao tác</th>
+              <th colspan="2">Thao tác</th>
             </tr>
           </thead>
 
@@ -210,13 +161,13 @@
               <td>{{ room[2] }}</td>
 
               {% if room[3] == -1 %}
-              <td>Ngừng hoạt động</td>
+              <td><span class="status-badge status-danger">Ngừng hoạt động</span></td>
               {% elif room[3] == 1 %}
-              <td>Đang hoạt động</td>
+              <td><span class="status-badge status-success">Đang hoạt động</span></td>
               {% elif room[3] == 0 %}
-              <td>Bảo trì</td>
+              <td><span class="status-badge status-warning">Bảo trì</span></td>
               {% else %}
-              <td>Chưa xác định</td>
+              <td><span class="status-badge status-muted">Chưa xác định</span></td>
               {% endif %}
 
               <td>
@@ -227,20 +178,22 @@
                   <i class="fa-solid fa-eye"></i>
                   Xem chi tiết
                 </a>
+              </td>
+              <td>
                 <button
                   type="button"
                   class="report-room-act"
                   data-room-id="{{ room[0] }}"
                   data-room-name="{{ room[1] }}"
                 >
-                  <i class="fa-solid fa-eye"></i>
+                  <i class="fa-solid fa-triangle-exclamation"></i>
                   Báo cáo tình trạng
                 </button>
               </td>
             </tr>
             {% endfor %} {% else %}
             <tr>
-              <td colspan="6" class="empty-room-message">
+              <td colspan="7" class="empty-room-message">
                 <i class="fa-solid fa-door-open"></i>
                 {% if selected_week %} Bạn chưa được phân công phòng thực hành
                 trong tuần này. {% else %} Hiện chưa có tuần học để hiển thị
@@ -361,5 +314,6 @@
     {% endif %}
     <script src="/static/js/staff/room.js"></script>
     <script src="/static/js/auth/navbar.js"></script>
+    <script src="/static/js/auth/ui.js"></script>
   </body>
 </html>

@@ -3,31 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Giảng viên | Yêu cầu xếp lịch</title>
-    <link rel="stylesheet" href="/static/css/Nhap.css" />
+    <link rel="stylesheet" href="/static/css/shared/base.css" />
+    <title>Giảng viên</title>
+    <link rel="stylesheet" href="/static/css/auth/header.css" />
+    <link rel="stylesheet" href="/static/css/auth/navbar.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
+    <link rel="stylesheet" href="/static/css/auth/popup.css" />
+    <link rel="stylesheet" href="/static/css/teacher/required.css" />
+    <link rel="stylesheet" href="/static/css/shared/ui.css" />
+    <link rel="stylesheet" href="/static/css/shared/date-picker.css" />
   </head>
   <body>
     <header>
       <div class="header-left">
-        <div class="header-left-logo">
-          <div class="header-left-icon">
-            <i class="fa-solid fa-graduation-cap"></i>
-          </div>
-          <div class="header-left-title">Edu-LIMS</div>
-        </div>
+        {% include "partials/header-brand.html" %}
         <div class="header-left-describe">
           Hệ thống công tác thực hành tin học
         </div>
       </div>
 
       <div class="header-right">
-        <div class="header-label">
-          <i class="fa-solid fa-bell"></i>
-        </div>
         <div class="header-user" id="headerUser">
           <div class="header-avt">
             <img src="{{ user[7] }}" alt="Ảnh đại diện" />
@@ -47,13 +45,13 @@
           </div>
           <div class="navbar-user-name">
             <p>{{ user[1] }}</p>
-            <p>{{ user[8] }}</p>
+            <p>{% include "partials/role-label.html" %}</p>
           </div>
         </a>
       </div>
       <div class="navbar-box">
         <div class="navbar-item">
-          <a href="">
+          <a href="/teacher/calendar">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
                 <i class="fa-solid fa-user-gear"></i>
@@ -63,11 +61,17 @@
             <div class="navbar-item-arrow">
               <i class="fa-solid fa-chevron-right"></i>
             </div>
+            {% if has_unread_schedule %}
+            <span
+              class="notification-dot"
+              aria-label="Lịch vừa được cập nhật"
+            ></span>
+            {% endif %}
           </a>
         </div>
 
         <div class="navbar-item">
-          <a href="">
+          <a href="/teacher/required">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
                 <i class="fa-solid fa-display"></i>
@@ -81,7 +85,7 @@
         </div>
 
         <div class="navbar-item">
-          <a href="">
+          <a href="/teacher/profile">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
                 <i class="fa-solid fa-user"></i>
@@ -93,58 +97,6 @@
             </div>
           </a>
         </div>
-        <!-- <div class="navbar-item">
-          <a href="">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-solid fa-users"></i>
-              </div>
-              <div class="navbar-item-title">Cán bộ</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </a>
-        </div>
-        <div class="navbar-item">
-          <a href="">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-solid fa-chalkboard-user"></i>
-              </div>
-              <div class="navbar-item-title">Giảng viên</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </a>
-        </div>
-        <div class="navbar-item">
-          <a href="">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-solid fa-file-lines"></i>
-              </div>
-              <div class="navbar-item-title">Duyệt yêu cầu</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </a>
-        </div>
-        <div class="navbar-item">
-          <a href="">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-regular fa-calendar-days"></i>
-              </div>
-              <div class="navbar-item-title">Lịch thực hành</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </a>
-        </div> -->
       </div>
       <div class="navbar-logout">
         <a href="/logout">
@@ -472,8 +424,7 @@
               <td>{{ start_index + loop.index }}</td>
               <td>YC{{ re.MaYeuCau }}</td>
               <td>
-                {{ re.TenHocPhan }}
-                {% if re.NhomHocPhan %}
+                {{ re.TenHocPhan }} {% if re.NhomHocPhan %}
                 <br /><small>Nhóm: {{ re.NhomHocPhan }}</small>
                 {% endif %}
               </td>
@@ -549,7 +500,7 @@
           </tbody>
           {% else %}
           <tbody>
-            <td colspan="9" class="empty-required-message">
+            <td colspan="10" class="empty-required-message">
               <i class="fa-solid fa-door-open"></i>
               Không tìm thấy yêu cầu nào.
             </td>
@@ -650,11 +601,11 @@
             </div>
           </div>
 
-          <div class="close-detail-btn" id="close-detail-btn">Đóng</div>
+          <button type="button" class="close-detail-btn" id="close-detail-btn">Đóng</button>
         </div>
       </div>
 
-      <!-- required-page --> 
+      <!-- required-page -->
       <div class="required-page">
         {% set page_number = (page - 1) * per_page %}
         <span
@@ -665,21 +616,21 @@
         <div class="pagination">
           <div class="required-previous-page">
             {% if (page - 1) > 0 %}
-            <a href="/admin/required?page={{ page - 1 }}&keyword={{ keyword }}"
+            <a aria-label="Trang trước" href="/admin/required?page={{ page - 1 }}&keyword={{ keyword }}"
               ><i class="fa-solid fa-chevron-left"></i
             ></a>
             {% else %}
-            <span><i class="fa-solid fa-chevron-left"></i></span>
+            <span role="link" aria-disabled="true" aria-label="Trang trước"><i class="fa-solid fa-chevron-left"></i></span>
             {% endif %}
           </div>
           <div class="required-number-page">{{ page }}</div>
-          {% if amount > (page * per_page) %}
           <div class="required-next-page">
-            <a href="/admin/required?page={{ page + 1 }}&keyword={{ keyword }}"
+          {% if amount > (page * per_page) %}
+            <a aria-label="Trang sau" href="/admin/required?page={{ page + 1 }}&keyword={{ keyword }}"
               ><i class="fa-solid fa-chevron-right"></i
             ></a>
             {% else %}
-            <span><i class="fa-solid fa-chevron-right"></i></span>
+            <span role="link" aria-disabled="true" aria-label="Trang sau"><i class="fa-solid fa-chevron-right"></i></span>
             {% endif %}
           </div>
         </div>
@@ -739,5 +690,7 @@
 
     <script src="/static/js/teacher/required.js"></script>
     <script src="/static/js/auth/navbar.js"></script>
+    <script src="/static/js/auth/ui.js"></script>
+    <script src="/static/js/auth/date-picker.js"></script>
   </body>
 </html>

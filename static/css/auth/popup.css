@@ -1,0 +1,70 @@
+/* Popup thông báo, xác nhận, biểu mẫu và báo cáo dùng chung. */
+:is(.popup-error, .popup-success, .popup-confirm, .popup-confirm-error, .popup-success-account,
+    .account-add-container, .config-add-container, .program-add-container, .room-add-container,
+    .required-detail-container, .room-detail-update-computer, .computer-report) {
+  display: none; position: fixed; inset: 0; z-index: 2000;
+  align-items: center; justify-content: center; padding: 24px;
+  overflow-y: auto; background: transparent; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+}
+:is(.popup-error, .popup-success, .popup-confirm, .popup-confirm-error, .popup-success-account,
+    .account-add-container, .config-add-container, .program-add-container, .room-add-container,
+    .required-detail-container, .room-detail-update-computer, .computer-report).show { display: flex; }
+/* Thông báo và xác nhận luôn nằm trên biểu mẫu đang mở. */
+:is(.popup-error, .popup-success, .popup-confirm, .popup-confirm-error, .popup-success-account) { z-index: 2200; }
+:is(.popup, .account-popup-content, .popup-delete-account-content, .popup-delete-config-content,
+    .popup-delete-room-content, .popup-delete-program-content, .required-detail-info-container,
+    .computer-report-panel),
+:is(.config-add-container, .program-add-container, .room-add-container, .room-detail-update-computer) > form,
+.popup-confirm > form {
+  width: 100%; max-width: 560px; max-height: calc(100dvh - 48px); overflow-y: auto;
+  margin: auto; padding: 28px; border: 1px solid #e2e8f0; border-radius: 18px;
+  background: #fff; color: #1e293b; box-shadow: 0 24px 70px rgb(15 23 42 / 22%);
+  animation: popup-appear .16s ease-out;
+}
+.popup { max-width: 440px; text-align: center; }
+.popup-confirm > .popup-message { max-width: 440px; padding: 28px; border-radius: 18px; background: #fff; }
+.popup-icon { display: grid; place-items: center; width: 58px; height: 58px; margin: 0 auto 18px; border-radius: 50%; background: #eff6ff; color: #2563eb; font-size: 26px; }
+.popup-error .popup-icon, .popup-confirm-error .popup-icon { background: #fef2f2; color: #dc2626; }
+.popup-success .popup-icon, .popup-success-account .popup-icon { background: #f0fdf4; color: #16a34a; }
+.popup-confirm .popup-icon { background: #fffbeb; color: #d97706; }
+[class^="popup-"][class$="-message"], .popup-message { margin-bottom: 20px; line-height: 1.7; overflow-wrap: anywhere; }
+.popup > button { margin-top: 18px; }
+.popup h3, .account-popup-content h3, .computer-report-title, .room-detail-update-computer h3 { margin: 0 0 22px; color: #0f172a; font-size: 20px; font-weight: 700; }
+.popup-actions, .computer-report-actions, .btn-box, [class^="add-"][class$="-btn"] {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px;
+  margin-top: 24px; padding-top: 18px; border-top: 1px solid #e2e8f0;
+}
+.popup-actions form { margin: 0; }
+.popup > div:last-child:has(> button) { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 18px; }
+.popup-actions button, .popup button { white-space: normal; }
+:is(.account-add-item, .config-add-item, .program-add-item, .room-add-item, .computer-report-item) { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 18px; }
+:is(.account-add-title, .config-add-title, .program-add-title, .room-add-title, .computer-report-item-title) { display: block; flex-basis: 100%; color: #475569; font-weight: 600; }
+:is(.account-add-item, .config-add-item, .program-add-item, .room-add-item) > :is(input:not([type="radio"]):not([type="checkbox"]), select) { width: 100%; }
+.computer-report-item-value { width: 100%; overflow-wrap: anywhere; }
+.computer-report-item-value > :is(textarea, select) { width: 100%; }
+.reason-input-refuse { display: grid; gap: 8px; margin-top: 16px; text-align: left; }
+.required-detail-info-container { max-width: 680px; }
+.required-detail-info-item, .required-detail-send-item { display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+.required-detail-info-title, .required-detail-send-title { flex: 0 0 150px; color: #64748b; }
+.required-detail-info-describe, .required-detail-send-describe { min-width: 0; text-align: right; font-weight: 500; overflow-wrap: anywhere; }
+.required-detail-note-container, .required-detail-send-container { margin-top: 18px; }
+.required-detail-note-title { margin-bottom: 8px; color: #64748b; }
+.required-detail-note-describe { padding: 12px; border-radius: 8px; background: #f8fafc; white-space: pre-wrap; overflow-wrap: anywhere; }
+.required-detail-status { margin-bottom: 16px; }
+.delete-program-warning { padding: 12px; background: #fffbeb; color: #92400e; border-radius: 8px; }
+.delete-program-table-wrapper { max-height: 240px; margin: 16px 0; overflow: auto; }
+.room-detail-update-computer > form { max-width: 440px; }
+.room-detail-update-computer select { display: block; width: 100%; margin-top: 10px; }
+@keyframes popup-appear { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 600px) {
+  :is(.popup-error, .popup-success, .popup-confirm, .popup-confirm-error, .popup-success-account,
+      .account-add-container, .config-add-container, .program-add-container, .room-add-container,
+      .required-detail-container, .room-detail-update-computer, .computer-report) { padding: 12px; }
+  :is(.popup, .account-popup-content, .popup-delete-account-content, .popup-delete-config-content,
+      .popup-delete-room-content, .popup-delete-program-content, .required-detail-info-container, .computer-report-panel),
+  :is(.config-add-container, .program-add-container, .room-add-container, .room-detail-update-computer) > form,
+  .popup-confirm > form { padding: 20px; max-height: calc(100dvh - 24px); }
+  .required-detail-info-item, .required-detail-send-item { flex-direction: column; gap: 4px; }
+  .required-detail-info-title, .required-detail-send-title { flex-basis: auto; }
+  .required-detail-info-describe, .required-detail-send-describe { text-align: left; }
+}

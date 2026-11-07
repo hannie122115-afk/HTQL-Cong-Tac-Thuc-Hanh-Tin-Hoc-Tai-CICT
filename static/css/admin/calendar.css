@@ -1,0 +1,7 @@
+/* admin/calendar.css */
+@import url("../shared/calendar.css");
+#accept-page { width: min(1680px, calc(100% - 48px)); }
+#accept-page .calendar-table table { min-width: 1050px; }
+#schedule-scope-all { background: var(--primary); color: #fff; }
+#schedule-scope-current { background: #eff6ff; color: #1d4ed8; }
+@media (max-width: 768px) { #accept-page { width: calc(100% - 24px); } }

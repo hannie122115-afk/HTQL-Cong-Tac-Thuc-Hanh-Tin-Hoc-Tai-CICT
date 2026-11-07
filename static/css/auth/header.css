@@ -1,0 +1,201 @@
+/* Header dùng chung cho các trang Edu-LIMS. */
+body {
+  margin: 0;
+}
+
+body > header,
+body > header * {
+  box-sizing: border-box;
+}
+
+body > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 70px;
+  padding: 12px 32px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fff;
+  color: #1e293b;
+  box-shadow: 0 2px 10px rgb(15 23 42 / 5%);
+  font-family: "Segoe UI", Arial, sans-serif;
+  line-height: 1.4;
+}
+
+header .header-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-width: 0;
+}
+
+header .header-left-logo {
+  text-decoration: none;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+header .header-left-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  color: #fff;
+  font-size: 23px;
+}
+
+header .header-left-title {
+  color: #1e40af;
+  font-size: 24px;
+  font-weight: 750;
+  letter-spacing: -0.6px;
+  white-space: nowrap;
+}
+
+header .header-left-describe {
+  min-width: 0;
+  padding-left: 24px;
+  border-left: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+header .header-right {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 20px;
+}
+
+header .header-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: #64748b;
+  font-size: 19px;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+header .header-label:hover {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+header .header-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 6px 3px 3px;
+  border-radius: 24px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+
+header .header-user:hover {
+  background: #f1f5f9;
+}
+
+header .header-user:focus-visible,
+header .header-label:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
+}
+
+header .header-avt {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  overflow: hidden;
+  border: 2px solid #dbeafe;
+  border-radius: 50%;
+  background: #eff6ff;
+}
+
+header .header-avt img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+header .navbar-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  body > header {
+    gap: 16px;
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  header .header-left {
+    gap: 16px;
+  }
+
+  header .header-left-describe {
+    padding-left: 16px;
+    font-size: 12px;
+  }
+
+  header .header-right {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  body > header {
+    gap: 10px;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  header .header-left-describe {
+    display: none;
+  }
+
+  header .header-left-logo {
+    gap: 8px;
+  }
+
+  header .header-left-title {
+    font-size: 20px;
+  }
+
+  header .header-left-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    font-size: 20px;
+  }
+
+  header .header-right {
+    gap: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  header .header-label,
+  header .header-user {
+    transition: none;
+  }
+}

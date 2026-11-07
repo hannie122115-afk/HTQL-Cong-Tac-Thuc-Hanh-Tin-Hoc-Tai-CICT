@@ -1,0 +1,14 @@
+/* admin/config-detail.css */
+@import url("../shared/detail.css");
+.program-config-table table, .config-add-program table { min-width: 760px; }
+.config-detail-program > form { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; }
+.config-detail-search-box { flex: 1 1 320px; }
+.config-detail-save-act { margin-bottom: 18px; }
+.config-detail-info-container .room-value > span { padding: 3px 10px; border-radius: 6px; background: #eff6ff; color: #1d4ed8; }
+.config-detail-info-container form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 24px; }
+.config-detail-info-title { grid-column: 1 / -1; margin-bottom: 4px; }
+.config-detail-info { min-width: 0; }
+.config-detail-info:last-child { grid-column: span 2; }
+.config-detail-info .config-detail-item { height: 100%; }
+@media (max-width: 1000px) { .config-detail-info-container form { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .config-detail-info-container form { grid-template-columns: minmax(0, 1fr); } .config-detail-info:last-child { grid-column: auto; } }

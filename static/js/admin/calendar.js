@@ -292,7 +292,7 @@ function renderCalendarWeek() {
 
   const week = weeks[currentIndex];
 
-  weekName.textContent = week.name;
+  weekName.textContent = `Tuần ${week.name}`;
   weekSpace.textContent = `${formatDate(parseDate(week.start))} - ${formatDate(parseDate(week.end))}`;
 
   dayElements.forEach((element) => {

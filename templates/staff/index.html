@@ -3,32 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Trang chủ | Cán Bộ</title>
-
-    <link rel="stylesheet" href="/static/css/Nhap.css" />
+    <link rel="stylesheet" href="/static/css/shared/base.css" />
+    <title>Cán Bộ</title>
+    <link rel="stylesheet" href="/static/css/auth/header.css" />
+    <link rel="stylesheet" href="/static/css/auth/navbar.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
+    <link rel="stylesheet" href="/static/css/auth/popup.css" />
+    <link rel="stylesheet" href="/static/css/staff/index.css" />
+    <link rel="stylesheet" href="/static/css/shared/ui.css" />
   </head>
   <body>
     <header>
       <div class="header-left">
-        <div class="header-left-logo">
-          <div class="header-left-icon">
-            <i class="fa-solid fa-graduation-cap"></i>
-          </div>
-          <div class="header-left-title">Edu-LIMS</div>
-        </div>
+        {% include "partials/header-brand.html" %}
         <div class="header-left-describe">
           Hệ thống công tác thực hành tin học
         </div>
       </div>
 
       <div class="header-right">
-        <div class="header-label">
-          <i class="fa-solid fa-bell"></i>
-        </div>
         <div class="header-user" id="headerUser">
           <div class="header-avt">
             <img src="{{ user[7] }}" alt="Ảnh đại diện" />
@@ -48,7 +44,7 @@
           </div>
           <div class="navbar-user-name">
             <p>{{ user[1] }}</p>
-            <p>{{ user[8] }}</p>
+            <p>{% include "partials/role-label.html" %}</p>
           </div>
         </a>
       </div>
@@ -65,7 +61,10 @@
               <i class="fa-solid fa-chevron-right"></i>
             </div>
             {% if has_unread_schedule %}
-            <span class="notification-dot" aria-label="Lịch vừa được cập nhật"></span>
+            <span
+              class="notification-dot"
+              aria-label="Lịch vừa được cập nhật"
+            ></span>
             {% endif %}
           </a>
         </div>
@@ -85,7 +84,7 @@
         </div>
 
         <div class="navbar-item">
-          <a href="">
+          <a href="staff/report">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
                 <i class="fa-solid fa-display"></i>
@@ -99,7 +98,7 @@
         </div>
 
         <div class="navbar-item">
-          <a href="">
+          <a href="staff/profile">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
                 <i class="fa-solid fa-user"></i>
@@ -131,43 +130,43 @@
         </div>
         <div class="dashboard-item-title">Lịch thực hành của tôi</div>
         {% if has_unread_schedule %}
-        <span class="notification-dot" aria-label="Lịch vừa được cập nhật"></span>
+        <span
+          class="notification-dot"
+          aria-label="Lịch vừa được cập nhật"
+        ></span>
         {% endif %}
       </a>
 
-      <a href="/teacher/required">
+      <a href="/staff/room">
         <div class="dashboard-item-icon">
           <i class="fa-solid fa-user-gear"></i>
         </div>
-        <div class="dashboard-item-title">Yêu cầu xếp lịch</div>
+        <div class="dashboard-item-title">Phòng thực hành</div>
       </a>
 
-      <a href="">
+      <a href="/staff/report">
+        <div class="dashboard-item-icon">
+          <i class="fa-solid fa-user-gear"></i>
+        </div>
+        <div class="dashboard-item-title">Xem báo cáo</div>
+      </a>
+
+      <a href="/staff/profile">
         <div class="dashboard-item-icon">
           <i class="fa-solid fa-display"></i>
         </div>
         <div class="dashboard-item-title">Hồ sơ</div>
       </a>
 
-      <a href="">
+      <a href="/logout">
         <div class="dashboard-item-icon">
           <i class="fa-solid fa-chalkboard-user"></i>
         </div>
         <div class="dashboard-item-title">Đăng xuất</div>
       </a>
-      <!-- <a href="">
-        <div class="dashboard-item-icon">
-          <i class="fa-solid fa-file-lines"></i>
-        </div>
-        <div class="dashboard-item-title">Duyệt yêu cầu</div>
-      </a>
-      <a href="">
-        <div class="dashboard-item-icon">
-          <i class="fa-regular fa-calendar-days"></i>
-        </div>
-        <div class="dashboard-item-title">Lịch thực hành</div>
-      </a> -->
+      
     </div>
     <script src="/static/js/auth/navbar.js"></script>
+    <script src="/static/js/auth/ui.js"></script>
   </body>
 </html>

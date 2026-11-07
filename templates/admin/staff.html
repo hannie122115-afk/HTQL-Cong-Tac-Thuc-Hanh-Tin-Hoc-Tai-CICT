@@ -3,37 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Giảng viên | Yêu cầu xếp lịch</title>
-    <link rel="stylesheet" href="/static/css/Nhap.css" />
+    <link rel="stylesheet" href="/static/css/shared/base.css" />
+    <title>Quản trị viên</title>
+    <link rel="stylesheet" href="/static/css/auth/header.css" />
+    <link rel="stylesheet" href="/static/css/auth/navbar.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
+    <link rel="stylesheet" href="/static/css/auth/popup.css" />
+    <link rel="stylesheet" href="/static/css/admin/staff.css" />
+    <link rel="stylesheet" href="/static/css/shared/ui.css" />
   </head>
   <body>
     <header>
       <div class="header-left">
-        <div class="header-left-logo">
-          <div class="header-left-icon">
-            <i class="fa-solid fa-graduation-cap"></i>
-          </div>
-          <div class="header-left-title">Edu-LIMS</div>
-        </div>
+        {% include "partials/header-brand.html" %}
         <div class="header-left-describe">
           Hệ thống công tác thực hành tin học
         </div>
       </div>
 
       <div class="header-right">
-        <div class="header-label">
-          <i class="fa-solid fa-bell"></i>
-        </div>
         <div class="header-user" id="headerUser">
           <div class="header-avt">
-            <img src="{{ user[7] }}" alt="Ảnh đại diện" />
+            <img src="{{avt}}" alt="" />
           </div>
           <div class="navbar-arrow">
-            <i class="fa-solid fa-caret-down"></i>
+            <i class="fa-solid fa-chevron-down"></i>
           </div>
         </div>
       </div>
@@ -43,63 +40,62 @@
       <div class="navbar-user-container">
         <a href="">
           <div class="navbar-user-avt">
-            <img src="{{ user[7] }}" alt="Ảnh đại diện" />
+            <img src="{{avt}}" alt="" />
           </div>
           <div class="navbar-user-name">
             <p>{{ user[1] }}</p>
-            <p>{{ user[8] }}</p>
+            <p>{% include "partials/role-label.html" %}</p>
+          </div>
+        </a>
+      </div>
+      <div class="navbar-item">
+        <a href="/admin/config">
+          <div class="navbar-item-name">
+            <div class="navbar-item-icon">
+              <i class="fa-solid fa-display"></i>
+            </div>
+            <div class="navbar-item-title">Cấu hình máy</div>
+          </div>
+          <div class="navbar-item-arrow">
+            <i class="fa-solid fa-chevron-right"></i>
           </div>
         </a>
       </div>
       <div class="navbar-box">
         <div class="navbar-item">
-          <a href="">
-            <div class="navbar-item-name">
-              <div class="navbar-item-icon">
-                <i class="fa-solid fa-user-gear"></i>
-              </div>
-              <div class="navbar-item-title">Lịch thực hành của tôi</div>
-            </div>
-            <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
-            </div>
-          </a>
-        </div>
-
-        <div class="navbar-item">
-          <a href="">
+          <a href="/admin/program">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
                 <i class="fa-solid fa-display"></i>
               </div>
-              <div class="navbar-item-title">Yêu cầu xếp lịch</div>
+              <div class="navbar-item-title">Phần mềm</div>
             </div>
             <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
+              <i class="fa-solid fa-download"></i>
             </div>
           </a>
         </div>
 
         <div class="navbar-item">
-          <a href="">
+          <a href="/admin/room">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
-                <i class="fa-solid fa-user"></i>
+                <i class="fa-solid fa-user-gear"></i>
               </div>
-              <div class="navbar-item-title">Hồ sơ cá nhân</div>
+              <div class="navbar-item-title">Phòng thực hành</div>
             </div>
             <div class="navbar-item-arrow">
               <i class="fa-solid fa-chevron-right"></i>
             </div>
           </a>
         </div>
-        <!-- <div class="navbar-item">
-          <a href="">
+        <div class="navbar-item">
+          <a href="/admin/account">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
                 <i class="fa-solid fa-users"></i>
               </div>
-              <div class="navbar-item-title">Cán bộ</div>
+              <div class="navbar-item-title">Tài khoản quản trị</div>
             </div>
             <div class="navbar-item-arrow">
               <i class="fa-solid fa-chevron-right"></i>
@@ -107,44 +103,82 @@
           </a>
         </div>
         <div class="navbar-item">
-          <a href="">
+          <a href="/admin/report">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
                 <i class="fa-solid fa-chalkboard-user"></i>
               </div>
-              <div class="navbar-item-title">Giảng viên</div>
+              <div class="navbar-item-title">Báo cáo tình trạng</div>
             </div>
             <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
+              <i class="fa-solid fa-circle-check"></i>
             </div>
+            {% if has_unread_reports %}
+            <span
+              class="notification-dot"
+              aria-label="Báo cáo mới chưa xem"
+            ></span>
+            {% endif %}
           </a>
         </div>
         <div class="navbar-item">
-          <a href="">
+          <a href="/admin/accept">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
-                <i class="fa-solid fa-file-lines"></i>
+                <i class="fa-solid fa-chalkboard-user"></i>
               </div>
               <div class="navbar-item-title">Duyệt yêu cầu</div>
             </div>
             <div class="navbar-item-arrow">
-              <i class="fa-solid fa-chevron-right"></i>
+              <i class="fa-solid fa-circle-check"></i>
             </div>
+            {% if has_unread_requests %}
+            <span
+              class="notification-dot"
+              aria-label="Yêu cầu mới chưa xem"
+            ></span>
+            {% endif %}
           </a>
         </div>
         <div class="navbar-item">
-          <a href="">
+          <a href="/admin/calendar">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
-                <i class="fa-regular fa-calendar-days"></i>
+                <i class="fa-solid fa-file-lines"></i>
               </div>
-              <div class="navbar-item-title">Lịch thực hành</div>
+              <div class="navbar-item-title">Xếp lịch thực hành</div>
             </div>
             <div class="navbar-item-arrow">
               <i class="fa-solid fa-chevron-right"></i>
             </div>
           </a>
-        </div> -->
+        </div>
+        <div class="navbar-item">
+          <a href="/admin/staff">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-regular fa-calendar-days"></i>
+              </div>
+              <div class="navbar-item-title">Xếp lịch cán bộ</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="navbar-item">
+        <a href="admin/profile">
+          <div class="navbar-item-name">
+            <div class="navbar-item-icon">
+              <i class="fa-solid fa-user"></i>
+            </div>
+            <div class="navbar-item-title">Hồ sơ cá nhân</div>
+          </div>
+          <div class="navbar-item-arrow">
+            <i class="fa-solid fa-chevron-right"></i>
+          </div>
+        </a>
       </div>
       <div class="navbar-logout">
         <a href="/logout">
@@ -314,8 +348,8 @@
           <i class="fa-solid fa-circle-question"></i>
         </div>
         <div class="popup-error-message">
-          Bạn có chắc chắn muốn hủy chỉnh sửa? Thao tác này sẽ không lưu các thay
-          đổi.
+          Bạn có chắc chắn muốn hủy chỉnh sửa? Thao tác này sẽ không lưu các
+          thay đổi.
         </div>
         <div>
           <button type="button" id="cancel-edit-stay">
@@ -339,8 +373,6 @@
       </div>
     </div>
 
-    
-
     <!-- truyen du lieu tu python => javascript -->
     <script id="weeks-data" type="application/json">
       {{ weeks | tojson }}
@@ -353,5 +385,6 @@
     </script>
     <script src="/static/js/admin/staff.js"></script>
     <script src="/static/js/auth/navbar.js"></script>
+    <script src="/static/js/auth/ui.js"></script>
   </body>
 </html>

@@ -1,0 +1,6 @@
+/* admin/program.css */
+.program-table table { min-width: 900px; }
+.program-table td:nth-child(4) { font-weight: 600; }
+.program-add-container > form { max-width: 560px; }
+.popup-delete-program-content { max-width: 780px; }
+.delete-program-table { min-width: 580px; font-size: 12px; }

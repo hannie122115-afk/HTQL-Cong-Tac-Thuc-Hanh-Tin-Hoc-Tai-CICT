@@ -6,6 +6,7 @@ from typing import List, Optional
 from datetime import date
 from datetime import datetime, timedelta
 from psycopg2.extras import RealDictCursor
+from psycopg2.errors import ForeignKeyViolation
 import re, secrets, string, hashlib, os
 from datetime import datetime, date, timedelta
 
@@ -1052,6 +1053,7 @@ def show_admin_room(
     rooms = get_rooms(per_page, offset, keyword)
     amount = get_sum_rooms(keyword)
     success = request.session.pop("success", None)
+    error = request.session.pop("error", None)
 
     return templates.TemplateResponse(
         request=request,
@@ -1067,6 +1069,7 @@ def show_admin_room(
             "per_page": per_page,
             "keyword": keyword,
             "success": success,
+            "error": error,
         },
     )
 
@@ -1134,9 +1137,40 @@ def delete_room(
     if role != 2:
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
+    cursor = conn.cursor()
 
     try:
-        cursor = conn.cursor()
+        cursor.execute("SELECT MaPhong FROM PHONG WHERE MaPhong = %s FOR UPDATE", (room_id,))
+        if cursor.fetchone() is None:
+            conn.rollback()
+            request.session["error"] = "Phòng không tồn tại hoặc đã được xóa."
+            return RedirectResponse(url="/admin/room", status_code=303)
+
+        cursor.execute(
+            """
+                SELECT COUNT(*) FROM BAO_CAO_TINH_TRANG
+                WHERE MaPhong = %s OR MaMayTinh IN (
+                    SELECT MaMayTinh FROM MAY_TINH WHERE MaPhong = %s
+                )
+            """,
+            (room_id, room_id),
+        )
+        report_count = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM YEU_CAU_THU WHERE MaPhong = %s", (room_id,))
+        schedule_count = cursor.fetchone()[0]
+        dependencies = []
+        if report_count:
+            dependencies.append(f"{report_count} báo cáo tình trạng")
+        if schedule_count:
+            dependencies.append(f"{schedule_count} buổi thực hành đã xếp")
+        if dependencies:
+            conn.rollback()
+            request.session["error"] = (
+                f"Không thể xóa phòng {room_id} vì còn "
+                + " và ".join(dependencies)
+                + ". Vui lòng xử lý dữ liệu liên quan trước khi xóa."
+            )
+            return RedirectResponse(url="/admin/room", status_code=303)
 
         cursor.execute(
             """
@@ -1156,16 +1190,23 @@ def delete_room(
 
         if cursor.rowcount == 0:
             conn.rollback()
-            request.session["success"] = "Phòng không tồn tại."
+            request.session["error"] = "Phòng không tồn tại."
         else:
             conn.commit()
             request.session["success"] = "Xóa phòng thành công!"
 
+    except ForeignKeyViolation:
+        conn.rollback()
+        request.session["error"] = (
+            "Không thể xóa phòng vì phòng hoặc máy tính trong phòng "
+            "đang được dữ liệu khác sử dụng."
+        )
     except Exception:
         conn.rollback()
         raise
 
     finally:
+        cursor.close()
         conn.close()
 
     return RedirectResponse(
