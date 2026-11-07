@@ -2746,9 +2746,58 @@
   font-weight: 600;
 }
 
+/*  bao cáo tình trạng admin */
+
+.report-detail-act {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.report-detail-act.is-viewed {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.report-detail-act.is-viewed:hover {
+  background: #bbf7d0;
+}
+
+.room-table tbody tr.is-selected {
+  background: #f0fdf4;
+}
+
+.computer-report-item-value {
+  overflow-wrap: anywhere;
+}
+
+#report-status {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #1e293b;
+  font: inherit;
+}
+
+#report-status:focus {
+  border-color: #2563eb;
+  outline: 2px solid rgba(37, 99, 235, 0.15);
+}
+
 .submit-computer-report {
   background: #2563eb;
   color: #fff;
+}
+
+.close-computer-report {
+  background: #e2e8f0;
+  color: #334155;
 }
 
 .cancel-computer-report {

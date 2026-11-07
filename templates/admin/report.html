@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản trị viên</title>
+    <link rel="stylesheet" href="/static/css/Nhap.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="header-left">
+        <div class="header-left-logo">
+          <div class="header-left-icon">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div class="header-left-title">Edu-LIMS</div>
+        </div>
+        <div class="header-left-describe">
+          Hệ thống công tác thực hành tin học
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="header-label">
+          <i class="fa-solid fa-bell"></i>
+        </div>
+        <div class="header-user" id="headerUser">
+          <div class="header-avt">
+            <img src="{{avt}}" alt="" />
+          </div>
+          <div class="navbar-arrow">
+            <i class="fa-solid fa-caret-down"></i>
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- navbar -->
+    <div class="navbar-container" id="navbarContainer">
+      <div class="navbar-user-container">
+        <a href="">
+          <div class="navbar-user-avt">
+            <img src="{{avt}}" alt="" />
+          </div>
+          <div class="navbar-user-name">
+            <p>{{ user[1] }}</p>
+            <p>Quản trị viên</p>
+          </div>
+        </a>
+      </div>
+      <div class="navbar-box">
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <div class="navbar-item-title">Hồ sơ cá nhân</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Phần mềm</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-download"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Cấu hình máy</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user-gear"></i>
+              </div>
+              <div class="navbar-item-title">Tài khoản</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-users"></i>
+              </div>
+              <div class="navbar-item-title">Cán bộ</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-chalkboard-user"></i>
+              </div>
+              <div class="navbar-item-title">Giảng viên</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-file-lines"></i>
+              </div>
+              <div class="navbar-item-title">Duyệt yêu cầu</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <div class="navbar-item">
+          <a href="">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-regular fa-calendar-days"></i>
+              </div>
+              <div class="navbar-item-title">Lịch thực hành</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="navbar-logout">
+        <a href="/logout">
+          <div class="navbar-logout-icon">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </div>
+          <div class="navbar-logout-title">Đăng xuất</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- body -->
+
+    <div class="config-container container-web">
+      <div class="direction">
+        <a href="/admin">Trang chủ</a>
+        <i class="fa-solid fa-angle-right"></i>
+        <a href="/admin/report">Báo cáo tình trạng</a>
+      </div>
+
+      <form method="get" action="/admin/report" class="date-search">
+        <label for="report-created-date">Lọc theo ngày gửi:</label>
+        <input
+          type="date"
+          id="report-created-date"
+          name="created_date"
+          value="{{ created_date.isoformat() }}"
+          onchange="this.form.submit()"
+          title="Lọc theo ngày gửi"
+        />
+      </form>
+
+      <!-- report-list -->
+      <div class="room-table">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Mã báo cáo</th>
+              <th>Mã phòng</th>
+              <th>Cán bộ báo cáo</th>
+              <th>Loại báo cáo</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% if reports %} {% for report in reports %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>BC{{ report[0] }}</td>
+              <td>{{ report[1] }}</td>
+              <td>{{ report[3] }}</td>
+              <td>
+                {% if report[4] is none %}Tình trạng phòng{% else %}Tình trạng
+                máy tính{% endif %}
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="see-detail-act report-detail-act"
+                  data-report-id="{{ report[0] }}"
+                  data-room-id="{{ report[1] }}"
+                  data-room-name="{{ report[2] }}"
+                  data-computer-id="{{ report[4] or '' }}"
+                  data-description="{{ report[5] }}"
+                  data-current-status="{{ report[6] }}"
+                  data-reporter="{{ report[3] }}"
+                >
+                  <i class="fa-solid fa-eye"></i>
+                  Xem chi tiết
+                </button>
+              </td>
+            </tr>
+            {% endfor %} {% else %}
+            <tr>
+              <td colspan="6" class="empty-room-message">
+                <i class="fa-solid fa-door-open"></i>
+                Không có báo cáo nào vào ngày {{
+                created_date.strftime("%d/%m/%Y") }}.
+              </td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="computer-report" id="computer-report" aria-hidden="true">
+      <form
+        method="post"
+        class="computer-report-panel"
+        id="report-status-form"
+        action=""
+      >
+        <input
+          type="hidden"
+          name="created_date"
+          value="{{ created_date.isoformat() }}"
+        />
+        <div class="computer-report-title" id="report-title">
+          Báo cáo tình trạng
+        </div>
+        <div class="computer-report-item">
+          <span class="computer-report-item-title">Loại báo cáo</span>
+          <span class="computer-report-item-value" id="report-type"></span>
+        </div>
+        <div class="computer-report-item">
+          <span class="computer-report-item-title">Mã báo cáo</span>
+          <span class="computer-report-item-value" id="report-code"></span>
+        </div>
+        <div class="computer-report-item">
+          <span class="computer-report-item-title">Mã phòng</span>
+          <span class="computer-report-item-value" id="report-room-id"></span>
+        </div>
+        <div class="computer-report-item" id="report-computer-item" hidden>
+          <span class="computer-report-item-title">Mã máy tính</span>
+          <span
+            class="computer-report-item-value"
+            id="report-computer-id"
+          ></span>
+        </div>
+        <div class="computer-report-item">
+          <span class="computer-report-item-title">Nội dung báo cáo</span>
+          <span
+            class="computer-report-item-value"
+            id="report-description"
+          ></span>
+        </div>
+        <div class="computer-report-item">
+          <span class="computer-report-item-title">Người gửi báo cáo</span>
+          <span class="computer-report-item-value" id="report-reporter"></span>
+        </div>
+        <div class="computer-report-item">
+          <label class="computer-report-item-title" for="report-status">
+            Cập nhật tình trạng
+          </label>
+          <select name="status" id="report-status" required></select>
+        </div>
+        <div class="computer-report-actions">
+          <button type="button" class="close-computer-report" id="close-report">
+            Đóng
+          </button>
+          <button type="submit" class="submit-computer-report">Cập nhật</button>
+        </div>
+      </form>
+    </div>
+
+    <div
+      class="popup-success"
+      id="popup-success"
+      data-show="{{ 'true' if success else 'false' }}"
+    >
+      <div class="popup">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="popup-success-message" id="popup-success-message">
+          {{ success or "Cập nhật tình trạng thành công." }}
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/js/admin/report.js"></script>
+    <script src="/static/js/auth/navbar.js"></script>
+  </body>
+</html>

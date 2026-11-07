@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Form, Query, Body
+from fastapi import APIRouter, Request, Form, Query, Body, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 from pwdlib import PasswordHash
@@ -59,6 +59,7 @@ def show_admin(request: Request):
             "avt": avt,
         },
     )
+
 
 
 # ====================================Cau hinh may========================
@@ -3341,3 +3342,136 @@ def assign_staff_to_schedule(request: Request, payload: dict = Body(...)):
     finally:
         cursor.close()
         conn.close()
+
+
+
+# ====================================Bao cao tinh trang========================
+
+
+@router.get("/admin/report")
+def show_admin_reports(
+    request: Request,
+    created_date: Optional[date] = Query(default=None),
+):
+    if request.session.get("role") != 2:
+        return RedirectResponse(url="/login", status_code=303)
+
+    selected_date = created_date or date.today()
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+                SELECT
+                    bc.MaBaoCao,
+                    p.MaPhong,
+                    p.TenPhong,
+                    cb.TenCanBo,
+                    bc.MaMayTinh,
+                    bc.TinhTrangCuThe,
+                    CASE
+                        WHEN bc.MaMayTinh IS NULL THEN p.TinhTrangPhong
+                        ELSE mt.TinhTrangMay
+                    END AS TinhTrangHienTai
+                FROM Bao_cao_tinh_trang bc
+                JOIN PHONG p ON p.MaPhong = bc.MaPhong
+                JOIN CAN_BO cb ON cb.MaCanBo = bc.MaCanBo
+                LEFT JOIN MAY_TINH mt
+                    ON mt.MaMayTinh = bc.MaMayTinh
+                   AND mt.MaPhong = bc.MaPhong
+                WHERE bc.NgayGui = %s
+                ORDER BY bc.MaBaoCao DESC
+            """,
+            (selected_date,),
+        )
+        reports = cursor.fetchall()
+        cursor.close()
+    finally:
+        conn.close()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/report.html",
+        context={
+            "user": get_user_by_id(request.session.get("accountId")),
+            "avt": request.session.get("avt"),
+            "reports": reports,
+            "created_date": selected_date,
+            "success": request.session.pop("success", None),
+        },
+    )
+
+
+@router.post("/admin/report/{report_id}/status")
+def update_reported_status(
+    request: Request,
+    report_id: int,
+    status: int = Form(...),
+    created_date: Optional[date] = Form(default=None),
+):
+    if request.session.get("role") != 2:
+        return RedirectResponse(url="/login", status_code=303)
+
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+                SELECT MaPhong, MaMayTinh
+                FROM Bao_cao_tinh_trang
+                WHERE MaBaoCao = %s
+            """,
+            (report_id,),
+        )
+        report = cursor.fetchone()
+        if report is None:
+            raise HTTPException(status_code=404, detail="Không tìm thấy báo cáo.")
+
+        room_id, computer_id = report
+        if computer_id is not None:
+            if status not in (0, 1, 2, 3):
+                raise HTTPException(
+                    status_code=422,
+                    detail="Tình trạng máy tính không hợp lệ.",
+                )
+            cursor.execute(
+                """
+                    UPDATE MAY_TINH
+                    SET TinhTrangMay = %s
+                    WHERE MaMayTinh = %s AND MaPhong = %s
+                """,
+                (status, computer_id, room_id),
+            )
+        else:
+            if status not in (-1, 0, 1):
+                raise HTTPException(
+                    status_code=422,
+                    detail="Tình trạng phòng không hợp lệ.",
+                )
+            cursor.execute(
+                """
+                    UPDATE PHONG
+                    SET TinhTrangPhong = %s
+                    WHERE MaPhong = %s
+                """,
+                (status, room_id),
+            )
+
+        if cursor.rowcount == 0:
+            raise HTTPException(
+                status_code=404,
+                detail="Không tìm thấy máy tính hoặc phòng cần cập nhật.",
+            )
+
+        conn.commit()
+        request.session["success"] = "Cập nhật tình trạng thành công."
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+    redirect_url = "/admin/report"
+    if created_date:
+        redirect_url += f"?created_date={created_date.isoformat()}"
+    return RedirectResponse(url=redirect_url, status_code=303)
