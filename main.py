@@ -22,6 +22,7 @@ app.include_router(teacher_router)
 
 
 @app.get("/")
+@app.get("/index.html")
 def home(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
 

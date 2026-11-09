@@ -1,12 +1,13 @@
-.login-container { width: min(440px, calc(100% - 32px)); margin: 64px auto; padding: 36px; border: 1px solid var(--border); border-radius: 18px; background: #fff; box-shadow: var(--shadow); }
-.login-title { margin-bottom: 28px; color: #0f172a; font-size: 26px; font-weight: 700; text-align: center; }
+.login-container { width: min(440px, calc(100% - 32px)); margin: 64px auto; padding: 36px; border: 1px solid var(--border); border-radius: 18px; background: #FFFFFF; box-shadow: var(--shadow); }
+.login-title { margin-bottom: 28px; color: #17324D; font-size: 26px; font-weight: 700; text-align: center; }
 .login-info { display: grid; gap: 20px; }
 .login-username, .login-password { position: relative; display: flex; align-items: center; }
-.login-username-icon, .login-password-icon { position: absolute; left: 14px; z-index: 1; color: #64748b; pointer-events: none; }
+.login-username-icon, .login-password-icon { position: absolute; left: 14px; z-index: 1; color: #63788D; pointer-events: none; }
 .login-input { width: 100%; }
 .login-input input { width: 100%; min-height: 48px !important; padding-left: 42px !important; }
 .login-password input { padding-right: 44px !important; }
-.toggle-password { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #64748b; cursor: pointer; }
+.toggle-password { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #63788D; cursor: pointer; }
 .login-button button { width: 100%; min-height: 46px; }
 .login-container > p { margin: 0 0 20px; padding: 10px 12px; border-radius: 8px; background: #fef2f2; color: #b91c1c; font-weight: 600; }
+.login-container > .login-message.is-success { background: #EAF5EC; color: #2F6B43; border: 1px solid #BAD8C2; }
 @media (max-width: 480px) { .login-container { margin: 32px auto; padding: 26px; } }

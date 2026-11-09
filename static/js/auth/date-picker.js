@@ -200,7 +200,9 @@
     sync();
   });
   document.addEventListener("click", event => {
-    if (opened && !opened.wrapper.contains(event.target) && !opened.panel.contains(event.target)) close();
+    // Giữ đường đi ban đầu của click: render() có thể đã tháo nút chuyển tháng khỏi DOM.
+    const path = event.composedPath();
+    if (opened && !path.includes(opened.wrapper) && !path.includes(opened.panel)) close();
   });
   document.addEventListener("focusin", event => {
     if (opened && !opened.wrapper.contains(event.target) && !opened.panel.contains(event.target)) close();

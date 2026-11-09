@@ -1,8 +1,8 @@
 /* admin/report.css */
 .room-table table { min-width: 850px; }
 .report-row.is-unread td:first-child { border-left: 3px solid var(--primary); }
-.report-detail-act.is-viewed { color: #166534; background: #dcfce7; }
-.room-table tbody tr.is-selected { background: #f0fdf4; }
+.report-detail-act.is-viewed { color: #2F6B43; background: #EAF5EC; }
+.room-table tbody tr.is-selected { background: #EAF5EC; }
 #report-form .computer-report-item { padding-bottom: 14px; border-bottom: 1px solid var(--border); }
 #report-status { width: 100%; }
-.submit-computer-report { background: var(--primary); color: #fff; }
+.submit-computer-report { background: var(--primary); color: #FFFFFF; }

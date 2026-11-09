@@ -3,21 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Giảng viên | Yêu cầu xếp lịch</title>
-    <link rel="stylesheet" href="/static/css/auth/header.css" />
+    <title>Lịch thực hành</title>
+    <link rel="stylesheet" href="/static/css/auth/header.css?v=24e4f1185f" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
-    <link rel="stylesheet" href="/static/css/shared/base.css" />
-    <link rel="stylesheet" href="/static/css/auth/popup.css" />
-    <link rel="stylesheet" href="/static/css/auth/calendar.css" />
-    <link rel="stylesheet" href="/static/css/shared/ui.css" />
+    <link rel="stylesheet" href="/static/css/shared/base.css?v=e6c30cd4a4" />
+    <link rel="stylesheet" href="/static/css/auth/popup.css?v=9cce345a79" />
+    <link rel="stylesheet" href="/static/css/auth/calendar.css?v=7f8eb2ba59" />
+    <link rel="stylesheet" href="/static/css/shared/ui.css?v=3a6450f69d" />
+    <link rel="stylesheet" href="/static/css/shared/theme.css?v=d09f9b8cb7" />
   </head>
   <body>
     <header>
       <div class="header-left">
-        {% include "partials/header-brand.html" %}
+        <a class="header-left-logo" href="/index.html" aria-label="Edu-LIMS — Trang chủ">
+          <div class="header-left-icon">
+            <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+          </div>
+          <div class="header-left-title">Edu-LIMS</div>
+        </a>
         <div class="header-left-describe">
           Hệ thống công tác thực hành tin học
         </div>

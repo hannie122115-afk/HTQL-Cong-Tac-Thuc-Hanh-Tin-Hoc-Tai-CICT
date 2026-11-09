@@ -18,7 +18,10 @@ class RoomDeleteTests(unittest.TestCase):
                     raise failure
             cursor.execute.side_effect = execute
         request = SimpleNamespace(session={"role": 2})
-        with patch("routers.admin.get_connection", return_value=connection):
+        with (
+            patch("routers.admin.has_permission", return_value=True),
+            patch("routers.admin.get_connection", return_value=connection),
+        ):
             response = delete_room(request, 102)
         self.assertEqual(response.status_code, 303)
         self.assertEqual(response.headers["location"], "/admin/room")
@@ -27,8 +30,13 @@ class RoomDeleteTests(unittest.TestCase):
         return request, connection, cursor
 
     def test_other_roles_cannot_delete(self):
-        with patch("routers.admin.get_connection") as connect:
-            response = delete_room(SimpleNamespace(session={"role": 1}), 102)
+        request = SimpleNamespace(session={"role": 1})
+        with (
+            patch("routers.admin.has_permission", return_value=False) as permission,
+            patch("routers.admin.get_connection") as connect,
+        ):
+            response = delete_room(request, 102)
+        permission.assert_called_once_with(request, "quan_ly_phong")
         connect.assert_not_called()
         self.assertEqual(response.headers["location"], "/login")
 

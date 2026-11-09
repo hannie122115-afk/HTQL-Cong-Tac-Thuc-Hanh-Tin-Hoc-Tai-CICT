@@ -3,22 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/static/css/shared/base.css" />
+    <link rel="stylesheet" href="/static/css/shared/base.css?v=e6c30cd4a4" />
     <title>Quản trị viên</title>
-    <link rel="stylesheet" href="/static/css/auth/header.css" />
-    <link rel="stylesheet" href="/static/css/auth/navbar.css" />
+    <link rel="stylesheet" href="/static/css/auth/header.css?v=24e4f1185f" />
+    <link rel="stylesheet" href="/static/css/auth/navbar.css?v=e940af40ee" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
-    <link rel="stylesheet" href="/static/css/auth/popup.css?v=a080a9d621" />
-    <link rel="stylesheet" href="/static/css/admin/room.css" />
-    <link rel="stylesheet" href="/static/css/shared/ui.css" />
+    <link rel="stylesheet" href="/static/css/auth/popup.css?v=9cce345a79" />
+    <link rel="stylesheet" href="/static/css/admin/room.css?v=b572389ac1" />
+    <link rel="stylesheet" href="/static/css/shared/ui.css?v=3a6450f69d" />
+    <link rel="stylesheet" href="/static/css/shared/theme.css?v=d09f9b8cb7" />
   </head>
   <body>
     <header>
       <div class="header-left">
-        {% include "partials/header-brand.html" %}
+        <a class="header-left-logo" href="/admin/index.html" aria-label="Edu-LIMS — Trang chủ">
+          <div class="header-left-icon">
+            <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+          </div>
+          <div class="header-left-title">Edu-LIMS</div>
+        </a>
         <div class="header-left-describe">
           Hệ thống công tác thực hành tin học
         </div>
@@ -221,7 +227,9 @@
 
       <!-- add room -->
       <div class="room-add-container" id="room-add-container">
-        <form action="/admin/room" method="post" id="room-add-form">
+        <form action="/admin/room" method="post" id="room-add-form" class="modal-panel">
+          <h3 class="modal-heading">Thêm phòng thực hành</h3>
+          <div class="modal-body">
           <div class="room-add-item">
             <span class="room-add-title"> Tên phòng </span>
             <input
@@ -281,6 +289,8 @@
             <button type="submit" class="submit-add-config-btn">
               Thêm phòng
             </button>
+          </div>
+
           </div>
         </form>
       </div>
@@ -402,13 +412,15 @@
       </div>
     </div>
 
-    <div class="popup-confirm" id="popup-delete-room">
-      <div class="popup popup-delete-room-content">
+    <div class="popup-confirm confirmation-popup" id="popup-delete-room">
+      <div class="popup popup-delete-room-content modal-panel">
+        <h3 class="modal-heading">Xác nhận xóa phòng <span id="delete-room-name"></span></h3>
+        <div class="modal-body">
         <div class="popup-icon">
-          <i class="fa-solid fa-triangle-exclamation"></i>
+          <i class="fa-solid fa-circle-question"></i>
         </div>
 
-        <h3>Xác nhận xóa phòng <span id="delete-room-name"></span></h3>
+
         <p>Toàn bộ máy tính trong phòng cũng sẽ bị xóa.</p>
         <p>Phòng có báo cáo hoặc lịch thực hành liên quan cần được xử lý trước khi xóa.</p>
 
@@ -418,6 +430,8 @@
           <form id="delete-room-form" method="post" action="">
             <button type="submit" id="delete-room-confirm">Xác nhận xóa</button>
           </form>
+        </div>
+
         </div>
       </div>
     </div>

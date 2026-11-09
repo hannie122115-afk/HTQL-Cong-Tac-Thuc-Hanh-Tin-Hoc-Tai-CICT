@@ -3,22 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/static/css/shared/base.css" />
+    <link rel="stylesheet" href="/static/css/shared/base.css?v=e6c30cd4a4" />
     <title>Quản trị viên</title>
-    <link rel="stylesheet" href="/static/css/auth/header.css" />
-    <link rel="stylesheet" href="/static/css/auth/navbar.css" />
+    <link rel="stylesheet" href="/static/css/auth/header.css?v=24e4f1185f" />
+    <link rel="stylesheet" href="/static/css/auth/navbar.css?v=e940af40ee" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
-    <link rel="stylesheet" href="/static/css/auth/popup.css" />
-    <link rel="stylesheet" href="/static/css/admin/config.css" />
-    <link rel="stylesheet" href="/static/css/shared/ui.css" />
+    <link rel="stylesheet" href="/static/css/auth/popup.css?v=9cce345a79" />
+    <link rel="stylesheet" href="/static/css/admin/config.css?v=a681b0661e" />
+    <link rel="stylesheet" href="/static/css/shared/ui.css?v=3a6450f69d" />
+    <link rel="stylesheet" href="/static/css/shared/theme.css?v=d09f9b8cb7" />
   </head>
   <body>
     <header>
       <div class="header-left">
-        {% include "partials/header-brand.html" %}
+        <a class="header-left-logo" href="/admin/index.html" aria-label="Edu-LIMS — Trang chủ">
+          <div class="header-left-icon">
+            <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+          </div>
+          <div class="header-left-title">Edu-LIMS</div>
+        </a>
         <div class="header-left-describe">
           Hệ thống công tác thực hành tin học
         </div>
@@ -221,7 +227,9 @@
 
       <!-- add config -->
       <div class="config-add-container" id="config-add-container">
-        <form action="/admin/config" method="post" id="config-add-form">
+        <form action="/admin/config" method="post" id="config-add-form" class="modal-panel">
+          <h3 class="modal-heading">Thêm cấu hình máy</h3>
+          <div class="modal-body">
           <div class="config-add-item">
             <span class="config-add-title"> CPU </span>
             <input type="text" name="cpu" id="" placeholder="Nhập tên CPU..." />
@@ -283,6 +291,8 @@
             >
               Thêm
             </button>
+          </div>
+
           </div>
         </form>
       </div>
@@ -400,13 +410,15 @@
       </div>
     </div>
 
-    <div class="popup-confirm" id="popup-delete-config">
-      <div class="popup popup-delete-config-content">
+    <div class="popup-confirm confirmation-popup" id="popup-delete-config">
+      <div class="popup popup-delete-config-content modal-panel">
+        <h3 class="modal-heading">Xác nhận xóa cấu hình</h3>
+        <div class="modal-body">
         <div class="popup-icon">
-          <i class="fa-solid fa-triangle-exclamation"></i>
+          <i class="fa-solid fa-circle-question"></i>
         </div>
 
-        <h3>Xác nhận xóa cấu hình</h3>
+
 
         <div class="popup-actions">
           <button type="button" id="delete-config-cancel">Hủy</button>
@@ -416,6 +428,8 @@
               Xác nhận xóa
             </button>
           </form>
+        </div>
+
         </div>
       </div>
     </div>

@@ -15,10 +15,10 @@ body > header {
   gap: 24px;
   min-height: 70px;
   padding: 12px 32px;
-  border-bottom: 1px solid #e2e8f0;
-  background: #fff;
-  color: #1e293b;
-  box-shadow: 0 2px 10px rgb(15 23 42 / 5%);
+  border-bottom: 1px solid #DCE5EE;
+  background: #FFFFFF;
+  color: #17324D;
+  box-shadow: 0 2px 10px rgb(7 59 112 / 5%);
   font-family: "Segoe UI", Arial, sans-serif;
   line-height: 1.4;
 }
@@ -45,13 +45,13 @@ header .header-left-icon {
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #2563eb, #4f46e5);
-  color: #fff;
+  background: linear-gradient(135deg, #1762B2, #1762B2);
+  color: #FFFFFF;
   font-size: 23px;
 }
 
 header .header-left-title {
-  color: #1e40af;
+  color: #073B70;
   font-size: 24px;
   font-weight: 750;
   letter-spacing: -0.6px;
@@ -61,8 +61,8 @@ header .header-left-title {
 header .header-left-describe {
   min-width: 0;
   padding-left: 24px;
-  border-left: 1px solid #e2e8f0;
-  color: #64748b;
+  border-left: 1px solid #DCE5EE;
+  color: #63788D;
   font-size: 14px;
   font-weight: 500;
 }
@@ -81,7 +81,7 @@ header .header-label {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  color: #64748b;
+  color: #63788D;
   font-size: 19px;
   cursor: pointer;
   transition:
@@ -90,8 +90,8 @@ header .header-label {
 }
 
 header .header-label:hover {
-  background: #eff6ff;
-  color: #2563eb;
+  background: #E8F1FA;
+  color: #1762B2;
 }
 
 header .header-user {
@@ -106,12 +106,12 @@ header .header-user {
 }
 
 header .header-user:hover {
-  background: #f1f5f9;
+  background: #F5F7FA;
 }
 
 header .header-user:focus-visible,
 header .header-label:focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid #1762B2;
   outline-offset: 3px;
 }
 
@@ -120,9 +120,9 @@ header .header-avt {
   width: 38px;
   height: 38px;
   overflow: hidden;
-  border: 2px solid #dbeafe;
+  border: 2px solid #E8F1FA;
   border-radius: 50%;
-  background: #eff6ff;
+  background: #E8F1FA;
 }
 
 header .header-avt img {
@@ -137,7 +137,7 @@ header .navbar-arrow {
   align-items: center;
   justify-content: center;
   width: 16px;
-  color: #64748b;
+  color: #63788D;
   font-size: 12px;
 }
 

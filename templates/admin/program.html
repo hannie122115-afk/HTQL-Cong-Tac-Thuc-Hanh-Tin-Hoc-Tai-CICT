@@ -3,22 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/static/css/shared/base.css" />
+    <link rel="stylesheet" href="/static/css/shared/base.css?v=e6c30cd4a4" />
     <title>Quản trị viên</title>
-    <link rel="stylesheet" href="/static/css/auth/navbar.css" />
-    <link rel="stylesheet" href="/static/css/auth/header.css" />
+    <link rel="stylesheet" href="/static/css/auth/navbar.css?v=e940af40ee" />
+    <link rel="stylesheet" href="/static/css/auth/header.css?v=24e4f1185f" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
-    <link rel="stylesheet" href="/static/css/auth/popup.css" />
-    <link rel="stylesheet" href="/static/css/admin/program.css" />
-    <link rel="stylesheet" href="/static/css/shared/ui.css" />
+    <link rel="stylesheet" href="/static/css/auth/popup.css?v=9cce345a79" />
+    <link rel="stylesheet" href="/static/css/admin/program.css?v=b716ecebb6" />
+    <link rel="stylesheet" href="/static/css/shared/ui.css?v=3a6450f69d" />
+    <link rel="stylesheet" href="/static/css/shared/theme.css?v=d09f9b8cb7" />
   </head>
   <body>
     <header>
       <div class="header-left">
-        {% include "partials/header-brand.html" %}
+        <a class="header-left-logo" href="/admin/index.html" aria-label="Edu-LIMS — Trang chủ">
+          <div class="header-left-icon">
+            <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+          </div>
+          <div class="header-left-title">Edu-LIMS</div>
+        </a>
         <div class="header-left-describe">
           Hệ thống công tác thực hành tin học
         </div>
@@ -225,7 +231,9 @@
         id="program-add-container"
         tabindex="-1"
       >
-        <form action="/admin/program" method="post" id="program-form">
+        <form action="/admin/program" method="post" id="program-form" class="modal-panel">
+          <h3 class="modal-heading">Thông tin phần mềm</h3>
+          <div class="modal-body">
           <div class="program-add-item">
             <span class="program-add-title"> Tên phần mềm </span>
             <input
@@ -281,6 +289,8 @@
             >
               Lưu chỉnh sửa
             </button>
+          </div>
+
           </div>
         </form>
       </div>
@@ -411,10 +421,12 @@
       </div>
     </div>
 
-    <div class="popup-confirm" id="popup-confirm">
-      <div class="popup">
+    <div class="popup-confirm confirmation-popup" id="popup-confirm">
+      <div class="popup modal-panel">
+        <h3 class="modal-heading">Hủy chỉnh sửa</h3>
+        <div class="modal-body">
         <div class="popup-icon">
-          <i class="fa-solid fa-triangle-exclamation"></i>
+          <i class="fa-solid fa-circle-question"></i>
         </div>
 
         <div class="popup-message">
@@ -427,18 +439,22 @@
           <button type="button" id="popup-cancel-no">Không</button>
           <button type="button" id="popup-cancel-yes">Hủy chỉnh sửa</button>
         </div>
+
+        </div>
       </div>
     </div>
     <div id="program-page" data-success="{{ success or '' }}"></div>
 
     <!-- Popup xác nhận xóa phần mềm -->
-    <div class="popup-confirm" id="popup-delete-program">
-      <div class="popup popup-delete-program-content">
+    <div class="popup-confirm confirmation-popup" id="popup-delete-program">
+      <div class="popup popup-delete-program-content modal-panel">
+        <h3 class="modal-heading">Xác nhận xóa phần mềm</h3>
+        <div class="modal-body">
         <div class="popup-icon">
-          <i class="fa-solid fa-triangle-exclamation"></i>
+          <i class="fa-solid fa-circle-question"></i>
         </div>
 
-        <h3>Xác nhận xóa phần mềm</h3>
+
 
         <p>
           Phần mềm:
@@ -470,7 +486,7 @@
         </p>
 
         <p class="delete-program-warning">
-          <i class="fa-solid fa-circle-exclamation"></i>
+          <i class="fa-solid fa-circle-question"></i>
           Nếu xóa, phần mềm sẽ bị gỡ khỏi danh sách phần mềm tương thích của các
           cấu hình trên. Bạn có chắc chắn muốn xóa không?
         </p>
@@ -483,6 +499,8 @@
               Xác nhận xóa
             </button>
           </form>
+        </div>
+
         </div>
       </div>
     </div>

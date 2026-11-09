@@ -1,0 +1,114 @@
+/* Bảng màu hệ thống: navy, blue và các nền pastel. */
+:root {
+  --navy: #073B70;
+  --primary: #1762B2;
+  --primary-dark: #073B70;
+  --primary-soft: #E8F1FA;
+  --background: #F5F7FA;
+  --surface: #FFFFFF;
+  --soft-green: #EAF5EC;
+  --soft-purple: #F1ECF8;
+  --soft-yellow: #FFF5DC;
+  --text: #17324D;
+  --muted: #63788D;
+  --border: #DCE5EE;
+  --shadow: 0 4px 18px rgb(7 59 112 / 5%);
+  --brand-gradient: linear-gradient(115deg, #073B70, #1762B2 65%, #287BC1);
+}
+html { color-scheme: light; }
+body { background: var(--background); color: var(--text); }
+body > header { border-bottom-color: var(--border); box-shadow: 0 2px 12px rgb(7 59 112 / 5%); }
+header .header-left-title { color: var(--navy); }
+header .header-left-icon { background: var(--brand-gradient); box-shadow: 0 4px 10px rgb(23 98 178 / 16%); }
+.navbar-container { border-color: var(--navy); background: linear-gradient(155deg, #073B70, #0B477F); color: #FFFFFF; box-shadow: 0 14px 36px rgb(7 59 112 / 22%); }
+.navbar-user-container, .navbar-logout { border-color: rgb(255 255 255 / 16%); }
+.navbar-user-name p:first-child { color: #FFFFFF; }
+.navbar-user-name p + p { color: #CDDFEF; }
+.navbar-user-container > a:hover { background: rgb(255 255 255 / 7%); }
+.navbar-item-arrow { color: #BFD5EA; }
+.navbar-item > a, .navbar-logout > a { transition: background-color .2s ease, color .2s ease; }
+.navbar-item > a:hover, .navbar-item.active > a, .navbar-item > a[aria-current="page"] {
+  background: linear-gradient(110deg, #1762B2, #2176C2); color: #FFFFFF;
+}
+.navbar-item > a:hover .navbar-item-arrow { color: #FFFFFF; }
+.navbar-item:has(.notification-dot) > a { background: rgb(255 255 255 / 9%); color: #FFFFFF; }
+.navbar-item:has(.notification-dot) > a:hover { background: #1762B2; }
+.navbar-logout > a { color: #FFF5DC; }
+.navbar-logout > a:hover { background: rgb(255 255 255 / 10%); color: #FFFFFF; }
+.navbar-container .notification-dot { border-color: #073B70; box-shadow: 0 0 0 3px rgb(255 245 220 / 20%); }
+
+button[type="submit"]:not([id*="delete"]):not([id*="refuse"]),
+[class$="-add-act"], .action-btn-group #editBtn, .action-btn-group #saveBtn,
+.required-detail-info-container .close-detail-btn, .container-act .login-button a {
+  background-image: var(--brand-gradient); background-size: 170% 100%; background-position: 0% 50%;
+  color: #FFFFFF; border-color: #1762B2;
+  transition: background-position .28s ease, box-shadow .2s ease;
+}
+button[type="submit"]:not([id*="delete"]):not([id*="refuse"]):hover,
+[class$="-add-act"]:hover, .action-btn-group #editBtn:hover, .action-btn-group #saveBtn:hover,
+.required-detail-info-container .close-detail-btn:hover, .container-act .login-button a:hover {
+  background-position: 100% 50%; box-shadow: 0 4px 12px rgb(23 98 178 / 18%);
+}
+button:disabled { box-shadow: none; }
+th { background: var(--primary-soft); color: var(--navy); }
+.calendar-table thead th { background: #E8F1FA; color: #073B70; }
+.calendar-table th:first-child { background: #E8F1FA; }
+.day-of-week { color: #63788D; }
+.session-btn.active, .session-btn.active:hover { background: linear-gradient(120deg, #E8F1FA, #F5F7FA); color: #073B70; border-color: #1762B2; }
+.grid-dashboard > a { background: linear-gradient(135deg, #FFFFFF 65%, #F5F7FA); }
+.grid-dashboard > a:hover { border-color: #A8C8E8; box-shadow: 0 8px 24px rgb(7 59 112 / 9%); }
+.grid-dashboard > a:nth-child(4n+1) .dashboard-item-icon { background: #E8F1FA; color: #1762B2; }
+.grid-dashboard > a:nth-child(4n+2) .dashboard-item-icon { background: #F1ECF8; color: #6C5395; }
+.grid-dashboard > a:nth-child(4n+3) .dashboard-item-icon { background: #EAF5EC; color: #337247; }
+.grid-dashboard > a:nth-child(4n) .dashboard-item-icon { background: #FFF5DC; color: #926A20; }
+.status-success, .badge.success { background: #EAF5EC; color: #2F6B43; }
+.status-warning, .badge.warning { background: #FFF5DC; color: #886217; }
+.status-info, .badge.info { background: #E8F1FA; color: #073B70; }
+.required-detail-send-container { background: #E8F1FA; border-color: #BFD5EA; }
+.field-error { background: #fef2f2; }
+.ui-options, .ui-date-popover { border-color: #C7D5E2; box-shadow: 0 10px 28px rgb(7 59 112 / 13%); }
+button.ui-option:is(:hover, :focus), button.ui-option[aria-selected="true"] { background: #E8F1FA; color: #073B70; }
+.ui-date-popover .ui-date-day.is-selected { background: #1762B2; border-color: #1762B2; color: #FFFFFF; }
+
+/* Tiêu đề nằm ngoài vùng cuộn; chỉ .modal-body cuộn nội dung. */
+.modal-panel.modal-panel {
+  display: flex; flex-direction: column; padding: 0; overflow: hidden;
+  max-height: calc(100dvh - 48px); border-color: #DCE5EE;
+}
+.modal-panel > .modal-heading {
+  flex: 0 0 auto; margin: 0; padding: 21px 26px; border-bottom: 1px solid #DCE5EE;
+  background: linear-gradient(105deg, #E8F1FA, #FFFFFF 85%); color: #073B70;
+  font-size: 19px; font-weight: 700; line-height: 1.45; text-align: left;
+}
+.modal-panel > .modal-body {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+  padding: 24px 26px; scrollbar-gutter: stable; background: #FFFFFF;
+}
+.modal-body > form { margin: 0; }
+.modal-body .popup-actions { margin-bottom: 0; }
+.modal-body .computer-report-title { color: #073B70; }
+.modal-panel .required-detail-status { margin-top: 0; }
+/* Popup xác nhận: tiêu đề nhẹ, biểu tượng và hàng nút đều căn giữa. */
+.confirmation-popup > .modal-panel { max-width: 560px; }
+.confirmation-popup > .modal-panel > .modal-heading { padding: 24px 32px; font-size: 22px; }
+.confirmation-popup .modal-body { text-align: center; padding-top: 26px; padding-bottom: 26px; scrollbar-gutter: stable both-edges; }
+.confirmation-popup .popup-icon { background: #FFF2F2; color: #DC2626; width: 68px; height: 68px; margin: 0 auto 24px; font-size: 29px; }
+.confirmation-popup .popup-icon i::before { content: "?"; display: inline-grid; place-items: center; width: 31px; height: 31px; border-radius: 50%; background: #DC2626; color: #FFFFFF; font: 800 22px/1 "Segoe UI", Arial, sans-serif; }
+.confirmation-popup .modal-body > p, .confirmation-popup .popup-message, .confirmation-popup .popup-error-message { color: #17324D; font-size: 16px; line-height: 1.8; }
+.confirmation-popup .popup-actions, .confirmation-popup .modal-body > div:has(> button) {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 8px; margin-top: 24px; padding-top: 0; border-top: 0;
+}
+.confirmation-popup .popup-actions > form { display: flex; margin: 0; }
+.confirmation-popup .modal-body button { min-height: 48px; padding: 12px 20px; font-size: 15px; font-weight: 600; }
+.confirmation-popup button[type="button"]:not([id^="popup-delete-"]) { border-color: #D7E3EF; background: #F5F7FA; color: #35516B; }
+.confirmation-popup button[type="button"]:not([id^="popup-delete-"]):hover { background: #E8F1FA; border-color: #BFD5EA; }
+@media (max-width: 600px) {
+  .modal-panel.modal-panel { max-height: calc(100dvh - 24px); }
+  .modal-panel > .modal-heading { padding: 17px 18px; font-size: 17px; }
+  .modal-panel > .modal-body { padding: 18px; }
+  .confirmation-popup > .modal-panel > .modal-heading { padding: 20px 22px; font-size: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  button, a, [class$="-add-act"] { transition: none !important; }
+}

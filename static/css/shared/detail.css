@@ -1,6 +1,6 @@
-.config-detail-info-container, .room-detail-info-container { padding: 24px; margin-bottom: 24px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); }
+.config-detail-info-container, .room-detail-info-container { padding: 24px; margin-bottom: 24px; border: 1px solid var(--border); border-radius: var(--radius); background: #FFFFFF; box-shadow: var(--shadow); }
 .config-detail-info-title, .room-detail-info-title { margin-bottom: 22px; font-size: 20px; font-weight: 700; }
-.config-detail-item, .room-detail-item { display: flex; align-items: flex-start; gap: 14px; padding: 16px 0; border-top: 1px solid #f1f5f9; }
+.config-detail-item, .room-detail-item { display: flex; align-items: flex-start; gap: 14px; padding: 16px 0; border-top: 1px solid #F5F7FA; }
 .config-detail-item-logo, .room-detail-item-logo { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; background: var(--primary-soft); color: var(--primary); font-size: 18px; }
 .config-detail-item-info, .room-detail-item-info { display: flex; flex: 1; flex-direction: column; gap: 6px; min-width: 0; }
 .config-detail-item-info > span:first-child, .room-detail-item-info > span:first-child, .room-detail-item-info > label { color: var(--muted); font-size: 12px; }
@@ -9,11 +9,11 @@
 .config-input, .room-input, #config-edit-form .config-room-box, #room-edit-form .room-detail-item-info > select { display: none; }
 #room-edit-form.editing .room-detail-item-info > select { display: block; }
 .config-detail-actions, .room-detail-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-#config-edit-btn, #room-edit-btn { background: var(--primary); color: #fff; }
+#config-edit-btn, #room-edit-btn { background: var(--primary); color: #FFFFFF; }
 .config-add-program, .room-add-computer, .config-detail-save-act { display: none; }
 .config-add-program.show, .room-add-computer.show { display: block; }
-.config-add-program, .room-add-computer { padding: 20px; margin: 16px 0; border: 1px solid #bfdbfe; border-radius: var(--radius); background: #eff6ff; }
-.config-room-box { display: none; flex-wrap: wrap; gap: 10px; width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc; }
+.config-add-program, .room-add-computer { padding: 20px; margin: 16px 0; border: 1px solid #BFD5EA; border-radius: var(--radius); background: #E8F1FA; }
+.config-room-box { display: none; flex-wrap: wrap; gap: 10px; width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #F5F7FA; }
 .config-room-box.show { display: flex; }
-.config-room-box label { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; background: #fff; border-radius: 6px; }
+.config-room-box label { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; background: #FFFFFF; border-radius: 6px; }
 @media (max-width: 600px) { .config-detail-info-container, .room-detail-info-container { padding: 18px; } }

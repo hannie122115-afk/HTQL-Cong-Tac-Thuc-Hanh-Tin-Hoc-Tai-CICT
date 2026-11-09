@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Request, Form, Query
+from fastapi import APIRouter, Request, Form, Query, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 from psycopg2.extras import RealDictCursor
 from database import get_connection
+from authorization import has_permission
 from notification_service import (
     NOTIFICATION_TYPE_SCHEDULE,
     NOTIFICATION_TYPE_SCHEDULE_REQUEST,
@@ -39,10 +40,9 @@ def get_user_by_id(accountId):
 
 # ================trang chu ===========================
 @router.get("/teacher")
+@router.get("/teacher/index.html")
 def show_admin(request: Request):
-    role = request.session.get("role")
-
-    if role != 1:
+    if not has_permission(request, "xem_trang_chu_giang_vien"):
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
@@ -345,7 +345,10 @@ def get_rooms_by_ids(room_ids=None):
 
 @router.get("/teacher/calendar")
 def show_teacher_calendar(request: Request):
-    if request.session.get("role") != 1:
+    if not (
+        has_permission(request, "xem_lich_giang_day_ca_nhan")
+        and has_permission(request, "xem_thong_bao_ca_nhan_giang_vien")
+    ):
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
@@ -389,8 +392,7 @@ def show_required_teacher(
     created_date: str = "",
     status: Optional[str] = Query(None),
 ):
-    role = request.session.get("role")
-    if role != 1:
+    if not has_permission(request, "xem_yeu_cau_ca_nhan"):
         return RedirectResponse(url="/login", status_code=303)
 
     account_id = request.session.get("accountId")
@@ -433,8 +435,15 @@ def show_required_teacher(
 
 @router.get("/api/courses")
 def search_courses(
+    request: Request,
     keyword: str = Query(default="", min_length=1),
 ):
+    if not has_permission(request, "gui_yeu_cau_xep_lich"):
+        raise HTTPException(
+            status_code=403,
+            detail="Bạn không có quyền thực hiện thao tác này.",
+        )
+
     conn = get_connection()
     try:
         cur = conn.cursor()
@@ -457,8 +466,14 @@ def search_courses(
 
 @router.get("/api/programs")
 def search_programs(
+    request: Request,
     keyword: str = Query(default="", min_length=1),
 ):
+    if not has_permission(request, "gui_yeu_cau_xep_lich"):
+        raise HTTPException(
+            status_code=403,
+            detail="Bạn không có quyền thực hiện thao tác này.",
+        )
 
     conn = get_connection()
     try:
@@ -482,8 +497,14 @@ def search_programs(
 
 @router.get("/api/weeks")
 def search_weeks(
+    request: Request,
     keyword: str = Query(default="", min_length=1),
 ):
+    if not has_permission(request, "gui_yeu_cau_xep_lich"):
+        raise HTTPException(
+            status_code=403,
+            detail="Bạn không có quyền thực hiện thao tác này.",
+        )
 
     if not keyword.isdigit():
         return []
@@ -537,8 +558,7 @@ def add_required(
     required_note: Optional[str] = Form(""),
     required_week_day: List[int] = Form([]),
 ):
-    role = request.session.get("role")
-    if role != 1:
+    if not has_permission(request, "gui_yeu_cau_xep_lich"):
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
@@ -637,8 +657,7 @@ def delete_program(
     request: Request,
     required_id: int,
 ):
-    role = request.session.get("role")
-    if role != 1:
+    if not has_permission(request, "xoa_yeu_cau_ca_nhan"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
 

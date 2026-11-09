@@ -1,5 +1,5 @@
 /* admin/staff.css */
 @import url("../shared/calendar.css");
-#staff-list .staff-item { border-left: 3px solid #16a34a; background: #f0fdf4; }
-.staff-room-row .room-name { color: #166534; }
+#staff-list .staff-item { border-left: 3px solid #337247; background: #EAF5EC; }
+.staff-room-row .room-name { color: #2F6B43; }
 #empty-schedule-row td { padding: 40px; color: var(--muted); text-align: center; }

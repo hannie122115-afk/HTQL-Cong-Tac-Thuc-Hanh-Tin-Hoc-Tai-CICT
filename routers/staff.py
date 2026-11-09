@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, Form, Query, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
+from authorization import has_permission
 from psycopg2.extras import RealDictCursor
 from database import get_connection
 from notification_service import (
@@ -201,10 +202,9 @@ def save_status_report(staff_id, room_id, week_id, computer_id, current_status):
 
 # ================trang chu ===========================
 @router.get("/staff")
+@router.get("/staff/index.html")
 def show_admin(request: Request):
-    role = request.session.get("role")
-
-    if role != 0:
+    if not has_permission(request, "xem_trang_chu_can_bo"):
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
@@ -226,7 +226,7 @@ def show_admin(request: Request):
 
 @router.get("/staff/room")
 def show_staff_rooms(request: Request, week_id: Optional[int] = Query(default=None)):
-    if request.session.get("role") != 0:
+    if not has_permission(request, "xem_phong_duoc_phan_cong"):
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
@@ -276,7 +276,7 @@ def show_staff_room_detail(
     week_id: int = Query(...),
     keyword: str = Query(default=""),
 ):
-    if request.session.get("role") != 0:
+    if not has_permission(request, "xem_phong_duoc_phan_cong"):
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
@@ -356,7 +356,7 @@ def create_staff_status_report(
     current_status: str = Form(...),
     computer_id: Optional[str] = Form(default=None),
 ):
-    if request.session.get("role") != 0:
+    if not has_permission(request, "cap_nhat_tinh_trang"):
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
@@ -374,7 +374,10 @@ def create_staff_status_report(
 
 @router.get("/staff/calendar")
 def show_staff_calendar(request: Request):
-    if request.session.get("role") != 0:
+    if not (
+        has_permission(request, "xem_lich_duoc_phan_cong")
+        and has_permission(request, "xem_thong_bao_ca_nhan_can_bo")
+    ):
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))

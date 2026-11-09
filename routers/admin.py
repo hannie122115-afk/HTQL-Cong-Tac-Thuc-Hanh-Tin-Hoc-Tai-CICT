@@ -22,6 +22,7 @@ from notification_service import (
     notify_schedule_recipients,
     insert_notification,
 )
+from authorization import has_permission
 
 router = APIRouter()
 
@@ -53,10 +54,9 @@ def get_user_by_id(accountId):
 
 
 @router.get("/admin")
+@router.get("/admin/index.html")
 def show_admin(request: Request):
-    role = request.session.get("role")
-
-    if role != 2:
+    if not has_permission(request, "xem_trang_chu_quan_tri"):
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
@@ -164,8 +164,7 @@ def show_admin_config(
     page: int = 1,
     keyword: str = "",
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_cau_hinh"):
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
@@ -205,8 +204,7 @@ def add_config(
     rooms: List[int] = Form([]),
     success: int = 1,
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_cau_hinh"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -259,8 +257,7 @@ def delete_config(
     request: Request,
     config_id: int,
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_cau_hinh"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
 
@@ -410,8 +407,7 @@ def show_admin_config_detail(
     keyword: str = "",
     page: int = 1,
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_cau_hinh"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -504,8 +500,7 @@ def update_config(
     screen_card: str = Form(""),
     rooms: List[int] = Form([]),
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_cau_hinh"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -569,8 +564,7 @@ def delete_program_from_config(
     config_id: int,
     program_id: int,
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_cau_hinh"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -605,8 +599,7 @@ def save_config_program(
     config_id: int,
     program_ids: list[int] = Form(default=[]),
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_cau_hinh"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -705,8 +698,7 @@ def show_admin_program(
     page: int = 1,
     keyword: str = "",
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_phan_mem"):
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
@@ -744,8 +736,7 @@ def add_program(
     program_img: str = Form(""),
     success: int = 1,
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_phan_mem"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -785,8 +776,7 @@ def get_program_compatibility(
     request: Request,
     program_id: int,
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_phan_mem"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -833,8 +823,7 @@ def delete_program(
     request: Request,
     program_id: int,
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_phan_mem"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
 
@@ -886,8 +875,7 @@ def edit_config(
     program_publisher: str = Form(""),
     program_img: str = Form(""),
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_phan_mem"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -1039,8 +1027,7 @@ def show_admin_room(
     page: int = 1,
     keyword: str = "",
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_phong"):
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
@@ -1082,8 +1069,10 @@ def add_room(
     staff_id: str = Form(""),
     machine_count: int = Form(...),
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not (
+        has_permission(request, "quan_ly_phong")
+        and has_permission(request, "quan_ly_may_tinh")
+    ):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -1133,8 +1122,7 @@ def delete_room(
     request: Request,
     room_id: int,
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_phong"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -1315,8 +1303,7 @@ def show_admin_room_detail(
     keyword: str = "",
     page: int = 1,
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_phong"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -1368,8 +1355,7 @@ def update_room(
     config_id: Optional[int] = Form(None),
     room_status: int = Form(...),
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_phong"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -1408,8 +1394,7 @@ def delete_computer_room(
     room_id: int,
     computer_id: str,
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_may_tinh"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -1444,8 +1429,7 @@ def add_computer_room(
     room_id: int,
     machine_count: int = Form(...),
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_may_tinh"):
         return RedirectResponse(url="/login", status_code=303)
 
     if machine_count < 1 or machine_count > 59:
@@ -1533,8 +1517,7 @@ def update_computer_status(
     computer_id: str,
     computer_status: int = Form(...),
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "quan_ly_may_tinh"):
         return RedirectResponse(url="/login", status_code=303)
 
     if computer_status not in (0, 1, 2, 3):
@@ -1681,8 +1664,7 @@ def show_admin_account(
     role: str = "",
     status: str = "",
 ):
-    admin_role = request.session.get("role")
-    if admin_role != 2:
+    if not has_permission(request, "xem_tai_khoan"):
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
@@ -1751,8 +1733,7 @@ def add_account(
     account_tel: str = Form(""),
     account_role: str = Form(""),
 ):
-    admin_role = request.session.get("role")
-    if admin_role != 2:
+    if not has_permission(request, "cap_tai_khoan"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -1846,8 +1827,7 @@ async def send_account_setup_email(
     request: Request,
     account_id: int,
 ):
-    admin_role = request.session.get("role")
-    if admin_role != 2:
+    if not has_permission(request, "gui_email_thiet_lap_tai_khoan"):
         return RedirectResponse(url="/login", status_code=303)
     conn = None
     cursor = None
@@ -2138,8 +2118,7 @@ def setup_password(
 
 @router.post("/admin/account/{role}/{account_id}/delete")
 def delete_account(request: Request, account_id: int, role: int):
-    admin_role = request.session.get("role")
-    if admin_role != 2:
+    if not has_permission(request, "xoa_tai_khoan"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
 
@@ -2225,8 +2204,7 @@ def delete_account(request: Request, account_id: int, role: int):
 
 @router.get("/admin/account/{account_id}/detail")
 def account_detail(request: Request, account_id: int):
-    admin_role = request.session.get("role")
-    if admin_role != 2:
+    if not has_permission(request, "xem_tai_khoan"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     try:
@@ -2288,8 +2266,7 @@ def update_account_status(
     account_id: int,
     status: int = Form(...),
 ):
-    admin_role = request.session.get("role")
-    if admin_role != 2:
+    if not has_permission(request, "cap_nhat_trang_thai_tai_khoan"):
         return RedirectResponse(url="/login", status_code=303)
 
     if status not in (0, 1):
@@ -2508,8 +2485,7 @@ def show_accept(
     created_date_to: str = "",
     status: Optional[str] = Query(None),
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "xem_yeu_cau_xep_lich"):
         return RedirectResponse(url="/login", status_code=303)
 
     account_id = request.session.get("accountId")
@@ -2554,7 +2530,10 @@ def show_accept(
 
 @router.post("/admin/accept/{required_id}/read")
 def mark_required_as_read(request: Request, required_id: int):
-    if request.session.get("role") != 2:
+    if not (
+        has_permission(request, "xem_yeu_cau_xep_lich")
+        and has_permission(request, "xem_thong_bao_ca_nhan_quan_tri")
+    ):
         return RedirectResponse(url="/login", status_code=303)
 
     mark_notifications_read(
@@ -2570,8 +2549,7 @@ def accept_required(
     required_id: int,
     request: Request,
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "duyet_yeu_cau_xep_lich"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -2604,8 +2582,7 @@ def refuse_required(
     request: Request,
     reason: str = Body(..., embed=True),
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "duyet_yeu_cau_xep_lich"):
         return RedirectResponse(url="/login", status_code=303)
     conn = get_connection()
     cursor = conn.cursor()
@@ -2842,8 +2819,7 @@ def show_calendar(
     created_date_to: str = "",
     status: Optional[str] = Query(None),
 ):
-    role = request.session.get("role")
-    if role != 2:
+    if not has_permission(request, "xep_lich_thuc_hanh"):
         return RedirectResponse(url="/login", status_code=303)
 
     account_id = request.session.get("accountId")
@@ -2908,7 +2884,7 @@ def show_calendar(
 
 @router.post("/admin/calendar/save")
 def save_calendar_schedule(request: Request, payload: dict = Body(...)):
-    if request.session.get("role") != 2:
+    if not has_permission(request, "xep_lich_thuc_hanh"):
         return RedirectResponse(url="/login", status_code=303)
 
     schedules = payload.get("schedules")
@@ -3238,7 +3214,7 @@ def save_calendar_schedule(request: Request, payload: dict = Body(...)):
 
 @router.get("/admin/staff")
 def show_staff_schedule(request: Request):
-    if request.session.get("role") != 2:
+    if not has_permission(request, "xem_phan_cong_can_bo"):
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
@@ -3297,7 +3273,7 @@ def show_staff_schedule(request: Request):
 
 @router.post("/admin/staff/assign")
 def assign_staff_to_schedule(request: Request, payload: dict = Body(...)):
-    if request.session.get("role") != 2:
+    if not has_permission(request, "phan_cong_can_bo"):
         return JSONResponse(
             status_code=403,
             content={
@@ -3478,7 +3454,7 @@ def show_admin_reports(
     request: Request,
     created_date: Optional[date] = Query(default=None),
 ):
-    if request.session.get("role") != 2:
+    if not has_permission(request, "quan_ly_phong"):
         return RedirectResponse(url="/login", status_code=303)
 
     selected_date = created_date or date.today()
@@ -3534,7 +3510,10 @@ def show_admin_reports(
 
 @router.post("/admin/report/{report_id}/read")
 def mark_report_as_read(request: Request, report_id: int):
-    if request.session.get("role") != 2:
+    if not (
+        has_permission(request, "quan_ly_phong")
+        and has_permission(request, "xem_thong_bao_ca_nhan_quan_tri")
+    ):
         return RedirectResponse(url="/login", status_code=303)
 
     account_id = request.session.get("accountId")
@@ -3553,9 +3532,6 @@ def update_reported_status(
     status: int = Form(...),
     created_date: Optional[date] = Form(default=None),
 ):
-    if request.session.get("role") != 2:
-        return RedirectResponse(url="/login", status_code=303)
-
     conn = get_connection()
     try:
         cursor = conn.cursor()
@@ -3570,6 +3546,15 @@ def update_reported_status(
         report = cursor.fetchone()
         if report is None:
             raise HTTPException(status_code=404, detail="Không tìm thấy báo cáo.")
+
+        if not has_permission(
+            request,
+            "quan_ly_may_tinh" if report[1] is not None else "quan_ly_phong",
+        ):
+            raise HTTPException(
+                status_code=403,
+                detail="Bạn không có quyền thực hiện thao tác này.",
+            )
 
         room_id, computer_id = report
         if computer_id is not None:

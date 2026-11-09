@@ -1,7 +1,7 @@
 /* staff/room.css */
 .room-table table { min-width: 680px; }
-.staff-week-filter { padding: 18px 20px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; }
+.staff-week-filter { padding: 18px 20px; border: 1px solid var(--border); border-radius: var(--radius); background: #FFFFFF; }
 .staff-week-filter label { color: var(--muted); font-weight: 600; }
 .report-room-act { margin-left: 6px; }
-.submit-computer-report { background: var(--primary); color: #fff; }
+.submit-computer-report { background: var(--primary); color: #FFFFFF; }
 @media (max-width: 480px) { .staff-week-filter { align-items: stretch; flex-direction: column; } }

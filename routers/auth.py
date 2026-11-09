@@ -13,7 +13,7 @@ def show_login(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="login.html",
-        context={"message": message},
+        context={"message": message, "message_type": "success"},
     )
 
 
@@ -24,9 +24,11 @@ def login(request: Request, username: str = Form(""), password: str = Form("")):
 
     cursor.execute(
         """
-        SELECT MaTaiKhoan, TenDangNhap, MatKhau, VaiTro, AnhDaiDien, TrangThai
-        FROM TAI_KHOAN_DANG_NHAP
-        WHERE TenDangNhap = %s
+        SELECT tk.MaTaiKhoan, tk.TenDangNhap, tk.MatKhau, nd.MaVaiTro,
+               tk.AnhDaiDien, tk.TrangThai
+        FROM TAI_KHOAN_DANG_NHAP tk
+        JOIN NGUOI_DUNG nd ON nd.MaTaiKhoan = tk.MaTaiKhoan
+        WHERE tk.TenDangNhap = %s
     """,
         (username,),
     )
@@ -67,13 +69,6 @@ def login(request: Request, username: str = Form(""), password: str = Form("")):
     request.session["role"] = account[3]
     request.session["avt"] = account[4]
 
-    # role = account[3]
-    # if role == 2:
-    #     return RedirectResponse(url="/admin", status_code=303)
-    # if role == 1:
-    #     return RedirectResponse(url="/teacher", status_code=303)
-    # if role == 0:
-    #     return RedirectResponse(url="/staff", status_code=303)
     role = account[3]
 
     if role == 1:

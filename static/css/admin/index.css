@@ -1,5 +1,5 @@
 /* admin/index.css */
 .grid-dashboard { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
-.grid-dashboard > a:nth-child(3n+2) .dashboard-item-icon { color: #7c3aed; background: #f5f3ff; }
-.grid-dashboard > a:nth-child(3n) .dashboard-item-icon { color: #059669; background: #ecfdf5; }
+.grid-dashboard > a:nth-child(3n+2) .dashboard-item-icon { color: #6C5395; background: #F1ECF8; }
+.grid-dashboard > a:nth-child(3n) .dashboard-item-icon { color: #337247; background: #EAF5EC; }
 @media (max-width: 480px) { .grid-dashboard { grid-template-columns: 1fr; } }

@@ -1,5 +1,0 @@
-{% set header_role = request.session.get('role') if request is defined else none %}
-<a class="header-left-logo" href="{{ {0: '/staff', 1: '/teacher', 2: '/admin'}.get(header_role, '/') }}" aria-label="Edu-LIMS — Trang chủ">
-  <div class="header-left-icon"><i class="fa-solid fa-graduation-cap" aria-hidden="true"></i></div>
-  <div class="header-left-title">Edu-LIMS</div>
-</a>

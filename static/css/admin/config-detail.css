@@ -4,7 +4,7 @@
 .config-detail-program > form { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; }
 .config-detail-search-box { flex: 1 1 320px; }
 .config-detail-save-act { margin-bottom: 18px; }
-.config-detail-info-container .room-value > span { padding: 3px 10px; border-radius: 6px; background: #eff6ff; color: #1d4ed8; }
+.config-detail-info-container .room-value > span { padding: 3px 10px; border-radius: 6px; background: #E8F1FA; color: #1762B2; }
 .config-detail-info-container form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 24px; }
 .config-detail-info-title { grid-column: 1 / -1; margin-bottom: 4px; }
 .config-detail-info { min-width: 0; }
