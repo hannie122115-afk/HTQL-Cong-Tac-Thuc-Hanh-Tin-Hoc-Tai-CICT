@@ -335,6 +335,17 @@
               >
             </div>
 
+            <div id="account-academic-info" hidden>
+              <div class="account-add-item">
+                <span class="account-add-title">Học vị</span>
+                <span id="account_degree"></span>
+              </div>
+              <div class="account-add-item">
+                <span class="account-add-title">Học hàm</span>
+                <span id="account_title"></span>
+              </div>
+            </div>
+
             <div class="add-account-btn">
               <button type="button" id="cancel-add-account-btn">Hủy</button>
               <button type="submit" id="submit-add-account-btn">
@@ -375,19 +386,10 @@
               <td>{{ start_index + loop.index }}</td>
               <td>TK{{ account[0] }}</td>
               <td>{{ account[1] }}</td>
-              {% if account[2] == 1 %}
-              <td>{{ account[6] }}</td>
-              <td>{{ account[7] }}</td>
-              <td>Giảng viên</td>
-              {% elif account[2] == 0 %}
               <td>{{ account[4] }}</td>
-              <td>{{ account[5] }}</td>
-              <td>Cán bộ</td>
-              {% else %}
-              <td>[Không cung cấp]</td>
-              <td>[Không cung cấp]</td>
-              <td>Quản trị viên</td>
-              {% endif %} {% if account[3] == 1 %}
+              <td>{{ account[8] }}</td>
+              <td>{{ account[2] }}</td>
+            {% if account[3] == 1 %}
               <td><span class="status-badge status-success">Đang hoạt động</span></td>
               {% else %}
               <td><span class="status-badge status-danger">Bị khóa</span></td>

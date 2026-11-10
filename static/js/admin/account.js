@@ -2,6 +2,7 @@ const addBtn = document.getElementById("account-add-act");
 const formPopup = document.getElementById("account-add-container");
 const accountForm = document.getElementById("account-add-form");
 const popupTitle = document.getElementById("account-popup-title");
+const academicInfo = document.getElementById("account-academic-info");
 
 const cancelBtn = document.getElementById("cancel-add-account-btn");
 const submitBtn = document.getElementById("submit-add-account-btn");
@@ -37,6 +38,7 @@ let currentAccountStatus = null;
 // ======ADD ACCOUNT=====
 addBtn?.addEventListener("click", () => {
   accountForm.reset();
+  academicInfo.hidden = true;
   currentDetailAccountId = null;
   currentAccountStatus = null;
 
@@ -126,6 +128,11 @@ document.querySelectorAll(".see-detail-act").forEach((button) => {
       document.getElementById("account_name").value = data.name ?? "";
       document.getElementById("account_birth").value = data.birth ?? "";
       document.getElementById("account_tel").value = data.tel ?? "";
+      document.getElementById("account_degree").textContent =
+        data.degree || "Không có";
+      document.getElementById("account_title").textContent =
+        data.title || "Không có";
+      academicInfo.hidden = false;
 
       accountForm
         .querySelectorAll('input[name="account_gender"]')

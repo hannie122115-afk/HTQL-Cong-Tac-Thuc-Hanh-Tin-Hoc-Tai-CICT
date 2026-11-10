@@ -2,7 +2,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-from authorization import has_permission
+from routers.authorization import has_permission
 
 
 class AuthorizationTests(unittest.TestCase):

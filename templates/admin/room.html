@@ -304,6 +304,7 @@
               <th>Mã phòng</th>
               <th>Tên phòng</th>
               <th>Số lượng máy</th>
+              <th>Người quản lý</th>
               <th>Tình trạng phòng</th>
               <th colspan="2">Thao tác</th>
             </tr>
@@ -317,7 +318,7 @@
               <td>P{{ room[0] }}</td>
               <td>Phòng {{ room[1] }}</td>
               <td>{{ room[2] }}</td>
-
+              <td>{{ room[4] }}</td>
               {% if room[3] == -1 %}
               <td><span class="status-badge status-danger">Ngừng hoạt động</span></td>
               {% elif room[3] == 1 %}

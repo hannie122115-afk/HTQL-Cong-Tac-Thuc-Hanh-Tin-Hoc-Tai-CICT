@@ -61,6 +61,15 @@ class RoomDeleteTests(unittest.TestCase):
 
     def test_unreferenced_room_deletes_machines_then_room(self):
         request, connection, cursor = self.execute_delete([(102,), (0,), (0,)])
+        queries = [call.args[0] for call in cursor.execute.call_args_list]
+        report_query = next(query for query in queries if "BAO_CAO_TINH_TRANG" in query)
+        self.assertIn("TINH_TRANG_MAY_TINH", report_query)
+        self.assertIn("ttm.MaBaoCao = bc.MaBaoCao", report_query)
+        self.assertIn("ttm.MaMayTinh", report_query)
+        self.assertNotIn("bc.MaMayTinh", report_query)
+        self.assertIn("COUNT(DISTINCT bc.MaBaoCao)", report_query)
+        self.assertTrue(any("FROM LICH_THUC_HANH" in query for query in queries))
+        self.assertFalse(any("YEU_CAU_THU" in query for query in queries))
         deletes = [call.args[0] for call in cursor.execute.call_args_list if "DELETE" in call.args[0]]
         self.assertEqual(len(deletes), 2)
         self.assertIn("MAY_TINH", deletes[0])

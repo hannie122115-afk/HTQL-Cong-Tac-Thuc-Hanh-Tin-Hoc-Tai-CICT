@@ -3,7 +3,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 from psycopg2.extras import RealDictCursor
 from database import get_connection
-from authorization import has_permission
+from routers.authorization import has_permission
 from notification_service import (
     NOTIFICATION_TYPE_SCHEDULE,
     NOTIFICATION_TYPE_SCHEDULE_REQUEST,

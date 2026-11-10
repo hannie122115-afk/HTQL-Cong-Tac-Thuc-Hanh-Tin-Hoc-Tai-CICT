@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Form, Query, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
-from authorization import has_permission
+from routers.authorization import has_permission
 from psycopg2.extras import RealDictCursor
 from database import get_connection
 from notification_service import (

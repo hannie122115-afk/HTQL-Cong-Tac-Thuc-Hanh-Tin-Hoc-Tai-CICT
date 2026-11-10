@@ -22,7 +22,7 @@ from notification_service import (
     notify_schedule_recipients,
     insert_notification,
 )
-from authorization import has_permission
+from routers.authorization import has_permission
 
 router = APIRouter()
 
@@ -39,8 +39,9 @@ def get_user_by_id(accountId):
     cursor.execute(
         """
             SELECT *
-            FROM QUAN_TRI_VIEN
+            FROM NGUOI_DUNG
             WHERE MaTaiKhoan = %s
+                AND MaVaiTro = 2
         """,
         (accountId,),
     )
@@ -923,12 +924,19 @@ def get_rooms(per_page, offset, keyword):
                 p.MaPhong,
                 p.TenPhong,
                 COUNT(mt.MaMayTinh) AS TongSoMay,
-                p.TinhTrangPhong
+                p.TinhTrangPhong,
+                nd.TenNguoiDung
             FROM PHONG p
             LEFT JOIN MAY_TINH mt
                 ON mt.MaPhong = p.MaPhong
+            LEFT JOIN NGUOI_DUNG nd
+                ON nd.MaNguoiDung = p.MaNguoiQuanLy
+                AND nd.MaVaiTro = 0
             GROUP BY
-                p.MaPhong
+                p.MaPhong,
+                p.TenPhong,
+                p.TinhTrangPhong,
+                nd.TenNguoiDung
             HAVING
                 p.TenPhong ILIKE %s
                 OR COUNT(mt.MaMayTinh)::TEXT ILIKE %s
@@ -990,7 +998,8 @@ def get_staffs_room():
     cursor.execute(
         """
             SELECT *
-            FROM CAN_BO
+            FROM NGUOI_DUNG
+            WHERE MaVaiTro = 0
         """,
     )
 
@@ -1080,7 +1089,7 @@ def add_room(
     cursor.execute(
         """
             INSERT INTO PHONG
-            (TenPhong, MaCanBo, MaCauHinh)
+            (TenPhong, MaNguoiQuanLy, MaCauHinh)
             VALUES (%s, %s, %s)
             RETURNING MaPhong
         """,
@@ -1128,7 +1137,9 @@ def delete_room(
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT MaPhong FROM PHONG WHERE MaPhong = %s FOR UPDATE", (room_id,))
+        cursor.execute(
+            "SELECT MaPhong FROM PHONG WHERE MaPhong = %s FOR UPDATE", (room_id,)
+        )
         if cursor.fetchone() is None:
             conn.rollback()
             request.session["error"] = "Phòng không tồn tại hoặc đã được xóa."
@@ -1136,15 +1147,21 @@ def delete_room(
 
         cursor.execute(
             """
-                SELECT COUNT(*) FROM BAO_CAO_TINH_TRANG
-                WHERE MaPhong = %s OR MaMayTinh IN (
-                    SELECT MaMayTinh FROM MAY_TINH WHERE MaPhong = %s
-                )
+                SELECT COUNT(DISTINCT bc.MaBaoCao)
+                FROM BAO_CAO_TINH_TRANG bc
+                LEFT JOIN TINH_TRANG_MAY_TINH ttm
+                    ON ttm.MaBaoCao = bc.MaBaoCao
+                LEFT JOIN MAY_TINH mt
+                    ON mt.MaMayTinh = ttm.MaMayTinh
+                WHERE bc.MaPhong = %s OR mt.MaPhong = %s
             """,
             (room_id, room_id),
         )
         report_count = cursor.fetchone()[0]
-        cursor.execute("SELECT COUNT(*) FROM YEU_CAU_THU WHERE MaPhong = %s", (room_id,))
+        cursor.execute(
+            "SELECT COUNT(*) FROM LICH_THUC_HANH WHERE MaPhong = %s",
+            (room_id,),
+        )
         schedule_count = cursor.fetchone()[0]
         dependencies = []
         if report_count:
@@ -1217,10 +1234,14 @@ def get_room(roomId):
                 p.TenPhong,
                 ch.CPU AS CPU,
                 ch.MaCauHinh,
-                p.TinhTrangPhong
+                p.TinhTrangPhong,
+                nd.TenNguoiDung,
+                nd.MaNguoiDung
             FROM PHONG p
             LEFT JOIN CAU_HINH ch
                 ON ch.MaCauHinh = p.MaCauHinh
+            LEFT JOIN NGUOI_DUNG nd
+                ON nd.MaNguoiDung = p.MaNguoiQuanLy
             WHERE MaPhong = %s
         """,
         (roomId,),
@@ -1354,6 +1375,7 @@ def update_room(
     room_name: str = Form(""),
     config_id: Optional[int] = Form(None),
     room_status: int = Form(...),
+    room_manager_name: int = Form(...),
 ):
     if not has_permission(request, "quan_ly_phong"):
         return RedirectResponse(url="/login", status_code=303)
@@ -1365,13 +1387,15 @@ def update_room(
         UPDATE PHONG
         SET TenPhong = %s,
             MaCauHinh = %s,
-            TinhTrangPhong = %s
+            TinhTrangPhong = %s,
+            TenNguoiQuanLy = %s
         WHERE MaPhong = %s
         """,
         (
             room_name,
             config_id,
             room_status,
+            room_manager_name,
             room_id,
         ),
     )
@@ -1510,56 +1534,56 @@ def add_computer_room(
     )
 
 
-@router.post("/admin/room/{room_id}/computer/{computer_id}/update")
-def update_computer_status(
-    request: Request,
-    room_id: int,
-    computer_id: str,
-    computer_status: int = Form(...),
-):
-    if not has_permission(request, "quan_ly_may_tinh"):
-        return RedirectResponse(url="/login", status_code=303)
+# @router.post("/admin/room/{room_id}/computer/{computer_id}/update")
+# def update_computer_status(
+#     request: Request,
+#     room_id: int,
+#     computer_id: str,
+#     computer_status: int = Form(...),
+# ):
+#     if not has_permission(request, "quan_ly_may_tinh"):
+#         return RedirectResponse(url="/login", status_code=303)
 
-    if computer_status not in (0, 1, 2, 3):
-        request.session["error"] = "Tình trạng máy tính không hợp lệ!"
-        return RedirectResponse(
-            url=f"/admin/room/{room_id}",
-            status_code=303,
-        )
+#     if computer_status not in (0, 1, 2, 3):
+#         request.session["error"] = "Tình trạng máy tính không hợp lệ!"
+#         return RedirectResponse(
+#             url=f"/admin/room/{room_id}",
+#             status_code=303,
+#         )
 
-    conn = get_connection()
-    cursor = conn.cursor()
+#     conn = get_connection()
+#     cursor = conn.cursor()
 
-    try:
-        cursor.execute(
-            """
-            UPDATE MAY_TINH
-            SET TinhTrangMay = %s
-            WHERE MaMayTinh = %s
-              AND MaPhong = %s
-            """,
-            (computer_status, computer_id, room_id),
-        )
+#     try:
+#         cursor.execute(
+#             """
+#             UPDATE MAY_TINH
+#             SET TinhTrangMay = %s
+#             WHERE MaMayTinh = %s
+#               AND MaPhong = %s
+#             """,
+#             (computer_status, computer_id, room_id),
+#         )
 
-        if cursor.rowcount == 0:
-            conn.rollback()
-            request.session["error"] = "Không tìm thấy máy tính!"
-        else:
-            conn.commit()
-            request.session["success"] = "Cập nhật tình trạng máy tính thành công!"
+#         if cursor.rowcount == 0:
+#             conn.rollback()
+#             request.session["error"] = "Không tìm thấy máy tính!"
+#         else:
+#             conn.commit()
+#             request.session["success"] = "Cập nhật tình trạng máy tính thành công!"
 
-    except Exception:
-        conn.rollback()
-        raise
+#     except Exception:
+#         conn.rollback()
+#         raise
 
-    finally:
-        cursor.close()
-        conn.close()
+#     finally:
+#         cursor.close()
+#         conn.close()
 
-    return RedirectResponse(
-        url=f"/admin/room/{room_id}",
-        status_code=303,
-    )
+#     return RedirectResponse(
+#         url=f"/admin/room/{room_id}",
+#         status_code=303,
+#     )
 
 
 # ====================================Tai khoan========================
@@ -1574,29 +1598,28 @@ def get_accounts(per_page, offset, keyword, role, status):
             SELECT 
                 tk.MaTaiKhoan
                 ,tk.TenDangNhap
-                ,tk.VaiTro
+                ,vt.TenVaiTro
                 ,tk.TrangThai
-                ,cb.TenCanBo
-                ,cb.Email
-                ,gv.TenGiangVien
-                ,gv.Email
+                ,nd.TenNguoiDung
+                ,nd.NgaySinh
+                ,nd.GioiTinh
+                ,nd.SoDienThoai
+                ,nd.Email
             FROM TAI_KHOAN_DANG_NHAP tk
-            LEFT JOIN CAN_BO cb ON cb.MaTaiKhoan = tk.MaTaiKhoan
-            LEFT JOIN GIANG_VIEN gv ON gv.MaTaiKhoan = tk.MaTaiKhoan
+            LEFT JOIN NGUOI_DUNG nd ON nd.MaTaiKhoan = tk.MaTaiKhoan
+            LEFT JOIN VAI_TRO vt ON vt.MaVaiTro = nd.MaVaiTro
             WHERE
             (
                 %s = ''
-                OR cb.TenCanBo ILIKE %s
-                OR gv.TenGiangVien ILIKE %s
+                OR nd.TenNguoiDung ILIKE %s
                 OR tk.TenDangNhap ILIKE %s
             )
-            AND (%s IS NULL OR tk.VaiTro = %s)
+            AND (%s IS NULL OR vt.MaVaiTro = %s)
             AND (%s IS NULL OR tk.TrangThai = %s)
             LIMIT %s OFFSET %s
         """,
         (
             keyword,
-            f"%{keyword}%",
             f"%{keyword}%",
             f"%{keyword}%",
             role,
@@ -1624,21 +1647,18 @@ def get_sum_accounts(keyword, role, status):
         """
             SELECT COUNT(DISTINCT tk.MaTaiKhoan)
             FROM TAI_KHOAN_DANG_NHAP tk
-            LEFT JOIN CAN_BO cb ON cb.MaTaiKhoan = tk.MaTaiKhoan
-            LEFT JOIN GIANG_VIEN gv ON gv.MaTaiKhoan = tk.MaTaiKhoan
+            LEFT JOIN NGUOI_DUNG nd ON nd.MaTaiKhoan = tk.MaTaiKhoan
             WHERE 
             (
                 %s = ''
-                OR cb.TenCanBo ILIKE %s
-                OR gv.TenGiangVien ILIKE %s
+                OR nd.TenNguoiDung ILIKE %s
                 OR tk.TenDangNhap ILIKE %s
             )
-            AND (%s IS NULL OR tk.VaiTro = %s)
+            AND (%s IS NULL OR nd.MaVaiTro = %s)
             AND (%s IS NULL OR tk.TrangThai = %s)
         """,
         (
             keyword,
-            f"%{keyword}%",
             f"%{keyword}%",
             f"%{keyword}%",
             role,
@@ -1760,54 +1780,36 @@ def add_account(
         cursor.execute(
             """
             INSERT INTO TAI_KHOAN_DANG_NHAP
-                (TenDangNhap, MatKhau, VaiTro, AnhDaiDien, TrangThai)
-            VALUES (%s, %s, %s, %s, %s)
+                (TenDangNhap, MatKhau, AnhDaiDien, TrangThai)
+            VALUES (%s, %s, %s, %s)
             RETURNING MaTaiKhoan
             """,
             (
                 account_username,
                 hash_password(secrets.token_urlsafe(16)),
-                int(account_role),
                 "https://cdn2.fptshop.com.vn/small/avatar_trang_1_cd729c335b.jpg",
                 1,
             ),
         )
         account_id_new = cursor.fetchone()[0]
         request.session["pending_account_id"] = account_id_new
-        if account_role == "1":
-            cursor.execute(
-                """
-                INSERT INTO GIANG_VIEN
-                    (TenGiangVien, GioiTinh, NgaySinh,
-                     SoDienThoai, Email, MaTaiKhoan)
-                VALUES (%s, %s, %s, %s, %s, %s)
-                """,
-                (
-                    account_name,
-                    int(account_gender),
-                    birth_date,
-                    account_tel,
-                    account_email,
-                    account_id_new,
-                ),
-            )
-        else:
-            cursor.execute(
-                """
-                INSERT INTO CAN_BO
-                    (TenCanBo, GioiTinh, NgaySinh,
-                     SoDienThoai, Email, MaTaiKhoan)
-                VALUES (%s, %s, %s, %s, %s, %s)
-                """,
-                (
-                    account_name,
-                    int(account_gender),
-                    birth_date,
-                    account_tel,
-                    account_email,
-                    account_id_new,
-                ),
-            )
+        cursor.execute(
+            """
+            INSERT INTO NGUOI_DUNG
+                (TenNguoiDung, GioiTinh, NgaySinh,
+                    SoDienThoai, Email, MaTaiKhoan, MaVaiTro)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """,
+            (
+                account_name,
+                int(account_gender),
+                birth_date,
+                account_tel,
+                account_email,
+                account_id_new,
+                int(account_role),
+            ),
+        )
 
         conn.commit()
         request.session["success"] = "Cấp tài khoản thành công!"
@@ -1840,14 +1842,14 @@ async def send_account_setup_email(
             SELECT
                 tk.MaTaiKhoan,
                 tk.TenDangNhap,
-                tk.VaiTro,
+                vt.TenVaiTro,
                 tk.TrangThai,
-                COALESCE(gv.Email, cb.Email) AS Email
+                nd.Email AS Email
             FROM TAI_KHOAN_DANG_NHAP tk
-            LEFT JOIN GIANG_VIEN gv
-                ON gv.MaTaiKhoan = tk.MaTaiKhoan
-            LEFT JOIN CAN_BO cb
-                ON cb.MaTaiKhoan = tk.MaTaiKhoan
+            LEFT JOIN NGUOI_DUNG nd 
+                ON nd.MaTaiKhoan = tk.MaTaiKhoan
+            LEFT JOIN VaiTro vt
+                ON vt.MaVaiTro = nd.MaVaiTro
             WHERE tk.MaTaiKhoan = %s
             """,
             (account_id,),
@@ -2142,7 +2144,7 @@ def delete_account(request: Request, account_id: int, role: int):
         if role == 1:
             cursor.execute(
                 """
-                DELETE FROM GIANG_VIEN
+                DELETE FROM NGUOI_DUNG
                 WHERE MaTaiKhoan = %s
                 """,
                 (account_id,),
@@ -2151,8 +2153,8 @@ def delete_account(request: Request, account_id: int, role: int):
 
             cursor.execute(
                 """
-                SELECT MaCanBo
-                FROM CAN_BO
+                SELECT MaNguoiDung
+                FROM NGUOI_DUNG
                 WHERE MaTaiKhoan = %s
                 """,
                 (account_id,),
@@ -2162,14 +2164,14 @@ def delete_account(request: Request, account_id: int, role: int):
                 cursor.execute(
                     """
                     UPDATE PHONG
-                    SET MaCanBo = NULL
-                    WHERE MaCanBo = %s
+                    SET MaNguoiDung = NULL
+                    WHERE MaNguoiDung = %s
                     """,
                     (staff_id_del[0],),
                 )
             cursor.execute(
                 """
-                DELETE FROM CAN_BO
+                DELETE FROM NGUOI_DUNG
                 WHERE MaTaiKhoan = %s
                 """,
                 (account_id,),
@@ -2214,21 +2216,20 @@ def account_detail(request: Request, account_id: int):
                 SELECT
                     tk.MaTaiKhoan,
                     tk.TenDangNhap,
-                    tk.VaiTro,
+                    vt.TenVaiTro,
                     tk.TrangThai,
-                    cb.TenCanBo,
-                    cb.GioiTinh,
-                    cb.NgaySinh,
-                    cb.SoDienThoai,
-                    cb.Email,
-                    gv.TenGiangVien,
-                    gv.GioiTinh,
-                    gv.NgaySinh,
-                    gv.SoDienThoai,
-                    gv.Email
+                    nd.TenNguoiDung,
+                    nd.GioiTinh,
+                    nd.NgaySinh,
+                    nd.SoDienThoai,
+                    nd.Email,
+                    hv.TenHocVi,
+                    hh.TenHocHam
                 FROM TAI_KHOAN_DANG_NHAP tk
-                LEFT JOIN CAN_BO cb ON cb.MaTaiKhoan = tk.MaTaiKhoan
-                LEFT JOIN GIANG_VIEN gv ON gv.MaTaiKhoan = tk.MaTaiKhoan
+                LEFT JOIN NGUOI_DUNG nd ON nd.MaTaiKhoan = tk.MaTaiKhoan
+                LEFT JOIN VAI_TRO vt ON vt.MaVaiTro = nd.MaVaiTro
+                LEFT JOIN HOC_VI hv ON hv.MaHocVi = nd.MaHocVi
+                LEFT JOIN HOC_HAM hh ON hh.MaHocHam = nd.MaHocHam
                 WHERE tk.MaTaiKhoan = %s
                 """,
                 (account_id,),
@@ -2240,21 +2241,18 @@ def account_detail(request: Request, account_id: int):
                 {"error": "Không tìm thấy tài khoản."},
                 status_code=404,
             )
-        is_teacher = str(row[2]) == "1"
         return {
             "id": row[0],
             "username": row[1],
             "role": str(row[2]),
             "status": int(row[3]),
-            "name": row[9] if is_teacher else row[4],
-            "gender": row[10] if is_teacher else row[5],
-            "birth": (
-                row[11].isoformat()
-                if is_teacher and row[11]
-                else (row[6].isoformat() if row[6] else "")
-            ),
-            "tel": row[12] if is_teacher else row[7],
-            "email": row[13] if is_teacher else row[8],
+            "name": row[4],
+            "gender": row[5],
+            "birth": row[6].isoformat() if row[6] else "",
+            "tel": row[7],
+            "email": row[8],
+            "degree": row[9],
+            "title": row[10],
         }
     finally:
         conn.close()
