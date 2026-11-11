@@ -14,13 +14,20 @@
     <link rel="stylesheet" href="/static/css/auth/popup.css?v=9cce345a79" />
     <link rel="stylesheet" href="/static/css/admin/accept.css?v=2d721af3ef" />
     <link rel="stylesheet" href="/static/css/shared/ui.css?v=3a6450f69d" />
-    <link rel="stylesheet" href="/static/css/shared/date-picker.css?v=ae5bdbe927" />
+    <link
+      rel="stylesheet"
+      href="/static/css/shared/date-picker.css?v=ae5bdbe927"
+    />
     <link rel="stylesheet" href="/static/css/shared/theme.css?v=d09f9b8cb7" />
   </head>
   <body>
     <header>
       <div class="header-left">
-        <a class="header-left-logo" href="/admin/index.html" aria-label="Edu-LIMS — Trang chủ">
+        <a
+          class="header-left-logo"
+          href="/admin/index.html"
+          aria-label="Edu-LIMS — Trang chủ"
+        >
           <div class="header-left-icon">
             <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
           </div>
@@ -290,16 +297,16 @@
               </td>
               <td>
                 {{ re.TenHocPhan }} {% if re.NhomHocPhan %}
-                <br /><small>Nhóm: {{ re.NhomHocPhan }}</small>
+                <br /><small>{{ re.NhomHocPhan }}</small>
                 {% endif %}
               </td>
               <td>{{ re.TenGiangVien }}</td>
 
               <!-- loai yeu cau  -->
-              {% if re.LoaiYeuCau == 1 %}
-              <td>Dài hạn</td>
+              {% if re.LoaiYeuCau == 'thuc_hanh' %}
+              <td>Thực hành theo tuần</td>
               {% else %}
-              <td>Phát sinh</td>
+              <td>Ngày cụ thể</td>
               {% endif %}
 
               <!-- trang thai -->
@@ -359,101 +366,117 @@
         <div class="required-detail-info-container modal-panel">
           <h3 class="modal-heading">Chi tiết yêu cầu</h3>
           <div class="modal-body">
-          <div class="required-detail-status" id="detail-status"></div>
+            <div class="required-detail-status" id="detail-status"></div>
 
-          <div class="required-detail-info-item">
-            <div class="required-detail-info-title">Mã yêu cầu</div>
-            <div class="required-detail-info-describe" id="detail-id"></div>
-          </div>
-          <div class="required-detail-info-item">
-            <div class="required-detail-info-title">Tên học phần</div>
-            <div class="required-detail-info-describe" id="detail-course"></div>
-          </div>
-          <div
-            class="required-detail-info-item"
-            id="detail-group-box"
-            style="display: none"
-          >
-            <div class="required-detail-info-title">Nhóm học phần</div>
-            <div class="required-detail-info-describe" id="detail-group"></div>
-          </div>
-          <div class="required-detail-info-item">
-            <div class="required-detail-info-title">Tên phần mềm</div>
-            <div
-              class="required-detail-info-describe"
-              id="detail-program"
-            ></div>
-          </div>
-          <div class="required-detail-info-item">
-            <div class="required-detail-info-title">Số lượng máy</div>
-            <div class="required-detail-info-describe" id="detail-amount"></div>
-          </div>
-          <div class="required-detail-info-item">
-            <div class="required-detail-info-title">Buổi thực hành</div>
-            <div class="required-detail-info-describe" id="detail-lesson"></div>
-          </div>
-          <div class="required-detail-info-item">
-            <div class="required-detail-info-title">Loại yêu cầu</div>
-            <div class="required-detail-info-describe" id="detail-type"></div>
-          </div>
-
-          <!-- type = 1-->
-          <div class="required-detail-info-item" id="detail-week-day-box">
-            <div class="required-detail-info-title">Thứ thực hành</div>
-            <div
-              class="required-detail-info-describe"
-              id="detail-week-day"
-            ></div>
-          </div>
-          <div class="required-detail-info-item" id="detail-week-start-box">
-            <div class="required-detail-info-title">Tuần bắt đầu</div>
-            <div
-              class="required-detail-info-describe"
-              id="detail-week-start"
-            ></div>
-          </div>
-          <div class="required-detail-info-item" id="detail-week-end-box">
-            <div class="required-detail-info-title">Tuần kết thúc</div>
-            <div
-              class="required-detail-info-describe"
-              id="detail-week-end"
-            ></div>
-          </div>
-
-          <!-- type = 0 -->
-          <div class="required-detail-info-item" id="detail-practice-day-box">
-            <div class="required-detail-info-title">Ngày thực hành</div>
-            <div
-              class="required-detail-info-describe"
-              id="detail-practice-day"
-            ></div>
-          </div>
-
-          <div class="required-detail-note-container">
-            <div class="required-detail-note-title">Ghi chú</div>
-            <div class="required-detail-note-describe" id="detail-note"></div>
-          </div>
-
-          <div class="required-detail-send-container">
-            <div class="required-detail-send-item">
-              <div class="required-detail-send-title">Người yêu cầu</div>
+            <div class="required-detail-info-item">
+              <div class="required-detail-info-title">Mã yêu cầu</div>
+              <div class="required-detail-info-describe" id="detail-id"></div>
+            </div>
+            <div class="required-detail-info-item">
+              <div class="required-detail-info-title">Tên học phần</div>
               <div
-                class="required-detail-send-describe"
-                id="detail-teacher"
+                class="required-detail-info-describe"
+                id="detail-course"
               ></div>
             </div>
-            <div class="required-detail-send-item">
-              <div class="required-detail-send-title">Ngày yêu cầu</div>
-              <div class="required-detail-send-describe" id="detail-date"></div>
+            <div
+              class="required-detail-info-item"
+              id="detail-group-box"
+              style="display: none"
+            >
+              <div class="required-detail-info-title">Nhóm học phần</div>
+              <div
+                class="required-detail-info-describe"
+                id="detail-group"
+              ></div>
             </div>
-          </div>
+            <div class="required-detail-info-item">
+              <div class="required-detail-info-title">Tên phần mềm</div>
+              <div
+                class="required-detail-info-describe"
+                id="detail-program"
+              ></div>
+            </div>
+            <div class="required-detail-info-item">
+              <div class="required-detail-info-title">Sĩ số lớp</div>
+              <div
+                class="required-detail-info-describe"
+                id="detail-amount"
+              ></div>
+            </div>
+            <div class="required-detail-info-item">
+              <div class="required-detail-info-title">Buổi thực hành</div>
+              <div
+                class="required-detail-info-describe"
+                id="detail-lesson"
+              ></div>
+            </div>
+            <div class="required-detail-info-item">
+              <div class="required-detail-info-title">Loại yêu cầu</div>
+              <div class="required-detail-info-describe" id="detail-type"></div>
+            </div>
 
-          <div class="btn-box">
-            <div class="close-detail-btn" id="close-detail-btn">Đóng</div>
-            <div class="accept-detail-btn" id="accept-detail-btn">Duyệt</div>
-            <div class="refuse-detail-btn" id="refuse-detail-btn">Từ chối</div>
-          </div>
+            <!-- type = 1-->
+            <div class="required-detail-info-item" id="detail-week-day-box">
+              <div class="required-detail-info-title">Thứ thực hành</div>
+              <div
+                class="required-detail-info-describe"
+                id="detail-week-day"
+              ></div>
+            </div>
+            <div class="required-detail-info-item" id="detail-week-start-box">
+              <div class="required-detail-info-title">Tuần bắt đầu</div>
+              <div
+                class="required-detail-info-describe"
+                id="detail-week-start"
+              ></div>
+            </div>
+            <div class="required-detail-info-item" id="detail-week-end-box">
+              <div class="required-detail-info-title">Tuần kết thúc</div>
+              <div
+                class="required-detail-info-describe"
+                id="detail-week-end"
+              ></div>
+            </div>
 
+            <!-- type = 0 -->
+            <div class="required-detail-info-item" id="detail-practice-day-box">
+              <div class="required-detail-info-title">Ngày thực hành</div>
+              <div
+                class="required-detail-info-describe"
+                id="detail-practice-day"
+              ></div>
+            </div>
+
+            <div class="required-detail-note-container">
+              <div class="required-detail-note-title">Ghi chú</div>
+              <div class="required-detail-note-describe" id="detail-note"></div>
+            </div>
+
+            <div class="required-detail-send-container">
+              <div class="required-detail-send-item">
+                <div class="required-detail-send-title">Người yêu cầu</div>
+                <div
+                  class="required-detail-send-describe"
+                  id="detail-teacher"
+                ></div>
+              </div>
+              <div class="required-detail-send-item">
+                <div class="required-detail-send-title">Ngày yêu cầu</div>
+                <div
+                  class="required-detail-send-describe"
+                  id="detail-date"
+                ></div>
+              </div>
+            </div>
+
+            <div class="btn-box">
+              <div class="close-detail-btn" id="close-detail-btn">Đóng</div>
+              <div class="accept-detail-btn" id="accept-detail-btn">Duyệt</div>
+              <div class="refuse-detail-btn" id="refuse-detail-btn">
+                Từ chối
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -473,17 +496,21 @@
               ><i class="fa-solid fa-chevron-left"></i
             ></a>
             {% else %}
-            <span role="link" aria-disabled="true" aria-label="Trang trước"><i class="fa-solid fa-chevron-left"></i></span>
+            <span role="link" aria-disabled="true" aria-label="Trang trước"
+              ><i class="fa-solid fa-chevron-left"></i
+            ></span>
             {% endif %}
           </div>
           <div class="required-number-page">{{ page }}</div>
           <div class="required-next-page">
-          {% if amount > (page * per_page) %}
+            {% if amount > (page * per_page) %}
             <a aria-label="Trang sau" href="/admin/accept?page={{ page + 1 }}"
               ><i class="fa-solid fa-chevron-right"></i
             ></a>
             {% else %}
-            <span role="link" aria-disabled="true" aria-label="Trang sau"><i class="fa-solid fa-chevron-right"></i></span>
+            <span role="link" aria-disabled="true" aria-label="Trang sau"
+              ><i class="fa-solid fa-chevron-right"></i
+            ></span>
             {% endif %}
           </div>
         </div>
@@ -507,40 +534,37 @@
       <div class="popup modal-panel">
         <h3 class="modal-heading">Xác nhận từ chối yêu cầu</h3>
         <div class="modal-body">
-        <div class="popup-icon">
-          <i class="fa-solid fa-circle-question"></i>
-        </div>
-
-
-
-        <p style="margin: 12px 0">
-          Bạn có chắc chắn muốn từ chối yêu cầu thực hành?
-        </p>
-
-        <p style="font-size: 13px; color: #666">
-          Vui lòng nhập lý do từ chối yêu cầu này.
-        </p>
-
-        <form id="refuse-required-form" method="post" action="">
-          <div class="reason-input-refuse" id="reason-input-refuse">
-            <input
-              type="text"
-              name="reason"
-              id="refuse-reason"
-              placeholder="Nhập lý do từ chối..."
-            />
+          <div class="popup-icon">
+            <i class="fa-solid fa-circle-question"></i>
           </div>
-          <div class="message-error" id="message-error"></div>
 
-          <div class="popup-actions" style="margin-top: 20px">
-            <button type="button" id="refuse-required-cancel">Hủy</button>
+          <p style="margin: 12px 0">
+            Bạn có chắc chắn muốn từ chối yêu cầu thực hành?
+          </p>
 
-            <button type="submit" id="refuse-required-confirm">
-              Xác nhận từ chối
-            </button>
-          </div>
-        </form>
+          <p style="font-size: 13px; color: #666">
+            Vui lòng nhập lý do từ chối yêu cầu này.
+          </p>
 
+          <form id="refuse-required-form" method="post" action="">
+            <div class="reason-input-refuse" id="reason-input-refuse">
+              <input
+                type="text"
+                name="reason"
+                id="refuse-reason"
+                placeholder="Nhập lý do từ chối..."
+              />
+            </div>
+            <div class="message-error" id="message-error"></div>
+
+            <div class="popup-actions" style="margin-top: 20px">
+              <button type="button" id="refuse-required-cancel">Hủy</button>
+
+              <button type="submit" id="refuse-required-confirm">
+                Xác nhận từ chối
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

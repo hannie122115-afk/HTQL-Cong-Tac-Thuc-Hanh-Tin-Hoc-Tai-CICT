@@ -78,6 +78,7 @@ function getAllSchedules() {
     weekEnd: Number(item.MaTuanKetThuc),
     weekId: Number(item.MaTuanHoc) || null,
     currentWeekOnly: Boolean(item.MaTuanHoc),
+    existingSchedule: true,
   }));
 
   const newSchedules = temporarySchedules.map((item) => ({
@@ -90,9 +91,10 @@ function getAllSchedules() {
     dates: [],
     weekStart: Number(item.weekStart),
     weekEnd: Number(item.weekEnd),
-    weekId: Number(item.weekId),
+    weekId: item.currentWeekOnly ? Number(item.weekId) : null,
     day: Number(item.day),
     currentWeekOnly: Boolean(item.currentWeekOnly),
+    existingSchedule: Boolean(item.existingSchedule),
   }));
 
   return [...databaseSchedules, ...newSchedules];
@@ -245,12 +247,18 @@ function renderScheduledRequests() {
       card.appendChild(teacherElement);
 
       card.dataset.requiredId = schedule.requiredId;
+      card.dataset.source = schedule.existingSchedule
+        ? "database"
+        : schedule.source;
+      card.dataset.weekId = schedule.weekId || "";
       card.dataset.course = course;
       card.dataset.group = group;
       card.dataset.teacher = teacher;
       card.dataset.session = schedule.session;
       card.dataset.machines = item.SoLuongMay || item.machines || "";
-      card.dataset.software = item.MaPhanMem || item.software || "";
+      card.dataset.software = JSON.stringify(
+        item.MaPhanMem || item.software || [],
+      );
       card.dataset.date = date;
       card.dataset.days = schedule.days;
       card.dataset.weekStart = schedule.weekStart || "";
@@ -442,6 +450,7 @@ function checkRoomSuitableJS(room, item) {
   const configId = room.dataset.configId;
 
   const softwareList = JSON.parse(room.dataset.software || "[]");
+  const requiredSoftware = JSON.parse(item.dataset.software || "[]");
 
   if (roomStatus !== 1) return false;
   if (!configId) return false;
@@ -450,7 +459,9 @@ function checkRoomSuitableJS(room, item) {
     return false;
   }
 
-  if (!softwareList.includes(Number(item.dataset.software))) {
+  if (!requiredSoftware.every((programId) =>
+    softwareList.includes(Number(programId)),
+  )) {
     return false;
   }
 
@@ -667,6 +678,8 @@ function restoreRequiredItem(card) {
   item.draggable = isEditing;
 
   item.dataset.requiredId = card.dataset.requiredId;
+  item.dataset.source = card.dataset.source || "";
+  item.dataset.weekId = card.dataset.weekId || "";
   item.dataset.course = card.dataset.course;
   item.dataset.group = card.dataset.group || "";
   item.dataset.teacher = card.dataset.teacher;
@@ -888,6 +901,8 @@ function placeRequestOnCalendar(cell, item, day, weekId, currentWeekOnly) {
     session: Number(item.dataset.session),
     weekId,
     currentWeekOnly,
+    existingSchedule: item.dataset.source === "database",
+    sourceWeekId: Number(item.dataset.weekId) || null,
     course: item.dataset.course,
     group: item.dataset.group || "",
     teacher: item.dataset.teacher,
@@ -1281,6 +1296,7 @@ saveBtn.addEventListener("click", async () => {
           day: schedule.day,
           weekId: schedule.weekId,
           currentWeekOnly: Boolean(schedule.currentWeekOnly),
+          existingSchedule: Boolean(schedule.existingSchedule),
         })),
         removedDays: Array.from(removedScheduleDays),
         removedDayWeeks: Array.from(removedScheduleDayWeeks),

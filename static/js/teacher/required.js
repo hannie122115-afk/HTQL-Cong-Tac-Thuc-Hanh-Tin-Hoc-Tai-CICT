@@ -25,6 +25,9 @@ const addBtn = document.getElementById("required-add-act");
 const addContainer = document.getElementById("required-add-container");
 const cancelBtn = document.getElementById("cancel-add-required-btn");
 const requiredForm = document.getElementById("required-form");
+const semesterSelect = document.getElementById("required-semester");
+const groupSelect = document.getElementById("required_group_id");
+const courseSoftware = document.getElementById("required-course-software");
 
 addBtn.addEventListener("click", function () {
   if (
@@ -46,6 +49,7 @@ cancelBtn.addEventListener("click", function () {
   addContainer.style.display = "none";
   if (requiredForm) {
     requiredForm.reset();
+    resetCourseDetails();
   }
 });
 
@@ -55,26 +59,110 @@ const courseInput = document.getElementById("required_course_name");
 const courseIdInput = document.getElementById("required_course_id");
 const suggestionCourseBox = document.getElementById("course-suggestions");
 
+function resetCourseDetails() {
+  groupSelect.replaceChildren(new Option("Chọn học phần trước", ""));
+  groupSelect.disabled = true;
+  courseSoftware.textContent = "Chọn học phần để xem phần mềm.";
+}
+
+async function loadCourseDetails(courseId) {
+  const semesterId = semesterSelect.value;
+  if (!courseId || !semesterId) {
+    resetCourseDetails();
+    return;
+  }
+
+  groupSelect.replaceChildren(new Option("Đang tải nhóm học phần...", ""));
+  groupSelect.disabled = true;
+  courseSoftware.textContent = "Đang tải phần mềm tương thích...";
+
+  try {
+    const params = new URLSearchParams({
+      course_id: courseId,
+      semester_id: semesterId,
+    });
+    const [groupsResponse, softwareResponse] = await Promise.all([
+      fetch(`/api/course-groups?${params}`),
+      fetch(`/api/course-software?${params}`),
+    ]);
+    if (!groupsResponse.ok || !softwareResponse.ok) {
+      throw new Error("Không tải được nhóm học phần hoặc phần mềm.");
+    }
+
+    const [groups, programs] = await Promise.all([
+      groupsResponse.json(),
+      softwareResponse.json(),
+    ]);
+    if (
+      courseIdInput.value !== String(courseId) ||
+      semesterSelect.value !== semesterId
+    ) {
+      return;
+    }
+
+    groupSelect.replaceChildren(new Option("Chọn nhóm học phần", ""));
+    groups.forEach((group) => {
+      groupSelect.appendChild(new Option(group.TenNhom, group.MaNhom));
+    });
+    groupSelect.disabled = groups.length === 0;
+    if (groups.length === 0) {
+      groupSelect.replaceChildren(
+        new Option("Không có nhóm trong học kỳ này", ""),
+      );
+    }
+    courseSoftware.textContent = programs.length
+      ? programs.map((program) => program.TenPhanMem).join(", ")
+      : "Học phần chưa có phần mềm tương thích.";
+  } catch (error) {
+    console.error(error);
+    resetCourseDetails();
+    showRequiredError(
+      "Không tải được nhóm học phần và phần mềm tương thích.",
+      groupSelect,
+    );
+  }
+}
+
+semesterSelect.addEventListener("change", function () {
+  courseInput.value = "";
+  courseIdInput.value = "";
+  suggestionCourseBox.replaceChildren();
+  resetCourseDetails();
+  weekStartInput.value = "";
+  weekStartIdInput.value = "";
+  weekEndInput.value = "";
+  weekEndIdInput.value = "";
+  weekStartDate.textContent = "";
+  weekEndDate.textContent = "";
+});
+
 courseInput.addEventListener("input", function () {
   const keyword = this.value.trim();
 
-  // Xóa mã đã chọn nếu người dùng sửa nội dung
   courseIdInput.value = "";
+  resetCourseDetails();
   clearTimeout(searchTimeout);
   suggestionCourseBox.replaceChildren();
-  if (keyword.length === 0) {
+  if (keyword.length === 0 || !semesterSelect.value) {
     return;
   }
 
   searchTimeout = setTimeout(async function () {
     try {
+      const semesterId = semesterSelect.value;
       const response = await fetch(
-        `/api/courses?keyword=${encodeURIComponent(keyword)}`,
+        `/api/courses?keyword=${encodeURIComponent(keyword)}&semester_id=${encodeURIComponent(semesterId)}`,
       );
       if (!response.ok) {
         throw new Error("Không thể tìm học phần");
       }
       const courses = await response.json();
+      if (
+        courseInput.value.trim() !== keyword ||
+        semesterSelect.value !== semesterId
+      ) {
+        return;
+      }
       suggestionCourseBox.replaceChildren();
 
       courses.forEach(function (course) {
@@ -86,6 +174,7 @@ courseInput.addEventListener("input", function () {
           courseInput.value = course.TenHocPhan;
           courseIdInput.value = course.MaHocPhan;
           suggestionCourseBox.replaceChildren();
+          loadCourseDetails(course.MaHocPhan);
         });
         suggestionCourseBox.appendChild(item);
       });
@@ -105,64 +194,6 @@ courseInput.addEventListener("input", function () {
 document.addEventListener("click", function (event) {
   if (!event.target.closest(".required-add-item")) {
     suggestionCourseBox.replaceChildren();
-  }
-});
-
-//PROGRAMS
-
-const programInput = document.getElementById("required_program_name");
-const programIdInput = document.getElementById("required_program_id");
-const suggestionProgramBox = document.getElementById("program-suggestions");
-
-programInput.addEventListener("input", function () {
-  const keyword = this.value.trim();
-
-  programIdInput.value = "";
-  clearTimeout(searchTimeout);
-  suggestionProgramBox.replaceChildren();
-  if (keyword.length === 0) {
-    return;
-  }
-
-  searchTimeout = setTimeout(async function () {
-    try {
-      const response = await fetch(
-        `/api/programs?keyword=${encodeURIComponent(keyword)}`,
-      );
-      if (!response.ok) {
-        throw new Error("Không thể tìm học phần");
-      }
-      const programs = await response.json();
-      suggestionProgramBox.replaceChildren();
-
-      programs.forEach(function (program) {
-        const item = document.createElement("div");
-        item.className = "program-suggestion-item";
-        item.textContent = `${program.MaPhanMem} - ${program.TenPhanMem}`;
-
-        item.addEventListener("click", function () {
-          programInput.value = program.TenPhanMem;
-          programIdInput.value = program.MaPhanMem;
-          suggestionProgramBox.replaceChildren();
-        });
-        suggestionProgramBox.appendChild(item);
-      });
-
-      if (programs.length === 0) {
-        const empty = document.createElement("div");
-        empty.className = "program-suggestion-empty";
-        empty.textContent = "Không tìm thấy phần mềm";
-        suggestionProgramBox.appendChild(empty);
-      }
-    } catch (error) {
-      console.error(error);
-      suggestionProgramBox.replaceChildren();
-    }
-  }, 300);
-});
-document.addEventListener("click", function (event) {
-  if (!event.target.closest(".required-add-item")) {
-    suggestionProgramBox.replaceChildren();
   }
 });
 
@@ -192,18 +223,24 @@ function setupWeekAutocomplete(input, idInput, suggestionBox, dateSpan) {
     clearTimeout(searchTimeout);
     suggestionBox.replaceChildren();
 
-    if (!keyword) return;
+    if (!keyword || !semesterSelect.value) return;
     searchTimeout = setTimeout(async function () {
       try {
+        const semesterId = semesterSelect.value;
         const response = await fetch(
-          `/api/weeks?keyword=${encodeURIComponent(keyword)}`,
+          `/api/weeks?keyword=${encodeURIComponent(keyword)}&semester_id=${encodeURIComponent(semesterId)}`,
         );
         if (!response.ok) {
           throw new Error("Không thể tìm tuần học");
         }
 
         const weeks = await response.json();
-        if (input.value.trim() !== keyword) return;
+        if (
+          input.value.trim() !== keyword ||
+          semesterSelect.value !== semesterId
+        ) {
+          return;
+        }
         suggestionBox.replaceChildren();
 
         weeks.forEach(function (week) {
@@ -218,10 +255,15 @@ function setupWeekAutocomplete(input, idInput, suggestionBox, dateSpan) {
 
             const [day, month, year] = week.NgayBatDau.split("/");
             const startDate = new Date(year, month - 1, day);
+            const [daye, monthe, yeare] = week.NgayKetThuc.split("/");
+            const startEnd = new Date(yeare, monthe - 1, daye);
             startDate.setHours(0, 0, 0, 0);
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            if (startDate >= today) {
+            if (
+              (startDate <= today && startEnd >= today) ||
+              (startDate > today && startEnd > today)
+            ) {
               dateSpan.classList.remove("field-error");
               input.removeAttribute("aria-invalid");
               dateSpan.textContent = `Từ ngày ${week.NgayBatDau} đến ngày ${week.NgayKetThuc}.`;
@@ -289,7 +331,7 @@ weekDayField.hidden = false;
 
 requiredTypeRadios.forEach((radio) => {
   radio.addEventListener("change", function () {
-    if (this.value === "1") {
+    if (this.value === "thuc_hanh") {
       weekStartField.hidden = false;
       weekEndField.hidden = false;
       weekDayField.hidden = false;
@@ -307,8 +349,40 @@ requiredTypeRadios.forEach((radio) => {
 const popupError = document.getElementById("popup-error");
 const popupErrorClose = document.getElementById("popup-error-close");
 const popupErrorMessage = document.getElementById("popup-error-message");
-
+const practiceDayInput = document.getElementById("required_practice_day");
 let inputToFocus = null;
+
+function showRequiredError(message, target) {
+  popupErrorMessage.textContent = message;
+  inputToFocus = target;
+  popupError.classList.add("show");
+}
+
+function getErrorFocusTarget(message) {
+  if (message.includes("học kỳ")) return semesterSelect;
+  if (message.includes("nhóm học phần")) return groupSelect;
+  if (message.includes("học phần")) return courseInput;
+  if (message.includes("buổi thực hành")) {
+    return document.querySelector('input[name="required_lesson"]');
+  }
+  if (message.includes("thứ thực hành")) {
+    return document.querySelector('input[name="required_week_day"]');
+  }
+  if (message.includes("ngày thực hành")) return practiceDayInput;
+  if (message.includes("tuần") && message.includes("kết thúc")) {
+    return weekEndInput;
+  }
+  if (message.includes("tuần")) return weekStartInput;
+  if (message.includes("loại yêu cầu")) {
+    return document.querySelector('input[name="required_type"]');
+  }
+  return null;
+}
+
+if (popupErrorMessage.textContent.trim()) {
+  inputToFocus = getErrorFocusTarget(popupErrorMessage.textContent);
+  popupError.classList.add("show");
+}
 
 // Đóng popup error
 popupErrorClose.addEventListener("click", function () {
@@ -337,31 +411,22 @@ if (requiredPage && popupSuccess) {
 requiredForm.addEventListener("submit", function (e) {
   if (!courseInput.value.trim() || !courseIdInput.value) {
     e.preventDefault();
-    popupErrorMessage.textContent =
-      "Vui lòng chọn Học phần từ danh sách gợi ý!";
-    popupError.classList.add("show");
-    inputToFocus = courseInput;
+    showRequiredError(
+      "Vui lòng chọn Học phần từ danh sách gợi ý!",
+      courseInput,
+    );
     return;
   }
 
-  if (!programInput.value.trim() || !programIdInput.value) {
+  if (!semesterSelect.value) {
     e.preventDefault();
-    popupErrorMessage.textContent =
-      "Vui lòng chọn Phần mềm từ danh sách gợi ý!";
-    popupError.classList.add("show");
-    inputToFocus = programInput;
+    showRequiredError("Vui lòng chọn học kỳ.", semesterSelect);
     return;
   }
 
-  const computerAmountInput = document.querySelector(
-    'input[name="required_computer_amount"]',
-  );
-  if (!computerAmountInput.value || parseInt(computerAmountInput.value) <= 0) {
+  if (!groupSelect.value) {
     e.preventDefault();
-    popupErrorMessage.textContent =
-      "Vui lòng nhập Số lượng máy tính hợp lệ (lớn hơn 0 và nhỏ hơn 60)!";
-    popupError.classList.add("show");
-    inputToFocus = computerAmountInput;
+    showRequiredError("Vui lòng chọn nhóm học phần.", groupSelect);
     return;
   }
 
@@ -369,33 +434,34 @@ requiredForm.addEventListener("submit", function (e) {
     'input[name="required_type"]:checked',
   )?.value;
 
-  if (selectedType === "1") {
+  if (selectedType === "thuc_hanh") {
     const selectedWeekDays = document.querySelectorAll(
       'input[name="required_week_day"]:checked',
     );
     if (selectedWeekDays.length === 0) {
       e.preventDefault();
-      popupErrorMessage.textContent =
-        "Vui lòng chọn ít nhất một Thứ thực hành trong tuần!";
-      popupError.classList.add("show");
+      showRequiredError(
+        "Vui lòng chọn ít nhất một Thứ thực hành trong tuần!",
+        document.querySelector('input[name="required_week_day"]'),
+      );
       return;
     }
 
     if (!weekStartInput.value.trim() || !weekStartIdInput.value) {
       e.preventDefault();
-      popupErrorMessage.textContent =
-        "Vui lòng chọn Tuần bắt đầu từ danh sách gợi ý!";
-      popupError.classList.add("show");
-      inputToFocus = weekStartInput;
+      showRequiredError(
+        "Vui lòng chọn Tuần bắt đầu từ danh sách gợi ý!",
+        weekStartInput,
+      );
       return;
     }
 
     if (!weekEndInput.value.trim() || !weekEndIdInput.value) {
       e.preventDefault();
-      popupErrorMessage.textContent =
-        "Vui lòng chọn Tuần kết thúc từ danh sách gợi ý!";
-      popupError.classList.add("show");
-      inputToFocus = weekEndInput;
+      showRequiredError(
+        "Vui lòng chọn Tuần kết thúc từ danh sách gợi ý!",
+        weekEndInput,
+      );
       return;
     }
 
@@ -403,22 +469,20 @@ requiredForm.addEventListener("submit", function (e) {
     const endWeekVal = parseInt(weekEndIdInput.value, 10);
     if (endWeekVal < startWeekVal) {
       e.preventDefault();
-      popupErrorMessage.textContent =
-        "Tuần kết thúc phải lớn hơn hoặc bằng tuần bắt đầu!";
-      popupError.classList.add("show");
-      inputToFocus = weekEndInput;
+      showRequiredError(
+        "Tuần kết thúc phải lớn hơn hoặc bằng tuần bắt đầu!",
+        weekEndInput,
+      );
       return;
     }
-  } else if (selectedType === "0") {
+  } else if (selectedType === "khac") {
     const practiceDayInput = document.querySelector(
       'input[name="required_practice_day"]',
     );
 
     if (!practiceDayInput || !practiceDayInput.value.trim()) {
       e.preventDefault();
-      popupErrorMessage.textContent = "Vui lòng chọn Ngày thực hành!";
-      popupError.classList.add("show");
-      inputToFocus = practiceDayInput;
+      showRequiredError("Vui lòng chọn Ngày thực hành!", practiceDayInput);
       return;
     }
   }
@@ -435,24 +499,16 @@ document.querySelectorAll(".see-detail-act").forEach(function (button) {
     document.getElementById("detail-id").textContent = `YC${data.id}`;
     document.getElementById("detail-course").textContent =
       `${data.courseId} - ${data.course}`;
-    const detailGroupBox = document.getElementById("detail-group-box");
-    const detailGroup = document.getElementById("detail-group");
-    detailGroup.textContent = data.group || "";
-    detailGroupBox.style.display = data.group ? "flex" : "none";
+    document.getElementById("detail-group").textContent = `${data.group}`;
+    document.getElementById("detail-number").textContent =
+      `${data.number} sinh viên`;
     document.getElementById("detail-program").textContent = data.program;
-    document.getElementById("detail-amount").textContent = `${data.amount} máy`;
     document.getElementById("detail-note").textContent =
       data.note || "Không có";
     document.getElementById("detail-teacher").textContent = data.teacher || "";
     document.getElementById("detail-date").textContent = data.date || "";
 
-    const lessons = {
-      1: "Sáng (7h00 - 11h30)",
-      2: "Chiều (13h30 - 17h00)",
-      3: "Tối (18h20 - 20h00)",
-    };
-    document.getElementById("detail-lesson").textContent =
-      lessons[data.lesson] || "";
+    document.getElementById("detail-lesson").textContent = data.lesson || "";
 
     const statuses = {
       0: '<i class="fa-regular fa-hourglass"></i> Chờ duyệt',
@@ -463,7 +519,8 @@ document.querySelectorAll(".see-detail-act").forEach(function (button) {
     const detailStatus = document.getElementById("detail-status");
     detailStatus.innerHTML = statuses[data.status] || "";
     detailStatus.className = `required-detail-status status-${
-      { 0: "warning", 1: "info", 2: "success", 3: "danger" }[data.status] || "muted"
+      { 0: "warning", 1: "info", 2: "success", 3: "danger" }[data.status] ||
+      "muted"
     }`;
 
     const weekDayBox = document.getElementById("detail-week-day-box");
@@ -471,8 +528,8 @@ document.querySelectorAll(".see-detail-act").forEach(function (button) {
     const weekEndBox = document.getElementById("detail-week-end-box");
     const practiceDayBox = document.getElementById("detail-practice-day-box");
 
-    if (String(data.type) === "1") {
-      document.getElementById("detail-type").textContent = "Dài hạn";
+    if (data.type === "thuc_hanh") {
+      document.getElementById("detail-type").textContent = "Thực hành";
 
       let formattedThu = "";
       if (data.thu) {
@@ -492,7 +549,7 @@ document.querySelectorAll(".see-detail-act").forEach(function (button) {
       weekEndBox.style.display = "flex";
       practiceDayBox.style.display = "none";
     } else {
-      document.getElementById("detail-type").textContent = "Phát sinh";
+      document.getElementById("detail-type").textContent = "Khác";
       document.getElementById("detail-practice-day").textContent = data.ngayTh;
 
       weekDayBox.style.display = "none";

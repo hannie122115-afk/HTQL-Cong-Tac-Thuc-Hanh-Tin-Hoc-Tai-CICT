@@ -16,7 +16,9 @@ document.querySelectorAll(".see-detail-act").forEach(function (button) {
     detailGroup.textContent = data.group || "";
     detailGroupBox.style.display = data.group ? "flex" : "none";
     document.getElementById("detail-program").textContent = data.program;
-    document.getElementById("detail-amount").textContent = `${data.amount} máy`;
+    document.getElementById("detail-amount").textContent = data.amount
+      ? `${data.amount} sinh viên`
+      : "Chưa cập nhật";
     document.getElementById("detail-note").textContent =
       data.note || "Không có";
     document.getElementById("detail-teacher").textContent = data.teacher || "";
@@ -44,8 +46,9 @@ document.querySelectorAll(".see-detail-act").forEach(function (button) {
     const weekEndBox = document.getElementById("detail-week-end-box");
     const practiceDayBox = document.getElementById("detail-practice-day-box");
 
-    if (String(data.type) === "1") {
-      document.getElementById("detail-type").textContent = "Dài hạn";
+    if (data.type === "thuc_hanh") {
+      document.getElementById("detail-type").textContent =
+        "Thực hành theo tuần";
 
       let formattedThu = "";
       if (data.thu) {
@@ -65,7 +68,7 @@ document.querySelectorAll(".see-detail-act").forEach(function (button) {
       weekEndBox.style.display = "flex";
       practiceDayBox.style.display = "none";
     } else {
-      document.getElementById("detail-type").textContent = "Phát sinh";
+      document.getElementById("detail-type").textContent = "Ngày cụ thể";
       document.getElementById("detail-practice-day").textContent = data.ngayTh;
 
       weekDayBox.style.display = "none";

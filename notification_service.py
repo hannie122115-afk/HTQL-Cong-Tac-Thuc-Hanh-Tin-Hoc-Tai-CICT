@@ -33,21 +33,18 @@ def get_schedule_notification_accounts(
 
     cursor.execute(
         """
-            SELECT yc.MaYeuCau, gv.MaTaiKhoan, cb.MaTaiKhoan
-            FROM YEU_CAU_XEP_LICH yc
-            JOIN GIANG_VIEN gv ON gv.MaGiangVien = yc.MaGiangVien
-            LEFT JOIN YEU_CAU_THU yct ON yct.MaYeuCau = yc.MaYeuCau
-            LEFT JOIN CAN_BO cb ON cb.MaCanBo = yct.MaCanBo
-            WHERE yc.MaYeuCau = ANY(%s)
+            SELECT lth.MaLichThucHanh, nd.MaTaiKhoan
+            FROM LICH_THUC_HANH lth
+            JOIN LOP_HOC_PHAN lhp ON lhp.MaLopHocPhan = lth.MaLopHocPhan
+            JOIN NGUOI_DUNG nd ON nd.MaNguoiDung = lhp.MaGiangVien
+            WHERE lth.MaLichThucHanh = ANY(%s)
         """,
         (list(request_ids),),
     )
     recipients = {request_id: set() for request_id in request_ids}
-    for request_id, teacher_account_id, staff_account_id in cursor.fetchall():
+    for request_id, teacher_account_id in cursor.fetchall():
         if teacher_account_id is not None:
             recipients[request_id].add(teacher_account_id)
-        if staff_account_id is not None:
-            recipients[request_id].add(staff_account_id)
     return recipients
 
 

@@ -2330,79 +2330,158 @@ def get_required(
 
     cursor.execute(
         """
-            SELECT 
-                yc.MaYeuCau AS "MaYeuCau"
-                , TO_CHAR(yc.NgayYeuCau, 'DD/MM/YYYY') AS "NgayYeuCau"
-                , yc.BuoiThucHanh AS "BuoiThucHanh"
-                , yc.SoLuongMay AS "SoLuongMay"
-                , yc.NhomHocPhan AS "NhomHocPhan"
-                , yc.TrangThai AS "TrangThai"
-                , yc.GhiChu AS "GhiChu"
-                , TO_CHAR(yc.NgayThucHanh, 'DD/MM/YYYY') AS "NgayThucHanh"
-                , STRING_AGG(
-                    DISTINCT yct.thu::text,
-                    ', ' ORDER BY yct.thu::text
-                ) AS "DanhSachThu"
-                , hp.TenHocPhan AS "TenHocPhan"
-                , hp.MaHocPhan AS "MaHocPhan"
-                , pm.TenPhanMem AS "TenPhanMem"
-                , gv.TenGiangVien AS "TenGiangVien"
-                , qtv.TenQuanTriVien AS "TenQuanTriVien"
-                , tbd.TenTuanHoc AS "TuanBatDau"
-                , tkt.TenTuanHoc AS "TuanKetThuc"
-                , CASE 
-                    WHEN yc.NgayThucHanh IS NOT NULL THEN 0 
-                    ELSE 1
-                END AS "LoaiYeuCau"
-                , EXISTS (
+            WITH filtered_schedule AS (
+                SELECT
+                    lth.MaLichThucHanh,
+                    lth.MaLopHocPhan,
+                    lth.LoaiYeuCau,
+                    lth.MaBuoi,
+                    lth.MaTrangThai,
+                    lth.NgayYeuCau,
+                    lth.NgayThucHanh,
+                    lth.MaThu,
+                    lth.MaTuanHoc,
+                    lth.GhiChu,
+                    th.NgayBatDau AS NgayTuanBatDau,
+                    lhp.MaHocPhan,
+                    lhp.MaHocKy,
+                    lhp.MaGiangVien,
+                    lhp.SiSo,
+                    hp.TenHocPhan,
+                    nd.TenNguoiDung AS TenGiangVien,
+                    hk.TenHocKy,
+                    b.TenBuoi,
+                    tt.TenTrangThai,
+                    th.TenTuanHoc,
+                    n.TenNhom
+                FROM LICH_THUC_HANH lth
+                JOIN LOP_HOC_PHAN lhp
+                    ON lhp.MaLopHocPhan = lth.MaLopHocPhan
+                JOIN HOC_PHAN hp ON hp.MaHocPhan = lhp.MaHocPhan
+                JOIN NGUOI_DUNG nd ON nd.MaNguoiDung = lhp.MaGiangVien
+                JOIN HOC_KY hk ON hk.MaHocKy = lhp.MaHocKy
+                JOIN BUOI b ON b.MaBuoi = lth.MaBuoi
+                JOIN TRANG_THAI tt ON tt.MaTrangThai = lth.MaTrangThai
+                JOIN NHOM n ON n.MaNhom = lhp.MaNhom
+                LEFT JOIN TUAN_HOC th ON th.MaTuanHoc = lth.MaTuanHoc
+                WHERE hp.TenHocPhan ILIKE %s
+                    AND (%s IS NULL OR %s = '' OR lth.NgayYeuCau::date >= %s::date)
+                    AND (%s IS NULL OR %s = '' OR lth.NgayYeuCau::date <= %s::date)
+                    AND (%s IS NULL OR lth.MaTrangThai = %s)
+            ),
+            grouped_requests AS (
+                SELECT
+                    MIN(MaLichThucHanh) AS MaYeuCau,
+                    MaLopHocPhan,
+                    MaHocPhan,
+                    MaHocKy,
+                    TenHocKy,
+                    SiSo,
+                    TenNhom,
+                    TenHocPhan,
+                    TenGiangVien,
+                    LoaiYeuCau,
+                    MaBuoi,
+                    TenBuoi,
+                    MaTrangThai,
+                    TenTrangThai,
+                    NgayYeuCau,
+                    GhiChu,
+                    CASE
+                        WHEN LoaiYeuCau = 'khac' THEN NgayThucHanh
+                        ELSE NULL
+                    END AS NgayThucHanh,
+                    STRING_AGG(
+                        DISTINCT MaThu::text,
+                        ', ' ORDER BY MaThu::text
+                    ) FILTER (WHERE MaThu IS NOT NULL) AS DanhSachThu,
+                    MIN(TenTuanHoc) AS TuanBatDau,
+                    MAX(TenTuanHoc) AS TuanKetThuc,
+                    (ARRAY_AGG(MaTuanHoc ORDER BY NgayTuanBatDau))[1]
+                        AS MaTuanBatDau,
+                    (ARRAY_AGG(MaTuanHoc ORDER BY NgayTuanBatDau DESC))[1]
+                        AS MaTuanKetThuc
+                FROM filtered_schedule
+                GROUP BY
+                    MaLopHocPhan,
+                    MaHocPhan,
+                    MaHocKy,
+                    TenHocKy,
+                    SiSo,
+                    TenNhom,
+                    TenHocPhan,
+                    TenGiangVien,
+                    LoaiYeuCau,
+                    MaBuoi,
+                    TenBuoi,
+                    MaTrangThai,
+                    TenTrangThai,
+                    NgayYeuCau,
+                    GhiChu,
+                    CASE
+                        WHEN LoaiYeuCau = 'khac' THEN NgayThucHanh
+                        ELSE NULL
+                    END
+            )
+            SELECT
+                gr.MaYeuCau AS "MaYeuCau",
+                gr.MaHocPhan AS "MaHocPhan",
+                gr.TenHocPhan AS "TenHocPhan",
+                gr.TenNhom AS "NhomHocPhan",
+                gr.SiSo AS "SoLuongMay",
+                (
+                    SELECT STRING_AGG(pm.TenPhanMem, ', ' ORDER BY pm.TenPhanMem)
+                    FROM HOC_PHAN_PHAN_MEM hppm
+                    JOIN PHAN_MEM pm ON pm.MaPhanMem = hppm.MaPhanMem
+                    WHERE hppm.MaHocPhan = gr.MaHocPhan
+                ) AS "TenPhanMem",
+                COALESCE(
+                    (
+                        SELECT ARRAY_AGG(hppm.MaPhanMem ORDER BY hppm.MaPhanMem)
+                        FROM HOC_PHAN_PHAN_MEM hppm
+                        WHERE hppm.MaHocPhan = gr.MaHocPhan
+                    ),
+                    ARRAY[]::integer[]
+                ) AS "MaPhanMem",
+                gr.LoaiYeuCau AS "LoaiYeuCau",
+                gr.MaBuoi AS "BuoiThucHanh",
+                gr.TenBuoi AS "TenBuoi",
+                gr.MaTrangThai AS "TrangThai",
+                gr.TenTrangThai AS "TenTrangThai",
+                gr.GhiChu AS "GhiChu",
+                TO_CHAR(gr.NgayThucHanh, 'DD/MM/YYYY') AS "NgayThucHanh",
+                gr.DanhSachThu AS "DanhSachThu",
+                gr.TuanBatDau AS "TuanBatDau",
+                gr.TuanKetThuc AS "TuanKetThuc",
+                gr.MaTuanBatDau AS "MaTuanBatDau",
+                gr.MaTuanKetThuc AS "MaTuanKetThuc",
+                gr.TenHocKy AS "TenHocKy",
+                TO_CHAR(gr.NgayYeuCau, 'DD/MM/YYYY') AS "NgayYeuCau",
+                gr.TenGiangVien AS "TenGiangVien",
+                EXISTS (
                     SELECT 1
                     FROM THONG_BAO tb
                     WHERE tb.MaTaiKhoan = %s
                       AND tb.LoaiThongBao = %s
-                      AND tb.MaDoiTuong = yc.MaYeuCau
+                      AND tb.MaDoiTuong = gr.MaYeuCau
                       AND tb.DaXem = FALSE
                 ) AS "ChuaXem"
-            FROM YEU_CAU_XEP_LICH yc
-            JOIN HOC_PHAN hp ON hp.MaHocPhan = yc.MaHocPhan
-            JOIN PHAN_MEM pm ON pm.MaPhanMem = yc.MaPhanMem
-            JOIN GIANG_VIEN gv ON gv.MaGiangVien = yc.MaGiangVien
-            LEFT JOIN QUAN_TRI_VIEN qtv ON qtv.MaQuanTriVien = yc.MaQuanTriVien
-            LEFT JOIN TUAN_HOC tbd ON tbd.MaTuanHoc = yc.MaTuanBatDau
-            LEFT JOIN TUAN_HOC tkt ON tkt.MaTuanHoc = yc.MaTuanKetThuc
-            LEFT JOIN YEU_CAU_THU yct ON yct.MaYeuCau = yc.MaYeuCau
-            WHERE (%s IS NULL OR %s = '' OR yc.NgayYeuCau::date >= %s::date)
-                AND (%s IS NULL OR %s = '' OR yc.NgayYeuCau::date <= %s::date)
-                AND (%s IS NULL OR yc.TrangThai = %s)
-            GROUP BY
-                yc.MaYeuCau
-                , yc.NgayYeuCau
-                , yc.BuoiThucHanh
-                , yc.SoLuongMay
-                , yc.NhomHocPhan
-                , yc.TrangThai
-                , yc.GhiChu
-                , yc.NgayThucHanh
-                , hp.TenHocPhan
-                , hp.MaHocPhan
-                , pm.TenPhanMem
-                , gv.TenGiangVien
-                , qtv.TenQuanTriVien
-                , tbd.TenTuanHoc
-                , tkt.TenTuanHoc
-            ORDER BY yc.NgayYeuCau DESC
+            FROM grouped_requests gr
+            ORDER BY gr.NgayYeuCau DESC, gr.MaYeuCau DESC
             LIMIT %s OFFSET %s
         """,
         (
+            "%",
+            date_from_val,
+            date_from_val,
+            date_from_val,
+            date_to_val,
+            date_to_val,
+            date_to_val,
+            status_val,
+            status_val,
             account_id,
             NOTIFICATION_TYPE_SCHEDULE_REQUEST,
-            date_from_val,
-            date_from_val,
-            date_from_val,
-            date_to_val,
-            date_to_val,
-            date_to_val,
-            status_val,
-            status_val,
             per_page,
             offset,
         ),
@@ -2434,12 +2513,36 @@ def get_sum_required(created_date_from, created_date_to, status):
 
     cursor.execute(
         """
-            SELECT COUNT(DISTINCT yc.MaYeuCau)
-            FROM YEU_CAU_XEP_LICH yc
-            JOIN HOC_PHAN hp ON hp.MaHocPhan = yc.MaHocPhan
-            WHERE (%s IS NULL OR %s = '' OR yc.NgayYeuCau::date >= %s::date)
-                AND (%s IS NULL OR %s = '' OR yc.NgayYeuCau::date <= %s::date)
-                AND (%s IS NULL OR yc.TrangThai = %s)
+            SELECT COUNT(*)
+            FROM (
+                SELECT
+                    lhp.MaLopHocPhan,
+                    lth.LoaiYeuCau,
+                    lth.MaBuoi,
+                    lth.MaTrangThai,
+                    lth.NgayYeuCau,
+                    lth.GhiChu,
+                    CASE
+                        WHEN lth.LoaiYeuCau = 'khac' THEN lth.NgayThucHanh
+                        ELSE NULL
+                    END AS NgayThucHanh
+                FROM LICH_THUC_HANH lth
+                JOIN LOP_HOC_PHAN lhp ON lhp.MaLopHocPhan = lth.MaLopHocPhan
+                WHERE (%s IS NULL OR %s = '' OR lth.NgayYeuCau::date >= %s::date)
+                    AND (%s IS NULL OR %s = '' OR lth.NgayYeuCau::date <= %s::date)
+                    AND (%s IS NULL OR lth.MaTrangThai = %s)
+                GROUP BY
+                    lhp.MaLopHocPhan,
+                    lth.LoaiYeuCau,
+                    lth.MaBuoi,
+                    lth.MaTrangThai,
+                    lth.NgayYeuCau,
+                    lth.GhiChu,
+                    CASE
+                        WHEN lth.LoaiYeuCau = 'khac' THEN lth.NgayThucHanh
+                        ELSE NULL
+                    END
+            ) grouped_requests
         """,
         (
             date_from_val,
@@ -2554,15 +2657,44 @@ def accept_required(
     try:
         cursor.execute(
             """
-            UPDATE YEU_CAU_XEP_LICH
-            SET TrangThai = 1
-            WHERE MaYeuCau = %s AND TrangThai = 0
-            RETURNING MaYeuCau
+            WITH target AS (
+                SELECT
+                    MaLopHocPhan,
+                    LoaiYeuCau,
+                    MaBuoi,
+                    NgayYeuCau,
+                    GhiChu,
+                    CASE WHEN LoaiYeuCau = 'khac' THEN NgayThucHanh END
+                        AS NgayThucHanh
+                FROM LICH_THUC_HANH
+                WHERE MaLichThucHanh = %s AND MaTrangThai = 0
+                FOR UPDATE
+            )
+            UPDATE LICH_THUC_HANH lth
+            SET MaTrangThai = 1
+            FROM target t
+            WHERE lth.MaTrangThai = 0
+              AND lth.MaLopHocPhan = t.MaLopHocPhan
+              AND lth.LoaiYeuCau = t.LoaiYeuCau
+              AND lth.MaBuoi = t.MaBuoi
+              AND lth.NgayYeuCau = t.NgayYeuCau
+              AND lth.GhiChu IS NOT DISTINCT FROM t.GhiChu
+              AND (CASE WHEN lth.LoaiYeuCau = 'khac'
+                        THEN lth.NgayThucHanh END)
+                  IS NOT DISTINCT FROM t.NgayThucHanh
+            RETURNING lth.MaLichThucHanh
             """,
             (required_id,),
         )
+        updated = cursor.fetchall()
+        if not updated:
+            conn.rollback()
+            return JSONResponse(
+                status_code=409,
+                content={"success": False, "message": "Yêu cầu không còn chờ duyệt."},
+            )
         conn.commit()
-        return {"success": True, "message": "Đã duyệt yêu cầu thành công."}
+        return {"success": True, "message": "Đã thêm vào danh sách chờ xếp lịch."}
     except Exception:
         conn.rollback()
         return JSONResponse(
@@ -2587,19 +2719,48 @@ def refuse_required(
     try:
         cursor.execute(
             """
-            UPDATE YEU_CAU_XEP_LICH
-            SET TrangThai = 3
-            , LyDo = %s
-            WHERE MaYeuCau = %s AND TrangThai = 0
-            RETURNING MaYeuCau
+            WITH target AS (
+                SELECT
+                    MaLopHocPhan,
+                    LoaiYeuCau,
+                    MaBuoi,
+                    NgayYeuCau,
+                    GhiChu,
+                    CASE WHEN LoaiYeuCau = 'khac' THEN NgayThucHanh END
+                        AS NgayThucHanh
+                FROM LICH_THUC_HANH
+                WHERE MaLichThucHanh = %s AND MaTrangThai = 0
+                FOR UPDATE
+            )
+            UPDATE LICH_THUC_HANH lth
+            SET MaTrangThai = 3,
+                LyDo = %s
+            FROM target t
+            WHERE lth.MaTrangThai = 0
+              AND lth.MaLopHocPhan = t.MaLopHocPhan
+              AND lth.LoaiYeuCau = t.LoaiYeuCau
+              AND lth.MaBuoi = t.MaBuoi
+              AND lth.NgayYeuCau = t.NgayYeuCau
+              AND lth.GhiChu IS NOT DISTINCT FROM t.GhiChu
+              AND (CASE WHEN lth.LoaiYeuCau = 'khac'
+                        THEN lth.NgayThucHanh END)
+                  IS NOT DISTINCT FROM t.NgayThucHanh
+            RETURNING lth.MaLichThucHanh
             """,
             (
-                reason,
                 required_id,
+                reason,
             ),
         )
+        updated = cursor.fetchall()
+        if not updated:
+            conn.rollback()
+            return JSONResponse(
+                status_code=409,
+                content={"success": False, "message": "Yêu cầu không còn chờ duyệt."},
+            )
         conn.commit()
-        return {"success": True, "message": "Đã từ chối yêu cầu thành công."}
+        return {"success": True, "message": "Đã từ chối yêu cầu xếp lịch."}
     except Exception:
         conn.rollback()
         return JSONResponse(
@@ -2719,49 +2880,137 @@ def get_required_for_waiting():
     conn = get_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
 
+    # filtered_schedule: lấy yc chờ và ghép nó với các trường trong lớp học phần
+    # grouped_requests: gom các dòng trong cùng 1 yc lại
     cursor.execute("""
+        WITH filtered_schedule AS (
+            SELECT
+                lth.MaLichThucHanh,
+                lth.MaLopHocPhan,
+                lth.LoaiYeuCau,
+                lth.MaBuoi,
+                lth.MaTrangThai,
+                lth.NgayYeuCau,
+                lth.NgayThucHanh,
+                lth.MaThu,
+                lth.MaTuanHoc,
+                lth.GhiChu,
+                th.NgayBatDau AS NgayTuanBatDau,
+                lhp.MaHocPhan,
+                lhp.MaHocKy,
+                lhp.MaGiangVien,
+                lhp.SiSo,
+                hp.TenHocPhan,
+                nd.TenNguoiDung AS TenGiangVien,
+                hk.TenHocKy,
+                b.TenBuoi,
+                tt.TenTrangThai,
+                th.TenTuanHoc,
+                n.TenNhom
+            FROM LICH_THUC_HANH lth
+            JOIN LOP_HOC_PHAN lhp
+                ON lhp.MaLopHocPhan = lth.MaLopHocPhan
+            JOIN HOC_PHAN hp ON hp.MaHocPhan = lhp.MaHocPhan
+            JOIN NGUOI_DUNG nd ON nd.MaNguoiDung = lhp.MaGiangVien
+            JOIN HOC_KY hk ON hk.MaHocKy = lhp.MaHocKy
+            JOIN BUOI b ON b.MaBuoi = lth.MaBuoi
+            JOIN TRANG_THAI tt ON tt.MaTrangThai = lth.MaTrangThai
+            JOIN NHOM n ON n.MaNhom = lhp.MaNhom
+            LEFT JOIN TUAN_HOC th ON th.MaTuanHoc = lth.MaTuanHoc
+            WHERE lth.MaTrangThai = 1
+              AND lth.MaPhong IS NULL
+        ),
+        grouped_requests AS (
+            SELECT
+                MIN(MaLichThucHanh) AS MaYeuCau,
+                MaLopHocPhan,
+                MaHocPhan,
+                MaHocKy,
+                TenHocKy,
+                SiSo,
+                TenNhom,
+                TenHocPhan,
+                TenGiangVien,
+                LoaiYeuCau,
+                MaBuoi,
+                TenBuoi,
+                MaTrangThai,
+                TenTrangThai,
+                NgayYeuCau,
+                GhiChu,
+                CASE
+                    WHEN LoaiYeuCau = 'khac' THEN NgayThucHanh
+                    ELSE NULL
+                END AS NgayThucHanh,
+                STRING_AGG(
+                    DISTINCT MaThu::text,
+                    ', ' ORDER BY MaThu::text
+                ) FILTER (WHERE MaThu IS NOT NULL) AS DanhSachThu,
+                MIN(TenTuanHoc) AS TuanBatDau,
+                MAX(TenTuanHoc) AS TuanKetThuc,
+                (ARRAY_AGG(MaTuanHoc ORDER BY NgayTuanBatDau))[1]
+                    AS MaTuanBatDau,
+                (ARRAY_AGG(MaTuanHoc ORDER BY NgayTuanBatDau DESC))[1]
+                    AS MaTuanKetThuc
+            FROM filtered_schedule
+            GROUP BY
+                MaLopHocPhan,
+                MaHocPhan,
+                MaHocKy,
+                TenHocKy,
+                SiSo,
+                TenNhom,
+                TenHocPhan,
+                TenGiangVien,
+                LoaiYeuCau,
+                MaBuoi,
+                TenBuoi,
+                MaTrangThai,
+                TenTrangThai,
+                NgayYeuCau,
+                GhiChu,
+                CASE
+                    WHEN LoaiYeuCau = 'khac' THEN NgayThucHanh
+                    ELSE NULL
+                END
+        )
         SELECT
-            yc.MaYeuCau AS "MaYeuCau"
-            , yc.BuoiThucHanh AS "BuoiThucHanh"
-            , yc.SoLuongMay AS "SoLuongMay"
-            , yc.MaPhanMem AS "MaPhanMem"
-            , yc.NgayThucHanh AS "NgayThucHanh"
-            , yc.MaTuanBatDau AS "MaTuanBatDau"
-            , yc.MaTuanKetThuc AS "MaTuanKetThuc"
-            , tbd.TenTuanHoc AS "TuanBatDau"
-            , tkt.TenTuanHoc AS "TuanKetThuc"
-            , yc.TrangThai AS "TrangThai"
-            , hp.TenHocPhan AS "TenHocPhan"
-            , yc.NhomHocPhan AS "NhomHocPhan"
-            , gv.TenGiangVien AS "TenGiangVien"
-            , STRING_AGG(
-                DISTINCT yct.thu::text,
-                ',' ORDER BY yct.thu::text
-            ) AS "DanhSachThu"
-            , CASE 
-                WHEN yc.NgayThucHanh IS NOT NULL THEN 0 
-                ELSE 1
-            END AS "LoaiYeuCau"
-        FROM YEU_CAU_XEP_LICH yc
-        JOIN HOC_PHAN hp
-            ON hp.MaHocPhan = yc.MaHocPhan
-        JOIN GIANG_VIEN gv
-            ON gv.MaGiangVien = yc.MaGiangVien
-        LEFT JOIN YEU_CAU_THU yct
-            ON yct.MaYeuCau = yc.MaYeuCau
-        LEFT JOIN TUAN_HOC tbd 
-            ON tbd.MaTuanHoc = yc.MaTuanBatDau
-        LEFT JOIN TUAN_HOC tkt 
-            ON tkt.MaTuanHoc = yc.MaTuanKetThuc
-        WHERE yc.TrangThai = 1
-        GROUP BY
-            yc.MaYeuCau
-            , hp.TenHocPhan
-            , yc.NhomHocPhan
-            , gv.TenGiangVien
-            , tbd.TenTuanHoc
-            , tkt.TenTuanHoc
-        ORDER BY yc.NgayYeuCau DESC
+            gr.MaYeuCau AS "MaYeuCau",
+            gr.MaHocPhan AS "MaHocPhan",
+            gr.TenHocPhan AS "TenHocPhan",
+            gr.TenNhom AS "NhomHocPhan",
+            gr.SiSo AS "SoLuongMay",
+            (
+                SELECT STRING_AGG(pm.TenPhanMem, ', ' ORDER BY pm.TenPhanMem)
+                FROM HOC_PHAN_PHAN_MEM hppm
+                JOIN PHAN_MEM pm ON pm.MaPhanMem = hppm.MaPhanMem
+                WHERE hppm.MaHocPhan = gr.MaHocPhan
+            ) AS "TenPhanMem",
+            COALESCE(
+                (
+                    SELECT ARRAY_AGG(hppm.MaPhanMem ORDER BY hppm.MaPhanMem)
+                    FROM HOC_PHAN_PHAN_MEM hppm
+                    WHERE hppm.MaHocPhan = gr.MaHocPhan
+                ),
+                ARRAY[]::integer[]
+            ) AS "MaPhanMem",
+            gr.LoaiYeuCau AS "LoaiYeuCau",
+            gr.MaBuoi AS "BuoiThucHanh",
+            gr.TenBuoi AS "TenBuoi",
+            gr.MaTrangThai AS "TrangThai",
+            gr.TenTrangThai AS "TenTrangThai",
+            gr.GhiChu AS "GhiChu",
+            TO_CHAR(gr.NgayThucHanh, 'YYYY-MM-DD') AS "NgayThucHanh",
+            gr.DanhSachThu AS "DanhSachThu",
+            gr.TuanBatDau AS "TuanBatDau",
+            gr.TuanKetThuc AS "TuanKetThuc",
+            gr.MaTuanBatDau AS "MaTuanBatDau",
+            gr.MaTuanKetThuc AS "MaTuanKetThuc",
+            gr.TenHocKy AS "TenHocKy",
+            TO_CHAR(gr.NgayYeuCau, 'DD/MM/YYYY') AS "NgayYeuCau",
+            gr.TenGiangVien AS "TenGiangVien"
+        FROM grouped_requests gr
+        ORDER BY gr.NgayYeuCau DESC, gr.MaYeuCau DESC
     """)
 
     result = cursor.fetchall()
@@ -2776,30 +3025,123 @@ def get_scheduled_requests():
     cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute("""
+        WITH filtered_schedule AS (
+            SELECT
+                lth.MaLichThucHanh,
+                lth.MaLopHocPhan,
+                lth.LoaiYeuCau,
+                lth.MaBuoi,
+                lth.MaTrangThai,
+                lth.NgayYeuCau,
+                lth.NgayThucHanh,
+                lth.MaThu,
+                lth.MaTuanHoc,
+                lth.MaPhong,
+                lth.GhiChu,
+                lhp.MaHocPhan,
+                lhp.MaHocKy,
+                lhp.MaGiangVien,
+                lhp.SiSo,
+                hp.TenHocPhan,
+                nd.TenNguoiDung AS TenGiangVien,
+                hk.TenHocKy,
+                b.TenBuoi,
+                tt.TenTrangThai,
+                th.TenTuanHoc,
+                th.NgayBatDau AS NgayTuanBatDau,
+                n.TenNhom
+            FROM LICH_THUC_HANH lth
+            JOIN LOP_HOC_PHAN lhp
+                ON lhp.MaLopHocPhan = lth.MaLopHocPhan
+            JOIN HOC_PHAN hp ON hp.MaHocPhan = lhp.MaHocPhan
+            JOIN NGUOI_DUNG nd ON nd.MaNguoiDung = lhp.MaGiangVien
+            JOIN HOC_KY hk ON hk.MaHocKy = lhp.MaHocKy
+            JOIN BUOI b ON b.MaBuoi = lth.MaBuoi
+            JOIN TRANG_THAI tt ON tt.MaTrangThai = lth.MaTrangThai
+            JOIN NHOM n ON n.MaNhom = lhp.MaNhom
+            LEFT JOIN TUAN_HOC th ON th.MaTuanHoc = lth.MaTuanHoc
+            WHERE lth.MaTrangThai = 2
+              AND lth.MaPhong IS NOT NULL
+        ),
+        request_bounds AS (
+            SELECT
+                MaLopHocPhan,
+                LoaiYeuCau,
+                MaBuoi,
+                NgayYeuCau,
+                GhiChu,
+                CASE
+                    WHEN LoaiYeuCau = 'khac' THEN NgayThucHanh
+                    ELSE NULL
+                END AS NgayThucHanh,
+                MIN(TenTuanHoc) AS TuanBatDau,
+                MAX(TenTuanHoc) AS TuanKetThuc,
+                (ARRAY_AGG(MaTuanHoc ORDER BY NgayTuanBatDau))[1]
+                    AS MaTuanBatDau,
+                (ARRAY_AGG(MaTuanHoc ORDER BY NgayTuanBatDau DESC))[1]
+                    AS MaTuanKetThuc
+            FROM filtered_schedule
+            GROUP BY
+                MaLopHocPhan,
+                LoaiYeuCau,
+                MaBuoi,
+                NgayYeuCau,
+                GhiChu,
+                CASE
+                    WHEN LoaiYeuCau = 'khac' THEN NgayThucHanh
+                    ELSE NULL
+                END
+        )
         SELECT
-            yc.MaYeuCau AS "MaYeuCau",
-            yct.MaPhong AS "MaPhong",
-            yct.Thu AS "Thu",
-            yct.MaTuanHoc AS "MaTuanHoc",
-            yc.BuoiThucHanh AS "BuoiThucHanh",
-            TO_CHAR(yc.NgayThucHanh, 'YYYY-MM-DD') AS "NgayThucHanh",
-            yc.MaTuanBatDau AS "MaTuanBatDau",
-            yc.MaTuanKetThuc AS "MaTuanKetThuc",
-            yc.SoLuongMay AS "SoLuongMay",
-            yc.MaPhanMem AS "MaPhanMem",
-            hp.TenHocPhan AS "TenHocPhan",
-            yc.NhomHocPhan AS "NhomHocPhan", 
-            gv.TenGiangVien AS "TenGiangVien"
-        FROM YEU_CAU_XEP_LICH yc
-        JOIN HOC_PHAN hp
-            ON hp.MaHocPhan = yc.MaHocPhan
-        JOIN GIANG_VIEN gv
-            ON gv.MaGiangVien = yc.MaGiangVien
-        JOIN YEU_CAU_THU yct
-            ON yct.MaYeuCau = yc.MaYeuCau
-        WHERE yc.TrangThai IN (1, 2)
-          AND yct.MaPhong IS NOT NULL
-        ORDER BY yc.MaYeuCau, yct.Thu, yct.MaTuanHoc
+            fs.MaLichThucHanh AS "MaYeuCau",
+            fs.MaLopHocPhan AS "MaLopHocPhan",
+            fs.MaHocPhan AS "MaHocPhan",
+            fs.MaHocKy AS "MaHocKy",
+            fs.MaGiangVien AS "MaGiangVien",
+            fs.MaPhong AS "MaPhong",
+            fs.MaTuanHoc AS "MaTuanHoc",
+            fs.TenNhom AS "NhomHocPhan",
+            fs.SiSo AS "SoLuongMay",
+            fs.TenHocPhan AS "TenHocPhan",
+            (
+                SELECT STRING_AGG(pm.TenPhanMem, ', ' ORDER BY pm.TenPhanMem)
+                FROM HOC_PHAN_PHAN_MEM hppm
+                JOIN PHAN_MEM pm ON pm.MaPhanMem = hppm.MaPhanMem
+                WHERE hppm.MaHocPhan = fs.MaHocPhan
+            ) AS "TenPhanMem",
+            COALESCE(
+                (
+                    SELECT ARRAY_AGG(hppm.MaPhanMem ORDER BY hppm.MaPhanMem)
+                    FROM HOC_PHAN_PHAN_MEM hppm
+                    WHERE hppm.MaHocPhan = fs.MaHocPhan
+                ),
+                ARRAY[]::integer[]
+            ) AS "MaPhanMem",
+            fs.LoaiYeuCau AS "LoaiYeuCau",
+            fs.MaBuoi AS "BuoiThucHanh",
+            fs.TenBuoi AS "TenBuoi",
+            fs.MaTrangThai AS "TrangThai",
+            fs.TenTrangThai AS "TenTrangThai",
+            fs.GhiChu AS "GhiChu",
+            TO_CHAR(fs.NgayThucHanh, 'YYYY-MM-DD') AS "NgayThucHanh",
+            fs.MaThu AS "Thu",
+            fs.TenTuanHoc AS "TenTuanHoc",
+            rb.TuanBatDau AS "TuanBatDau",
+            rb.TuanKetThuc AS "TuanKetThuc",
+            rb.MaTuanBatDau AS "MaTuanBatDau",
+            rb.MaTuanKetThuc AS "MaTuanKetThuc",
+            TO_CHAR(fs.NgayYeuCau, 'DD/MM/YYYY') AS "NgayYeuCau",
+            fs.TenGiangVien AS "TenGiangVien"
+        FROM filtered_schedule fs
+        JOIN request_bounds rb
+          ON rb.MaLopHocPhan = fs.MaLopHocPhan
+         AND rb.LoaiYeuCau = fs.LoaiYeuCau
+         AND rb.MaBuoi = fs.MaBuoi
+         AND rb.NgayYeuCau = fs.NgayYeuCau
+         AND rb.GhiChu IS NOT DISTINCT FROM fs.GhiChu
+         AND rb.NgayThucHanh IS NOT DISTINCT FROM
+             CASE WHEN fs.LoaiYeuCau = 'khac' THEN fs.NgayThucHanh END
+        ORDER BY fs.NgayYeuCau DESC, fs.MaLichThucHanh DESC
     """)
 
     result = cursor.fetchall()
@@ -2907,7 +3249,14 @@ def save_calendar_schedule(request: Request, payload: dict = Body(...)):
             room_id = int(item["roomId"])
             day = int(item["day"])
             week_id = int(item["weekId"])
-            if min(required_id, room_id, week_id) <= 0 or not 0 <= day <= 6:
+            existing_schedule = item.get("existingSchedule", False)
+            current_week_only = item.get("currentWeekOnly", False)
+            if (
+                min(required_id, room_id, week_id) <= 0
+                or not 0 <= day <= 6
+                or not isinstance(existing_schedule, bool)
+                or not isinstance(current_week_only, bool)
+            ):
                 raise ValueError
             placements.append(
                 {
@@ -2915,7 +3264,8 @@ def save_calendar_schedule(request: Request, payload: dict = Body(...)):
                     "room_id": room_id,
                     "day": day,
                     "week_id": week_id,
-                    "current_week_only": bool(item.get("currentWeekOnly")),
+                    "current_week_only": current_week_only,
+                    "existing_schedule": existing_schedule,
                 }
             )
 
@@ -2942,261 +3292,310 @@ def save_calendar_schedule(request: Request, payload: dict = Body(...)):
 
     conn = get_connection()
     cursor = conn.cursor()
-    touched_requests = set()  # luu thay doi loai bo trung
-    requested_ids = {required_id for required_id, _, _ in removals} | {
-        item["required_id"] for item in placements
-    }
-    try:
-        previous_recipients = get_schedule_notification_accounts(
+    touched_ids = set()
+    previous_recipients = {}
+
+    def remember_recipients(schedule_ids):
+        for schedule_id, account_ids in get_schedule_notification_accounts(
             cursor,
-            requested_ids,
+            schedule_ids,
+        ).items():
+            previous_recipients.setdefault(schedule_id, set()).update(account_ids)
+
+    def reject(message, status_code=400):
+        conn.rollback()
+        return JSONResponse(
+            status_code=status_code,
+            content={"success": False, "message": message},
         )
 
-        # =========== Phần xóa yc ========
-        # duyet tung yc can xoa
+    try:
+        # gỡ lịch cần xóa hoặc cần di chuyển trước, rồi mới thêm hoặc đổi lịch
         for required_id, day, week_id in removals:
             cursor.execute(
                 """
-                    SELECT MaTuanBatDau, MaTuanKetThuc
-                    FROM YEU_CAU_XEP_LICH
-                    WHERE MaYeuCau = %s AND TrangThai IN (1, 2)
+                    SELECT
+                        MaLopHocPhan,
+                        LoaiYeuCau,
+                        MaBuoi,
+                        NgayYeuCau,
+                        NgayThucHanh,
+                        GhiChu,
+                        MaTrangThai,
+                        MaPhong
+                    FROM LICH_THUC_HANH
+                    WHERE MaLichThucHanh = %s
+                    FOR UPDATE
                 """,
                 (required_id,),
             )
-            required = cursor.fetchone()
-            if not required:
+            target = cursor.fetchone()
+            if not target or target[6] != 2 or target[7] is None:
                 continue
-            week_start, week_end = required
 
-            # xoa o all tuan
-            if week_id is None:
-                cursor.execute(
-                    """
-                        DELETE FROM YEU_CAU_THU
-                        WHERE MaYeuCau = %s AND Thu = %s
-                          AND MaTuanHoc IS NOT NULL
-                    """,
-                    (required_id, day + 2),
-                )
+            class_id, request_type, lesson_id, request_date, practice_date, note = (
+                target[:6]
+            )
+            # tìm lịch cần xóa trước
+            schedule_ids_query = """
+                SELECT MaLichThucHanh, MaTuanHoc
+                FROM LICH_THUC_HANH
+                WHERE MaLopHocPhan = %s
+                  AND LoaiYeuCau = %s
+                  AND MaBuoi = %s
+                  AND NgayYeuCau = %s
+                  AND GhiChu IS NOT DISTINCT FROM %s
+                  AND MaThu = %s
+                  AND MaTrangThai = 2
+                  AND MaPhong IS NOT NULL
+                  AND (CASE WHEN LoaiYeuCau = 'khac'
+                            THEN NgayThucHanh END)
+                      IS NOT DISTINCT FROM
+                      (CASE WHEN %s = 'khac' THEN %s::date END)
+            """
+            parameters = [
+                class_id,
+                request_type,
+                lesson_id,
+                request_date,
+                note,
+                day + 2,
+                request_type,
+                practice_date,
+            ]
+            if week_id is not None:
+                schedule_ids_query += " AND MaTuanHoc = %s"
+                parameters.append(week_id)
+            cursor.execute(schedule_ids_query, tuple(parameters))
+            schedule_ids = [row[0] for row in cursor.fetchall()]
+            if not schedule_ids:
+                continue
 
-            # xoa o tuan cu the
-            else:
-                if (
-                    week_start is None
-                    or week_end is None
-                    or not week_start <= week_id <= week_end
-                ):
-                    conn.rollback()
-                    return JSONResponse(
-                        status_code=400,
-                        content={
-                            "success": False,
-                            "message": "Tuần được chọn không nằm trong thời gian yêu cầu.",
-                        },
-                    )
-                cursor.execute(
-                    """
-                        DELETE FROM YEU_CAU_THU
-                        WHERE MaYeuCau = %s AND Thu = %s AND MaTuanHoc = %s
-                    """,
-                    (required_id, day + 2, week_id),
-                )
-            if cursor.rowcount:
-                touched_requests.add(required_id)
+            # xóa nó ra khỏi lịch đã xếp, đưa về chờ xếp, mp null
+            remember_recipients(schedule_ids)
+            cursor.execute(
+                """
+                    UPDATE LICH_THUC_HANH
+                    SET MaPhong = NULL,
+                        MaTrangThai = 1
+                    WHERE MaLichThucHanh = ANY(%s)
+                      AND MaTrangThai = 2
+                      AND MaPhong IS NOT NULL
+                    RETURNING MaLichThucHanh
+                """,
+                (schedule_ids,),
+            )
+            touched_ids.update(row[0] for row in cursor.fetchall())
 
-        # ============= Phần xếp lịch mới ==========
-        slot_rooms = {}
+        # lấy tt lịch cần xếp
         for item in placements:
             required_id = item["required_id"]
             weekday = item["day"] + 2
             cursor.execute(
                 """
-                    SELECT NgayThucHanh, MaTuanBatDau, MaTuanKetThuc, BuoiThucHanh
-                    FROM YEU_CAU_XEP_LICH
-                    WHERE MaYeuCau = %s AND TrangThai IN (1, 2)
+                    SELECT
+                        lth.MaLopHocPhan,
+                        lth.LoaiYeuCau,
+                        lth.MaBuoi,
+                        lth.NgayYeuCau,
+                        lth.NgayThucHanh,
+                        lth.GhiChu,
+                        lth.MaTrangThai,
+                        lth.MaThu,
+                        lth.MaTuanHoc,
+                        lhp.MaHocPhan,
+                        lhp.MaHocKy,
+                        lhp.SiSo,
+                        lth.MaPhong
+                    FROM LICH_THUC_HANH lth
+                    JOIN LOP_HOC_PHAN lhp
+                      ON lhp.MaLopHocPhan = lth.MaLopHocPhan
+                    WHERE lth.MaLichThucHanh = %s
+                    FOR UPDATE OF lth
                 """,
                 (required_id,),
             )
             required = cursor.fetchone()
             if not required:
-                conn.rollback()
-                return JSONResponse(
-                    status_code=400,
-                    content={
-                        "success": False,
-                        "message": f"Yêu cầu {required_id} không còn ở trạng thái có thể xếp lịch.",
-                    },
-                )
-            practice_date, week_start, week_end, session = required
-            if week_start is None or week_end is None:
-                week_start = week_end = item["week_id"]
-            if not week_start <= item["week_id"] <= week_end:
-                conn.rollback()
-                return JSONResponse(
-                    status_code=400,
-                    content={
-                        "success": False,
-                        "message": "Tuần được chọn không nằm trong thời gian yêu cầu.",
-                    },
-                )
+                return reject(f"Không tìm thấy yêu cầu {required_id}.")
 
-            # ngay co dinh
-            if practice_date:
-                week_ids = [item["week_id"]]
-            # chỉ xếp 1 tuần
-            elif item["current_week_only"]:
-                week_ids = [item["week_id"]]
+            (
+                class_id,
+                request_type,
+                lesson_id,
+                request_date,
+                practice_date,
+                note,
+                status,
+                original_weekday,
+                original_week_id,
+                course_id,
+                semester_id,
+                class_size,
+                original_room_id,
+            ) = required
+            if item["existing_schedule"]:
+                if status not in (1, 2):
+                    return reject("Lịch này không còn ở trạng thái có thể chỉnh sửa.")
+                if original_week_id != item["week_id"]:
+                    return reject("Lịch đã xếp chỉ có thể di chuyển trong cùng tuần.")
+            elif status != 1 or original_room_id is not None:
+                return reject(f"Yêu cầu {required_id} không còn chờ xếp lịch.")
+
+            cursor.execute(
+                """
+                    SELECT NgayBatDau, NgayKetThuc
+                    FROM TUAN_HOC
+                    WHERE MaTuanHoc = %s AND MaHocKy = %s
+                """,
+                (item["week_id"], semester_id),
+            )
+            target_week = cursor.fetchone()
+            if not target_week:
+                return reject("Tuần được chọn không thuộc học kỳ của yêu cầu.")
+
+            target_date = target_week[0] + timedelta(days=item["day"])
+            if target_date > target_week[1] or (
+                request_type == "khac" and target_date != practice_date
+            ):
+                return reject("Ngày được chọn không hợp lệ với yêu cầu.")
+
+            if item["existing_schedule"]:
+                schedule_ids = [required_id]
             else:
                 cursor.execute(
                     """
-                        SELECT MaTuanHoc
-                        FROM TUAN_HOC
-                        WHERE MaTuanHoc BETWEEN %s AND %s
-                        ORDER BY NgayBatDau
-                    """,
-                    (week_start, week_end),
-                )
-                week_ids = [row[0] for row in cursor.fetchall()]
-
-            for target_week_id in week_ids:
-                cursor.execute(
-                    """
-                        SELECT NgayBatDau, NgayKetThuc
-                        FROM TUAN_HOC
-                        WHERE MaTuanHoc = %s
-                    """,
-                    (target_week_id,),
-                )
-                target_week = cursor.fetchone()
-                if not target_week:
-                    conn.rollback()
-                    return JSONResponse(
-                        status_code=400,
-                        content={
-                            "success": False,
-                            "message": "Không tìm thấy tuần được chọn.",
-                        },
-                    )
-                target_date = target_week[0] + timedelta(days=item["day"])
-                if target_date > target_week[1] or (
-                    practice_date and target_date != practice_date
-                ):
-                    conn.rollback()
-                    return JSONResponse(
-                        status_code=400,
-                        content={
-                            "success": False,
-                            "message": "Ngày được chọn không hợp lệ với yêu cầu.",
-                        },
-                    )
-
-                cursor.execute(
-                    """
-                        SELECT 1
-                        FROM YEU_CAU_THU
-                        WHERE MaYeuCau = %s AND Thu = %s
-                          AND (MaTuanHoc IS NULL OR MaTuanHoc = %s)
-                        LIMIT 1
-                    """,
-                    (required_id, weekday, target_week_id),
-                )
-                if not cursor.fetchone():
-                    conn.rollback()
-                    return JSONResponse(
-                        status_code=400,
-                        content={
-                            "success": False,
-                            "message": "Thứ này không thuộc yêu cầu thực hành.",
-                        },
-                    )
-                # kiem tra da xep vao phong nao chua
-                slot_key = (required_id, weekday, target_week_id)
-                existing_room = slot_rooms.get(slot_key)
-                if existing_room is not None and existing_room != item["room_id"]:
-                    conn.rollback()
-                    return JSONResponse(
-                        status_code=400,
-                        content={
-                            "success": False,
-                            "message": "Một buổi thực hành không thể được xếp vào nhiều phòng.",
-                        },
-                    )
-                slot_rooms[slot_key] = item["room_id"]
-
-                cursor.execute(
-                    """
-                        SELECT 1
-                        FROM YEU_CAU_THU yct
-                        JOIN YEU_CAU_XEP_LICH yc ON yc.MaYeuCau = yct.MaYeuCau
-                        WHERE yct.MaPhong = %s
-                          AND yct.Thu = %s
-                          AND yct.MaTuanHoc = %s
-                          AND yc.BuoiThucHanh = %s
-                          AND yc.TrangThai = 2
-                          AND yc.MaYeuCau <> %s
-                        LIMIT 1
-                    """,
-                    (item["room_id"], weekday, target_week_id, session, required_id),
-                )
-                if cursor.fetchone():
-                    conn.rollback()
-                    return JSONResponse(
-                        status_code=409,
-                        content={
-                            "success": False,
-                            "message": "Phòng đã có lịch thực hành khác vào buổi này.",
-                        },
-                    )
-
-                cursor.execute(
-                    """
-                        INSERT INTO YEU_CAU_THU
-                            (MaYeuCau, Thu, MaPhong, NgayThucHanh, MaCanBo, MaTuanHoc)
-                        VALUES (%s, %s, %s, %s, NULL, %s)
-                        ON CONFLICT (MaYeuCau, Thu, MaTuanHoc)
-                            WHERE MaTuanHoc IS NOT NULL
-                        DO UPDATE SET
-                            MaCanBo = CASE
-                                WHEN YEU_CAU_THU.MaPhong IS DISTINCT FROM EXCLUDED.MaPhong
-                                THEN NULL
-                                ELSE YEU_CAU_THU.MaCanBo
-                            END,
-                            MaPhong = EXCLUDED.MaPhong,
-                            NgayThucHanh = EXCLUDED.NgayThucHanh
-                        WHERE YEU_CAU_THU.MaPhong IS DISTINCT FROM EXCLUDED.MaPhong
-                           OR YEU_CAU_THU.NgayThucHanh IS DISTINCT FROM EXCLUDED.NgayThucHanh
+                        SELECT MaLichThucHanh, MaTuanHoc
+                        FROM LICH_THUC_HANH
+                        WHERE MaLopHocPhan = %s
+                          AND LoaiYeuCau = %s
+                          AND MaBuoi = %s
+                          AND NgayYeuCau = %s
+                          AND GhiChu IS NOT DISTINCT FROM %s
+                          AND MaThu = %s
+                          AND MaTrangThai = 1
+                          AND MaPhong IS NULL
+                          AND (CASE WHEN LoaiYeuCau = 'khac'
+                                    THEN NgayThucHanh END)
+                              IS NOT DISTINCT FROM
+                              (CASE WHEN %s = 'khac' THEN %s::date END)
+                          AND (%s = FALSE OR MaTuanHoc = %s)
                     """,
                     (
-                        required_id,
+                        class_id,
+                        request_type,
+                        lesson_id,
+                        request_date,
+                        note,
                         weekday,
-                        item["room_id"],
+                        request_type,
                         practice_date,
-                        target_week_id,
+                        item["current_week_only"],
+                        item["week_id"],
                     ),
                 )
-                if cursor.rowcount:
-                    touched_requests.add(required_id)
+                schedule_rows = cursor.fetchall()
+                schedule_ids = [
+                    row[0] for row in schedule_rows
+                ]  # Danh sách mã lịch sẽ cập nhật
+                schedule_week_ids = {
+                    row[1] for row in schedule_rows
+                }  # Tập hợp mã tuần tương ứng
+                if item["week_id"] not in schedule_week_ids:
+                    return reject("Thứ này không còn trong yêu cầu cần xếp lịch.")
+            if item["existing_schedule"]:
+                schedule_week_ids = {item["week_id"]}
 
-        for required_id in touched_requests:
+            # Kiểm tra điều kiện phòng
             cursor.execute(
                 """
-                    SELECT COUNT(*)
-                    FROM YEU_CAU_THU
-                    WHERE MaYeuCau = %s AND MaPhong IS NOT NULL
+                    SELECT
+                        p.TinhTrangPhong,
+                        p.MaCauHinh,
+                        COUNT(DISTINCT mt.MaMayTinh),
+                        COALESCE(
+                            ARRAY_AGG(DISTINCT cpm.MaPhanMem)
+                                FILTER (WHERE cpm.MaPhanMem IS NOT NULL),
+                            ARRAY[]::integer[]
+                        )
+                    FROM PHONG p
+                    LEFT JOIN MAY_TINH mt ON mt.MaPhong = p.MaPhong
+                    LEFT JOIN CAU_HINH_PHAN_MEM cpm
+                      ON cpm.MaCauHinh = p.MaCauHinh
+                    WHERE p.MaPhong = %s
+                    GROUP BY p.TinhTrangPhong, p.MaCauHinh
                 """,
-                (required_id,),
+                (item["room_id"],),
             )
-            status = 2 if cursor.fetchone()[0] else 1
-            cursor.execute(
-                "UPDATE YEU_CAU_XEP_LICH SET TrangThai = %s WHERE MaYeuCau = %s",
-                (status, required_id),
-            )
+            room = cursor.fetchone()
+            if not room or room[0] != 1 or room[1] is None:
+                return reject("Phòng được chọn không khả dụng.")
+            if class_size is not None and room[2] < class_size:
+                return reject("Phòng không đủ số máy cho sĩ số lớp học phần.")
 
-        notify_schedule_recipients(
-            cursor,
-            touched_requests,
-            previous_recipients,
-        )
+            cursor.execute(
+                """
+                    SELECT COALESCE(
+                        ARRAY_AGG(MaPhanMem ORDER BY MaPhanMem),
+                        ARRAY[]::integer[]
+                    )
+                    FROM HOC_PHAN_PHAN_MEM
+                    WHERE MaHocPhan = %s
+                """,
+                (course_id,),
+            )
+            required_software = set(cursor.fetchone()[0])
+            if not required_software.issubset(set(room[3])):
+                return reject("Phòng không cài đủ phần mềm của học phần.")
+
+            cursor.execute(
+                """
+                    SELECT 1
+                    FROM LICH_THUC_HANH
+                    WHERE MaPhong = %s
+                      AND MaTuanHoc = ANY(%s)
+                      AND MaThu = %s
+                      AND MaBuoi = %s
+                      AND MaTrangThai = 2
+                      AND NOT (MaLichThucHanh = ANY(%s))
+                    LIMIT 1
+                """,
+                (
+                    item["room_id"],
+                    list(schedule_week_ids),
+                    weekday,
+                    lesson_id,
+                    schedule_ids,
+                ),
+            )
+            if cursor.fetchone():
+                return reject(
+                    "Phòng đã có lịch thực hành khác vào buổi này.",
+                    status_code=409,
+                )
+
+            remember_recipients(schedule_ids)
+            cursor.execute(
+                """
+                    UPDATE LICH_THUC_HANH
+                    SET MaPhong = %s,
+                        MaThu = %s,
+                        MaTrangThai = 2
+                    WHERE MaLichThucHanh = ANY(%s)
+                      AND MaTrangThai IN (1, 2)
+                    RETURNING MaLichThucHanh
+                """,
+                (item["room_id"], weekday, schedule_ids),
+            )
+            touched_ids.update(row[0] for row in cursor.fetchall())
+
+        # gửi thông báo
+        if touched_ids:
+            notify_schedule_recipients(
+                cursor,
+                touched_ids,
+                previous_recipients,
+            )
         conn.commit()
         return {"success": True}
     except Exception:

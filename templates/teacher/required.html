@@ -12,15 +12,25 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
     <link rel="stylesheet" href="/static/css/auth/popup.css?v=9cce345a79" />
-    <link rel="stylesheet" href="/static/css/teacher/required.css?v=4cd5d641bc" />
+    <link
+      rel="stylesheet"
+      href="/static/css/teacher/required.css?v=4cd5d641bc"
+    />
     <link rel="stylesheet" href="/static/css/shared/ui.css?v=3a6450f69d" />
-    <link rel="stylesheet" href="/static/css/shared/date-picker.css?v=ae5bdbe927" />
+    <link
+      rel="stylesheet"
+      href="/static/css/shared/date-picker.css?v=ae5bdbe927"
+    />
     <link rel="stylesheet" href="/static/css/shared/theme.css?v=d09f9b8cb7" />
   </head>
   <body>
     <header>
       <div class="header-left">
-        <a class="header-left-logo" href="/teacher/index.html" aria-label="Edu-LIMS — Trang chủ">
+        <a
+          class="header-left-logo"
+          href="/teacher/index.html"
+          aria-label="Edu-LIMS — Trang chủ"
+        >
           <div class="header-left-icon">
             <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
           </div>
@@ -189,18 +199,56 @@
         tabindex="-1"
       >
         <form action="/teacher/required" method="post" id="required-form">
-          <span class="required-add-title">
-            Học kì hiện tại: {{ semester[1] }}
-          </span>
+          <div class="required-add-item">
+            <label class="required-add-title" for="required-semester">
+              Học kỳ
+            </label>
+            <select
+              name="required_semester_id"
+              id="required-semester"
+              required
+              {%
+              if
+              not
+              semesters
+              %}disabled{%
+              endif
+              %}
+            >
+              {% for item in semesters %}
+              <option
+                value="{{ item[0] }}"
+                {%
+                if
+                item[0]=""
+                ="selected_semester_id"
+                %}selected{%
+                endif
+                %}
+              >
+                {{ item[1] }} - {{ item[2] }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
 
           <div class="required-add-item">
-            <span class="required-add-title"> Tên học phần </span>
+            <label class="required-add-title" for="required_course_name">
+              Tên học phần
+            </label>
             <input
               type="text"
               name="required_course_name"
               id="required_course_name"
-              placeholder="Nhập tên học phần..."
+              placeholder="Chọn học kỳ trước..."
               autocomplete="off"
+              {%
+              if
+              not
+              semesters
+              %}disabled{%
+              endif
+              %}
             />
             <input
               type="hidden"
@@ -211,43 +259,24 @@
           </div>
 
           <div class="required-add-item">
-            <label class="required-add-title" for="required_group">
-              Nhóm học phần (không bắt buộc)
+            <label class="required-add-title" for="required_group_id">
+              Nhóm học phần
             </label>
-            <input
-              type="text"
-              name="required_group"
-              id="required_group"
-              maxlength="100"
-              placeholder="Nhập nhóm học phần..."
-            />
+            <select
+              name="required_group_id"
+              id="required_group_id"
+              required
+              disabled
+            >
+              <option value="">Chọn học phần trước</option>
+            </select>
           </div>
 
           <div class="required-add-item">
-            <span class="required-add-title"> Tên phần mềm </span>
-            <input
-              type="text"
-              name="required_program_name"
-              id="required_program_name"
-              placeholder="Nhập tên phần mềm..."
-              autocomplete="off"
-            />
-            <input
-              type="hidden"
-              name="required_program_id"
-              id="required_program_id"
-            />
-            <div id="program-suggestions" class="program-suggestions"></div>
-          </div>
-
-          <div class="required-add-item">
-            <span class="required-add-title"> Số lượng máy tính </span>
-            <input
-              type="number"
-              name="required_computer_amount"
-              id="required_computer_amount"
-              placeholder="Nhập số từ 1 đến 6..."
-            />
+            <span class="required-add-title">Phần mềm yêu cầu</span>
+            <div id="required-course-software">
+              Chọn học phần để xem phần mềm.
+            </div>
           </div>
 
           <div class="required-add-item">
@@ -266,17 +295,35 @@
             </label>
           </div>
 
+          <div class="required-add-item">
+            <label class="required-add-title" for="required_number_class">
+              Sỉ số lớp
+            </label>
+            <input
+              type="number"
+              name="required_number_class"
+              id="required_number_class"
+              placeholder="Nhập sỉ số lớp..."
+              autocomplete="off"
+            />
+          </div>
+
           <!-- required-type -->
           <div class="required-add-item">
             <span class="required-add-title"> Loại yêu cầu </span>
             <div class="required-add-item-box">
               <label>
-                <input type="radio" name="required_type" value="1" checked />
-                Yêu cầu phòng dài hạn
+                <input
+                  type="radio"
+                  name="required_type"
+                  value="thuc_hanh"
+                  checked
+                />
+                Thực hành theo tuần
               </label>
               <label>
-                <input type="radio" name="required_type" value="0" />
-                Yêu cầu phòng phát sinh
+                <input type="radio" name="required_type" value="khac" />
+                Yêu cầu ngày cụ thể
               </label>
             </div>
             <div class="required-type-box">
@@ -368,7 +415,11 @@
                   Ngày thực hành
                 </span>
                 <div class="required-add-item-box-input">
-                  <input type="date" name="required_practice_day" id="" />
+                  <input
+                    type="date"
+                    name="required_practice_day"
+                    id="required_practice_day"
+                  />
                 </div>
                 <span
                   >Yêu cầu ngày cụ thể cần cách ngày hiện tại ít nhất 3
@@ -414,10 +465,11 @@
               <th>#</th>
               <th>Mã yêu cầu</th>
               <th>Tên học phần</th>
-              <th>Tên phần mềm</th>
-              <th>Ngày gửi</th>
-              <th>Loại yêu cầu</th>
+              <!-- <th>Tên phần mềm yêu cầu</th> -->
+              <!-- <th>Loại yêu cầu</th> -->
               <th>Lịch đăng ký</th>
+              <th>Học kỳ</th>
+              <th>Ngày gửi</th>
               <th>Trạng thái</th>
               <th colspan="2">Thao tác</th>
             </tr>
@@ -429,28 +481,22 @@
             <tr>
               <td>{{ start_index + loop.index }}</td>
               <td>YC{{ re.MaYeuCau }}</td>
+              <td>{{ re.TenHocPhan }}</td>
+              <!-- <td>{{ re.TenPhanMem or "Không yêu cầu phần mềm" }}</td> -->
+              <!-- <td>
+                {% if re.LoaiYeuCau == "thuc_hanh" %}Thực hành{% else %}Khác{% endif %}
+              </td> -->
               <td>
-                {{ re.TenHocPhan }} {% if re.NhomHocPhan %}
-                <br /><small>Nhóm: {{ re.NhomHocPhan }}</small>
-                {% endif %}
-              </td>
-              <td>{{ re.TenPhanMem }}</td>
-              <td>{{ re.NgayYeuCau }}</td>
-
-              <!-- loai yeu cau  -->
-              {% if re.LoaiYeuCau == 1 %}
-              <td>Dài hạn</td>
-              <td>
-                {% for thu in re.DanhSachThu.split(', ') %} {% if thu == '8'
-                %}Chủ nhật{% else %}Thứ {{ thu }}{% endif %}{% if not loop.last
+                {% if re.LoaiYeuCau == "thuc_hanh" %} {% for thu in
+                (re.DanhSachThu or "").split(", ") %} {% if thu == "8" %}Chủ
+                nhật{% elif thu %}Thứ {{ thu }}{% endif %} {% if not loop.last
                 %}, {% endif %} {% endfor %}
                 <br />
-                Tuần {{ re.TuanBatDau }} - Tuần {{ re.TuanKetThuc }}
+                Tuần {{ re.TuanBatDau }} đến tuần {{ re.TuanKetThuc }} {% else
+                %} {{ re.NgayThucHanh or "Chưa có ngày cụ thể" }} {% endif %}
               </td>
-              {% else %}
-              <td>Phát sinh</td>
-              <td>{{ re.NgayThucHanh }}</td>
-              {% endif %}
+              <td>{{ re.TenHocKy }}</td>
+              <td>{{ re.NgayYeuCau }}</td>
 
               <!-- trang thai -->
               <td>
@@ -459,9 +505,11 @@
                 {% elif re.TrangThai == 1 %}
                 <span class="badge info">Chờ xếp lịch</span>
                 {% elif re.TrangThai == 2 %}
-                <span class="badge success">Đã duyệt</span>
+                <span class="badge success">{{ re.TenTrangThai }}</span>
+                {% elif re.TrangThai == 3 %}
+                <span class="badge danger">{{ re.TenTrangThai }}</span>
                 {% else %}
-                <span class="badge danger">Từ chối</span>
+                <span class="badge info">{{ re.TenTrangThai }}</span>
                 {% endif %}
               </td>
 
@@ -472,10 +520,8 @@
                   data-id="{{ re.MaYeuCau }}"
                   data-course="{{ re.TenHocPhan }}"
                   data-course-id="{{ re.MaHocPhan }}"
-                  data-group="{{ re.NhomHocPhan or '' }}"
                   data-program="{{ re.TenPhanMem }}"
-                  data-amount="{{ re.SoLuongMay }}"
-                  data-lesson="{{ re.BuoiThucHanh }}"
+                  data-lesson="{{ re.TenBuoi }}"
                   data-type="{{ re.LoaiYeuCau }}"
                   data-thu="{{ re.DanhSachThu or '' }}"
                   data-tuan-bd="{{ re.TuanBatDau or '' }}"
@@ -485,12 +531,15 @@
                   data-status="{{ re.TrangThai }}"
                   data-teacher="{{ re.TenGiangVien }}"
                   data-date="{{ re.NgayYeuCau }}"
+                  data-group="{{ re.SiSo }}"
+                  data-number="{{ re.TenNhom }}"
                 >
                   <i class="fa-regular fa-eye"></i>
                   Xem chi tiết
                 </button>
               </td>
               <td>
+                {% if re.TrangThai == 0 %}
                 <button
                   type="button"
                   class="delete-detail-act"
@@ -500,13 +549,16 @@
                   <i class="fa-solid fa-trash-can"></i>
                   Xóa
                 </button>
+                {% else %}
+                <span aria-label="Chỉ xóa được yêu cầu đang chờ duyệt">—</span>
+                {% endif %}
               </td>
             </tr>
             {% endfor %}
           </tbody>
           {% else %}
           <tbody>
-            <td colspan="10" class="empty-required-message">
+            <td colspan="11" class="empty-required-message">
               <i class="fa-solid fa-door-open"></i>
               Không tìm thấy yêu cầu nào.
             </td>
@@ -520,97 +572,113 @@
         <div class="required-detail-info-container modal-panel">
           <h3 class="modal-heading">Chi tiết yêu cầu</h3>
           <div class="modal-body">
-          <div class="required-detail-status" id="detail-status"></div>
+            <div class="required-detail-status" id="detail-status"></div>
 
-          <div class="required-detail-info-item">
-            <div class="required-detail-info-title">Mã yêu cầu</div>
-            <div class="required-detail-info-describe" id="detail-id"></div>
-          </div>
-          <div class="required-detail-info-item">
-            <div class="required-detail-info-title">Tên học phần</div>
-            <div class="required-detail-info-describe" id="detail-course"></div>
-          </div>
-          <div
-            class="required-detail-info-item"
-            id="detail-group-box"
-            style="display: none"
-          >
-            <div class="required-detail-info-title">Nhóm học phần</div>
-            <div class="required-detail-info-describe" id="detail-group"></div>
-          </div>
-          <div class="required-detail-info-item">
-            <div class="required-detail-info-title">Tên phần mềm</div>
-            <div
-              class="required-detail-info-describe"
-              id="detail-program"
-            ></div>
-          </div>
-          <div class="required-detail-info-item">
-            <div class="required-detail-info-title">Số lượng máy</div>
-            <div class="required-detail-info-describe" id="detail-amount"></div>
-          </div>
-          <div class="required-detail-info-item">
-            <div class="required-detail-info-title">Buổi thực hành</div>
-            <div class="required-detail-info-describe" id="detail-lesson"></div>
-          </div>
-          <div class="required-detail-info-item">
-            <div class="required-detail-info-title">Loại yêu cầu</div>
-            <div class="required-detail-info-describe" id="detail-type"></div>
-          </div>
-
-          <!-- type = 1-->
-          <div class="required-detail-info-item" id="detail-week-day-box">
-            <div class="required-detail-info-title">Thứ thực hành</div>
-            <div
-              class="required-detail-info-describe"
-              id="detail-week-day"
-            ></div>
-          </div>
-          <div class="required-detail-info-item" id="detail-week-start-box">
-            <div class="required-detail-info-title">Tuần bắt đầu</div>
-            <div
-              class="required-detail-info-describe"
-              id="detail-week-start"
-            ></div>
-          </div>
-          <div class="required-detail-info-item" id="detail-week-end-box">
-            <div class="required-detail-info-title">Tuần kết thúc</div>
-            <div
-              class="required-detail-info-describe"
-              id="detail-week-end"
-            ></div>
-          </div>
-
-          <!-- type = 0 -->
-          <div class="required-detail-info-item" id="detail-practice-day-box">
-            <div class="required-detail-info-title">Ngày thực hành</div>
-            <div
-              class="required-detail-info-describe"
-              id="detail-practice-day"
-            ></div>
-          </div>
-
-          <div class="required-detail-note-container">
-            <div class="required-detail-note-title">Ghi chú</div>
-            <div class="required-detail-note-describe" id="detail-note"></div>
-          </div>
-
-          <div class="required-detail-send-container">
-            <div class="required-detail-send-item">
-              <div class="required-detail-send-title">Người yêu cầu</div>
+            <div class="required-detail-info-item">
+              <div class="required-detail-info-title">Mã yêu cầu</div>
+              <div class="required-detail-info-describe" id="detail-id"></div>
+            </div>
+            <div class="required-detail-info-item">
+              <div class="required-detail-info-title">Tên học phần</div>
               <div
-                class="required-detail-send-describe"
-                id="detail-teacher"
+                class="required-detail-info-describe"
+                id="detail-course"
               ></div>
             </div>
-            <div class="required-detail-send-item">
-              <div class="required-detail-send-title">Ngày yêu cầu</div>
-              <div class="required-detail-send-describe" id="detail-date"></div>
+            <div class="required-detail-info-item">
+              <div class="required-detail-info-title">Tên nhóm</div>
+              <div
+                class="required-detail-info-describe"
+                id="detail-group"
+              ></div>
             </div>
-          </div>
+            <div class="required-detail-info-item">
+              <div class="required-detail-info-title">Sỉ số</div>
+              <div
+                class="required-detail-info-describe"
+                id="detail-number"
+              ></div>
+            </div>
+            <div class="required-detail-info-item">
+              <div class="required-detail-info-title">Phần mềm yêu cầu</div>
+              <div
+                class="required-detail-info-describe"
+                id="detail-program"
+              ></div>
+            </div>
+            <div class="required-detail-info-item">
+              <div class="required-detail-info-title">Buổi thực hành</div>
+              <div
+                class="required-detail-info-describe"
+                id="detail-lesson"
+              ></div>
+            </div>
+            <div class="required-detail-info-item">
+              <div class="required-detail-info-title">Loại yêu cầu</div>
+              <div class="required-detail-info-describe" id="detail-type"></div>
+            </div>
 
-          <button type="button" class="close-detail-btn" id="close-detail-btn">Đóng</button>
+            <!-- type = 1-->
+            <div class="required-detail-info-item" id="detail-week-day-box">
+              <div class="required-detail-info-title">Thứ thực hành</div>
+              <div
+                class="required-detail-info-describe"
+                id="detail-week-day"
+              ></div>
+            </div>
+            <div class="required-detail-info-item" id="detail-week-start-box">
+              <div class="required-detail-info-title">Tuần bắt đầu</div>
+              <div
+                class="required-detail-info-describe"
+                id="detail-week-start"
+              ></div>
+            </div>
+            <div class="required-detail-info-item" id="detail-week-end-box">
+              <div class="required-detail-info-title">Tuần kết thúc</div>
+              <div
+                class="required-detail-info-describe"
+                id="detail-week-end"
+              ></div>
+            </div>
 
+            <!-- type = 0 -->
+            <div class="required-detail-info-item" id="detail-practice-day-box">
+              <div class="required-detail-info-title">Ngày thực hành</div>
+              <div
+                class="required-detail-info-describe"
+                id="detail-practice-day"
+              ></div>
+            </div>
+
+            <div class="required-detail-note-container">
+              <div class="required-detail-note-title">Ghi chú</div>
+              <div class="required-detail-note-describe" id="detail-note"></div>
+            </div>
+
+            <div class="required-detail-send-container">
+              <div class="required-detail-send-item">
+                <div class="required-detail-send-title">Người yêu cầu</div>
+                <div
+                  class="required-detail-send-describe"
+                  id="detail-teacher"
+                ></div>
+              </div>
+              <div class="required-detail-send-item">
+                <div class="required-detail-send-title">Ngày yêu cầu</div>
+                <div
+                  class="required-detail-send-describe"
+                  id="detail-date"
+                ></div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="close-detail-btn"
+              id="close-detail-btn"
+            >
+              Đóng
+            </button>
           </div>
         </div>
       </div>
@@ -626,21 +694,29 @@
         <div class="pagination">
           <div class="required-previous-page">
             {% if (page - 1) > 0 %}
-            <a aria-label="Trang trước" href="/admin/required?page={{ page - 1 }}&keyword={{ keyword }}"
+            <a
+              aria-label="Trang trước"
+              href="/admin/required?page={{ page - 1 }}&keyword={{ keyword }}"
               ><i class="fa-solid fa-chevron-left"></i
             ></a>
             {% else %}
-            <span role="link" aria-disabled="true" aria-label="Trang trước"><i class="fa-solid fa-chevron-left"></i></span>
+            <span role="link" aria-disabled="true" aria-label="Trang trước"
+              ><i class="fa-solid fa-chevron-left"></i
+            ></span>
             {% endif %}
           </div>
           <div class="required-number-page">{{ page }}</div>
           <div class="required-next-page">
-          {% if amount > (page * per_page) %}
-            <a aria-label="Trang sau" href="/admin/required?page={{ page + 1 }}&keyword={{ keyword }}"
+            {% if amount > (page * per_page) %}
+            <a
+              aria-label="Trang sau"
+              href="/admin/required?page={{ page + 1 }}&keyword={{ keyword }}"
               ><i class="fa-solid fa-chevron-right"></i
             ></a>
             {% else %}
-            <span role="link" aria-disabled="true" aria-label="Trang sau"><i class="fa-solid fa-chevron-right"></i></span>
+            <span role="link" aria-disabled="true" aria-label="Trang sau"
+              ><i class="fa-solid fa-chevron-right"></i
+            ></span>
             {% endif %}
           </div>
         </div>
@@ -653,7 +729,9 @@
         <div class="popup-icon">
           <i class="fa-solid fa-circle-exclamation"></i>
         </div>
-        <div class="popup-error-message" id="popup-error-message"></div>
+        <div class="popup-error-message" id="popup-error-message">
+          {{ error or '' }}
+        </div>
         <button type="button" id="popup-error-close">Đóng</button>
       </div>
     </div>
@@ -673,31 +751,28 @@
       <div class="popup modal-panel">
         <h3 class="modal-heading">Xác nhận xóa yêu cầu</h3>
         <div class="modal-body">
-        <div class="popup-icon">
-          <i class="fa-solid fa-circle-question"></i>
-        </div>
+          <div class="popup-icon">
+            <i class="fa-solid fa-circle-question"></i>
+          </div>
 
+          <p style="margin: 12px 0">
+            Bạn có chắc chắn muốn xóa yêu cầu thực hành học phần
+            <strong id="delete-required-course"></strong>?
+          </p>
 
+          <p style="font-size: 13px; color: #666">
+            Hành động này không thể hoàn tác.
+          </p>
 
-        <p style="margin: 12px 0">
-          Bạn có chắc chắn muốn xóa yêu cầu thực hành học phần
-          <strong id="delete-required-course"></strong>?
-        </p>
+          <div class="popup-actions" style="margin-top: 20px">
+            <button type="button" id="delete-required-cancel">Hủy</button>
 
-        <p style="font-size: 13px; color: #666">
-          Hành động này không thể hoàn tác.
-        </p>
-
-        <div class="popup-actions" style="margin-top: 20px">
-          <button type="button" id="delete-required-cancel">Hủy</button>
-
-          <form id="delete-required-form" method="post" action="">
-            <button type="submit" id="delete-required-confirm">
-              Xác nhận xóa
-            </button>
-          </form>
-        </div>
-
+            <form id="delete-required-form" method="post" action="">
+              <button type="submit" id="delete-required-confirm">
+                Xác nhận xóa
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

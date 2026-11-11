@@ -223,11 +223,13 @@
             data-teacher="{{ re.TenGiangVien }}"
             data-session="{{ re.BuoiThucHanh }}"
             data-machines="{{ re.SoLuongMay }}"
-            data-software="{{ re.MaPhanMem }}"
+            data-software="{{ re.MaPhanMem | tojson }}"
             data-date="{{ re.NgayThucHanh or '' }}"
             data-days="{{ re.DanhSachThu or '' }}"
             data-week-start="{{ re.MaTuanBatDau or '' }}"
             data-week-end="{{ re.MaTuanKetThuc or '' }}"
+            data-week-start-name="{{ re.TuanBatDau or '' }}"
+            data-week-end-name="{{ re.TuanKetThuc or '' }}"
           >
             <div class="required-item-course">{{ re.TenHocPhan }}</div>
             {% if re.NhomHocPhan %}
@@ -237,7 +239,7 @@
             <div class="required-item-time">
               {% if re.BuoiThucHanh == 1 %} Sáng {% elif re.BuoiThucHanh == 2%}
               Chiều {% else %} Tối {% endif %} <span></span> {% if re.LoaiYeuCau
-              == 0 %} {{re.NgayThucHanh}} {% else %} {{re.DanhSachThu}}
+              == 'khac' %} {{re.NgayThucHanh}} {% else %} {{re.DanhSachThu}}
               <span></span>
               Tuần {{re.TuanBatDau}} - Tuần {{re.TuanKetThuc}}{% endif %}
             </div>
