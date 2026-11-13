@@ -81,7 +81,7 @@ document.querySelectorAll(".see-detail-act").forEach(function (button) {
       String(data.status) === "0" ? "block" : "none";
 
     refuseDetailBtn.style.display =
-      String(data.status) === "0" ? "block" : "none";
+      ["0", "1"].includes(String(data.status)) ? "block" : "none";
 
     detailContainer.classList.add("show");
 
@@ -147,7 +147,7 @@ acceptDetailBtn.addEventListener("click", async function () {
     const result = await response.json();
 
     if (!response.ok || !result.success) {
-      messageError.textContent = result.message || "Không thể duyệt yêu cầu.";
+      alert(result.message || "Không thể thêm yêu cầu vào danh sách chờ xếp lịch.");
       return;
     }
 
@@ -156,7 +156,7 @@ acceptDetailBtn.addEventListener("click", async function () {
       window.location.reload();
     }, 300);
   } catch (error) {
-    console.error("Lỗi duyệt yêu cầu:", error);
+    console.error("Lỗi chuyển yêu cầu sang chờ xếp lịch:", error);
     alert("Không thể kết nối đến máy chủ.");
   } finally {
     acceptDetailBtn.style.pointerEvents = "";
@@ -171,6 +171,8 @@ const messageError = document.getElementById("message-error");
 const refuseRequiredCancel = document.getElementById("refuse-required-cancel");
 
 refuseDetailBtn.addEventListener("click", function () {
+  refuseRequiredForm.reset();
+  messageError.textContent = "";
   popupRefuse.classList.add("show");
 });
 

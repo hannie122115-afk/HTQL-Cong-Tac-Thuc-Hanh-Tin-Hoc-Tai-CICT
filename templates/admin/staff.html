@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="vi">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,7 +12,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
     <link rel="stylesheet" href="/static/css/auth/popup.css?v=9cce345a79" />
-    <link rel="stylesheet" href="/static/css/admin/staff.css?v=188ffda889" />
+    <link rel="stylesheet" href="/static/css/admin/staff.css?v=room-assignments-1" />
     <link rel="stylesheet" href="/static/css/shared/ui.css?v=3a6450f69d" />
     <link rel="stylesheet" href="/static/css/shared/theme.css?v=d09f9b8cb7" />
   </head>
@@ -165,7 +165,7 @@
               <div class="navbar-item-icon">
                 <i class="fa-regular fa-calendar-days"></i>
               </div>
-              <div class="navbar-item-title">Xếp lịch cán bộ</div>
+              <div class="navbar-item-title">Phân công cán bộ</div>
             </div>
             <div class="navbar-item-arrow">
               <i class="fa-solid fa-chevron-right"></i>
@@ -206,135 +206,55 @@
       <div class="direction">
         <a href="/admin">Trang chủ</a>
         <i class="fa-solid fa-angle-right"></i>
-        <a href="/admin/staff">Xếp lịch cán bộ</a>
+        <a href="/admin/staff">Phân công cán bộ</a>
       </div>
 
-      <!-- staff-list -->
-      <div class="required-container">
-        <div class="required-title">Danh sách cán bộ</div>
+      <aside class="required-container">
+        <div class="required-title"><i class="fa-solid fa-users" aria-hidden="true"></i> Danh sách cán bộ</div>
         <div class="required-list" id="staff-list">
           {% for staff in staffs %}
-          <div
-            class="required-item staff-item"
-            draggable="false"
-            data-staff-id="{{ staff.MaCanBo }}"
-          >
-            <div class="required-item-course">{{ staff.TenCanBo }}</div>
-          </div>
+          <button type="button" class="required-item staff-item" draggable="{{ 'true' if can_assign else 'false' }}"
+            data-staff-id="{{ staff.MaNguoiDung }}" data-staff-name="{{ staff.TenNguoiDung }}"
+            aria-pressed="false" {% if not can_assign %}disabled{% endif %}>
+            <span class="required-item-course">{{ staff.TenNguoiDung }}</span>
+            <span class="staff-room-count">Số phòng được phân công: 0</span>
+          </button>
           {% else %}
-          <div class="calendar-empty">Chưa có cán bộ.</div>
+          <p class="calendar-empty">Chưa có cán bộ.</p>
           {% endfor %}
         </div>
-      </div>
-      <!-- calendar -->
-      <div class="calendar-container">
-        <div class="calendar-info">
-          {% if semester_current %} Học kỳ {{ semester_current[1] }} - Năm học
-          {{ semester_current[2] }} {% else %} Hiện không có học kỳ đang diễn ra
+      </aside>
+
+      <form class="room-assignment-panel" id="staff-assignment-form" data-can-assign="{{ 'true' if can_assign else 'false' }}">
+        <div class="room-list-heading">
+          <h2><i class="fa-solid fa-building" aria-hidden="true"></i> Danh sách phòng</h2>
+          <div class="room-legend"><span><i class="legend-dot assigned"></i> Đã được phân công</span><span><i class="legend-dot"></i> Chưa phân công</span></div>
+        </div>
+        <div class="room-grid" id="room-grid">
+          {% for room in rooms %}
+          <article class="assignment-room" data-room-id="{{ room.MaPhong }}" data-staff-id="{{ room.MaNguoiQuanLy or '' }}">
+            <button type="button" class="room-select" aria-label="Phân công {{ room.TenPhong }}" {% if not can_assign %}disabled{% endif %}>
+              <span class="assignment-room-name">{{ room.TenPhong }}</span>
+              <span class="assignment-room-capacity">({{ room.SoLuongMay }} máy)</span>
+              <i class="room-state-icon fa-solid fa-plus" aria-hidden="true"></i>
+            </button>
+            <div class="room-assignee" hidden><span class="room-staff-name"></span><button type="button" class="remove-assignment" aria-label="Bỏ phân công {{ room.TenPhong }}" {% if not can_assign %}disabled{% endif %}><i class="fa-solid fa-xmark" aria-hidden="true"></i></button></div>
+          </article>
+          {% else %}
+          <p class="calendar-empty">Chưa có phòng thực hành.</p>
+          {% endfor %}
+        </div>
+        <div class="room-assignment-footer">
+          <p class="assignment-hint"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Kéo thả cán bộ vào các phòng để phân công. Mỗi cán bộ có thể được phân công ở nhiều phòng. Bạn cũng có thể chọn cán bộ rồi chọn phòng.</p>
+          {% if can_assign %}
+          <div class="assignment-actions">
+            <button type="button" id="resetBtn"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i> Đặt lại</button>
+            <button type="submit" id="saveBtn"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Lưu thay đổi</button>
+          </div>
           {% endif %}
         </div>
-
-        <!-- calendar-title -->
-        <div class="calendar-title-box">
-          <button
-            type="button"
-            class="previous-week"
-            id="previousWeek"
-            aria-label="Tuần trước"
-          >
-            <i class="fa-solid fa-caret-left"></i>
-          </button>
-
-          <div class="week-name" id="weekName"></div>
-          <div class="week-space" id="week-space"></div>
-          <button
-            type="button"
-            class="next-week"
-            id="nextWeek"
-            aria-label="Tuần sau"
-          >
-            <i class="fa-solid fa-caret-right"></i>
-          </button>
-        </div>
-
-        <!-- Chọn buổi xếp lịch -->
-        <div class="session-btn-group">
-          <button type="button" class="session-btn active" data-session="1">
-            <strong>Sáng</strong>
-            <small>07:00 - 11:00</small>
-          </button>
-
-          <button type="button" class="session-btn" data-session="2">
-            <strong>Chiều</strong>
-            <small>13:30 - 17:00</small>
-          </button>
-
-          <button type="button" class="session-btn" data-session="3">
-            <strong>Tối</strong>
-            <small>18:20 - 20:00</small>
-          </button>
-        </div>
-
-        <div class="action-btn-group">
-          <button type="button" class="action-btn" id="editBtn">
-            <i class="fa-solid fa-pen"></i> Chỉnh sửa
-          </button>
-          <button type="button" class="action-btn" id="cancelBtn" hidden>
-            <i class="fa-solid fa-rotate-left"></i> Hủy
-          </button>
-          <button type="button" class="action-btn" id="saveBtn" hidden>
-            <i class="fa-solid fa-floppy-disk"></i> Lưu
-          </button>
-        </div>
-
-        <!-- calendar-table -->
-        <div class="calendar-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Phòng thực hành</th>
-
-                {% for day in range(2, 9) %}
-                <th>
-                  {% if day == 8 %} Chủ nhật {% else %} Thứ {{ day }} {% endif
-                  %}
-
-                  <span class="day-of-week" data-day="{{ day - 2 }}"></span>
-                </th>
-                {% endfor %}
-              </tr>
-            </thead>
-            <tbody id="calendar-body">
-              {% for room in all_room %}
-              <tr
-                class="staff-room-row"
-                data-room="{{ room[0] }}"
-                data-machine-count="{{ room[3] }}"
-                data-config-id="{{ room[4] or '' }}"
-                data-room-status="{{ room[2] }}"
-                data-software="{{ room[5] | tojson }}"
-              >
-                <td class="room-name">{{ room[1] }}</td>
-
-                {% for day in range(7) %}
-                <td
-                  class="schedule-cell"
-                  data-room="{{ room[0] }}"
-                  data-day="{{ day }}"
-                  data-session="1"
-                ></td>
-                {% endfor %}
-              </tr>
-              {% endfor %}
-              <tr id="empty-schedule-row" hidden>
-                <td class="calendar-empty" colspan="8">
-                  Buổi này chưa có phòng nào được xếp lịch trong tuần.
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <p id="assignment-status" role="status" aria-live="polite"></p>
+      </form>
     </div>
 
     <!-- popup -->
@@ -345,30 +265,6 @@
         </div>
         <div class="popup-error-message" id="popup-error-message"></div>
         <button type="button" id="popup-error-close">Đóng</button>
-      </div>
-    </div>
-
-    <div class="popup-error confirmation-popup" id="popup-cancel-edit">
-      <div class="popup modal-panel">
-        <h3 class="modal-heading">Hủy chỉnh sửa</h3>
-        <div class="modal-body">
-        <div class="popup-icon">
-          <i class="fa-solid fa-circle-question"></i>
-        </div>
-        <div class="popup-error-message">
-          Bạn có chắc chắn muốn hủy chỉnh sửa? Thao tác này sẽ không lưu các
-          thay đổi.
-        </div>
-        <div>
-          <button type="button" id="cancel-edit-stay">
-            Tiếp tục chỉnh sửa
-          </button>
-          <button type="button" id="cancel-edit-discard">
-            Hủy và không lưu
-          </button>
-        </div>
-
-        </div>
       </div>
     </div>
 
@@ -383,17 +279,7 @@
       </div>
     </div>
 
-    <!-- truyen du lieu tu python => javascript -->
-    <script id="weeks-data" type="application/json">
-      {{ weeks | tojson }}
-    </script>
-    <script id="scheduled-data" type="application/json">
-      {{ all_scheduled | tojson }}
-    </script>
-    <script id="staff-assignments-data" type="application/json">
-      {{ staff_assignments | tojson }}
-    </script>
-    <script src="/static/js/admin/staff.js"></script>
+    <script src="/static/js/admin/staff.js?v=room-assignments-1"></script>
     <script src="/static/js/auth/navbar.js"></script>
     <script src="/static/js/auth/ui.js"></script>
   </body>

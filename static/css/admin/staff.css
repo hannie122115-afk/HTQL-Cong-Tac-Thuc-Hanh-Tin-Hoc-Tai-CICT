@@ -1,5 +1,38 @@
-/* admin/staff.css */
 @import url("../shared/calendar.css");
-#staff-list .staff-item { border-left: 3px solid #337247; background: #EAF5EC; }
-.staff-room-row .room-name { color: #2F6B43; }
-#empty-schedule-row td { padding: 40px; color: var(--muted); text-align: center; }
+#staff-list .staff-item { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; width: 100%; text-align: left; white-space: normal; border-left: 3px solid #1684ff; background: #f4f8ff; color: #173c72; }
+#staff-list .staff-item.is-selected { border-color: #1684ff; background: #e3f0ff; box-shadow: 0 0 0 2px #1684ff33; }
+.staff-room-count { color: #56749a; font-size: 12px; font-weight: 400; }
+.room-assignment-panel { min-width: 0; padding: 24px; border: 1px solid #e3edfc; border-radius: 12px; background: #fff; }
+.room-list-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+.room-list-heading h2 { display: flex; align-items: center; gap: 10px; margin: 0; color: #172d83; font-size: 18px; }
+.room-list-heading h2 i { color: #1678df; }
+.room-legend { display: flex; flex-wrap: wrap; gap: 16px; color: #65769d; font-size: 12px; }
+.room-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; background: #cfdef5; }
+.legend-dot.assigned { background: #1684ff; }
+.room-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.assignment-room { min-width: 0; min-height: 100px; border: 1px solid #e1ebfc; border-radius: 10px; background: #fcfdff; transition: background .15s, border-color .15s; overflow: hidden; }
+.assignment-room.is-assigned { border-color: #97c6ff; background: #e4f1ff; }
+.assignment-room.is-drag-over { border-color: #1684ff; background: #d3e8ff; outline: 2px dashed #1684ff; outline-offset: 2px; }
+.assignment-room .room-select { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; width: 100%; min-height: 98px; padding: 20px 36px 20px 18px; border: 0; border-radius: 0; background: transparent; color: #172d83; text-align: left; white-space: normal; box-shadow: none; }
+.assignment-room .room-select:hover { background: #1684ff08; }
+.assignment-room-name { font-size: 14px; font-weight: 650; overflow-wrap: anywhere; }
+.assignment-room-capacity { font-size: 12px; color: #657ba8; font-weight: 400; }
+.room-state-icon { position: absolute; top: 17px; right: 14px; color: #5476b3; }
+.is-assigned .room-state-icon { color: #1684ff; }
+.room-assignee { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 12px 12px 18px; color: #1862b5; font-size: 12px; }
+.room-assignee[hidden] { display: none; }
+.room-staff-name { overflow-wrap: anywhere; }
+.room-assignee .remove-assignment { flex-shrink: 0; min-height: 26px; width: 26px; padding: 3px; border: 0; background: #fff9; color: #56749a; }
+.room-assignment-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin-top: 28px; }
+.assignment-hint { display: flex; align-items: flex-start; gap: 9px; flex: 1 1 300px; margin: 0; padding: 12px 14px; border-radius: 8px; background: #edf5ff; color: #526c9d; font-size: 12px; line-height: 1.7; }
+.assignment-hint i { color: #1684ff; margin-top: 4px; }
+.assignment-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.assignment-actions button { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #b5d3ff; background: #fff; color: #1684ff; }
+.assignment-actions #saveBtn { border-color: #1684ff; background: #1684ff; color: #fff; }
+#assignment-status { margin: 14px 0 0; font-size: 13px; color: #325b90; }
+#assignment-status:empty { display: none; }
+@media (max-width: 1200px) { .room-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 950px) { .room-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 768px) { .room-assignment-panel { padding: 16px; } .room-grid { gap: 12px; } }
+@media (prefers-reduced-motion: reduce) { .assignment-room { transition: none; } }

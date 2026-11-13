@@ -490,7 +490,10 @@
     <script id="scheduled-data" type="application/json">
       {{ all_scheduled | tojson }}
     </script>
-    <script src="/static/js/admin/calendar.js"></script>
+    <script id="calendar-requests-data" type="application/json">
+      {{ calendar_requests | tojson }}
+    </script>
+    <script src="/static/js/admin/calendar.js?v=week-day-occurrences-1"></script>
     <script src="/static/js/auth/navbar.js"></script>
     <script src="/static/js/auth/ui.js"></script>
   </body>

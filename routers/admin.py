@@ -2714,6 +2714,12 @@ def refuse_required(
 ):
     if not has_permission(request, "duyet_yeu_cau_xep_lich"):
         return RedirectResponse(url="/login", status_code=303)
+    reason = reason.strip()
+    if not reason:
+        return JSONResponse(
+            status_code=400,
+            content={"success": False, "message": "Vui lòng nhập lý do từ chối."},
+        )
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -2729,14 +2735,17 @@ def refuse_required(
                     CASE WHEN LoaiYeuCau = 'khac' THEN NgayThucHanh END
                         AS NgayThucHanh
                 FROM LICH_THUC_HANH
-                WHERE MaLichThucHanh = %s AND MaTrangThai = 0
+                WHERE MaLichThucHanh = %s
+                  AND MaTrangThai IN (0, 1)
+                  AND MaPhong IS NULL
                 FOR UPDATE
             )
             UPDATE LICH_THUC_HANH lth
             SET MaTrangThai = 3,
                 LyDo = %s
             FROM target t
-            WHERE lth.MaTrangThai = 0
+            WHERE lth.MaTrangThai IN (0, 1)
+              AND lth.MaPhong IS NULL
               AND lth.MaLopHocPhan = t.MaLopHocPhan
               AND lth.LoaiYeuCau = t.LoaiYeuCau
               AND lth.MaBuoi = t.MaBuoi
@@ -2757,7 +2766,10 @@ def refuse_required(
             conn.rollback()
             return JSONResponse(
                 status_code=409,
-                content={"success": False, "message": "Yêu cầu không còn chờ duyệt."},
+                content={
+                    "success": False,
+                    "message": "Chỉ có thể từ chối yêu cầu đang chờ duyệt hoặc chờ xếp lịch và chưa được xếp phòng.",
+                },
             )
         conn.commit()
         return {"success": True, "message": "Đã từ chối yêu cầu xếp lịch."}
@@ -3151,6 +3163,43 @@ def get_scheduled_requests():
     return result
 
 
+def get_calendar_request_occurrences():
+    """Keep every week/day in a request, including its already scheduled rows."""
+    conn = get_connection()
+    try:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('''
+            SELECT lth.MaLichThucHanh AS "id", lth.MaLopHocPhan AS "classId",
+                   lth.LoaiYeuCau AS "type", lth.MaBuoi AS "session",
+                   lth.NgayYeuCau AS "created", lth.GhiChu AS "note",
+                   lth.NgayThucHanh AS "date", lth.MaThu AS "weekday",
+                   lth.MaTuanHoc AS "weekId", lth.MaPhong AS "roomId",
+                   th.TenTuanHoc AS "weekName", th.NgayBatDau AS "weekStart"
+            FROM LICH_THUC_HANH lth
+            LEFT JOIN TUAN_HOC th ON th.MaTuanHoc = lth.MaTuanHoc
+            WHERE lth.MaTrangThai IN (1, 2)
+            ORDER BY th.NgayBatDau, lth.MaThu, lth.MaLichThucHanh
+        ''')
+        rows = cursor.fetchall()
+        cursor.close()
+    finally:
+        conn.close()
+    groups = {}
+    for row in rows:
+        key = (row["classId"], row["type"], row["session"], row["created"],
+               row["note"], row["date"] if row["type"] == "khac" else None)
+        group = groups.setdefault(key, {"id": row["id"], "occurrences": []})
+        group["id"] = min(group["id"], row["id"])
+        day = row["weekday"] - 2 if row["weekday"] is not None else (
+            row["date"].weekday() if row["date"] else None
+        )
+        group["occurrences"].append({
+            "requiredId": row["id"], "weekId": row["weekId"], "day": day,
+            "roomId": row["roomId"], "weekName": row["weekName"],
+        })
+    return list(groups.values())
+
+
 @router.get("/admin/calendar")
 def show_calendar(
     request: Request,
@@ -3179,6 +3228,7 @@ def show_calendar(
     all_room = get_all_room()
     all_scheduled = get_scheduled_requests()
     all_required_waiting = get_required_for_waiting()
+    calendar_requests = get_calendar_request_occurrences()
 
     weeks = []
     if semester_current:
@@ -3205,6 +3255,7 @@ def show_calendar(
             "weeks": weeks,
             "all_scheduled": all_scheduled,
             "all_required_waiting": all_required_waiting,
+            "calendar_requests": calendar_requests,
             "success": success,
         },
     )
@@ -3330,7 +3381,7 @@ def save_calendar_schedule(request: Request, payload: dict = Body(...)):
                 (required_id,),
             )
             target = cursor.fetchone()
-            if not target or target[6] != 2 or target[7] is None:
+            if not target or target[6] not in (1, 2):
                 continue
 
             class_id, request_type, lesson_id, request_date, practice_date, note = (
@@ -3606,235 +3657,116 @@ def save_calendar_schedule(request: Request, payload: dict = Body(...)):
         conn.close()
 
 
-# =========== XEP LICH CAN BO ========
+# =========== PHAN CONG CAN BO THEO PHONG ========
 
 
 @router.get("/admin/staff")
-def show_staff_schedule(request: Request):
+def show_staff_assignments(request: Request):
     if not has_permission(request, "xem_phan_cong_can_bo"):
         return RedirectResponse(url="/login", status_code=303)
 
-    user = get_user_by_id(request.session.get("accountId"))
-    semester = get_semester_current()
-    weeks = get_weeks_by_semester(semester[0]) if semester else []
-    all_room = get_all_room()
-    all_scheduled = get_scheduled_requests()
-
     conn = get_connection()
-    cursor = conn.cursor(cursor_factory=RealDictCursor)
-    cursor.execute("""
-            SELECT MaCanBo AS "MaCanBo", TenCanBo AS "TenCanBo"
-            FROM CAN_BO
-            ORDER BY TenCanBo
-        """)
-    staffs = cursor.fetchall()
-
-    assignments = []
-    if semester:
-        cursor.execute(
-            """
-                SELECT
-                    yct.MaYeuCau AS "MaYeuCau",
-                    yct.MaPhong AS "MaPhong",
-                    yct.Thu AS "Thu",
-                    yct.MaTuanHoc AS "MaTuanHoc",
-                    yct.MaCanBo AS "MaCanBo",
-                    cb.TenCanBo AS "TenCanBo"
-                FROM YEU_CAU_THU yct
-                JOIN CAN_BO cb ON cb.MaCanBo = yct.MaCanBo
-                JOIN TUAN_HOC th ON th.MaTuanHoc = yct.MaTuanHoc
-                JOIN HOC_KY hk ON hk.MaHocKy = %s
-                WHERE yct.MaCanBo IS NOT NULL
-                  AND th.MaHocKy = hk.MaHocKy
-            """,
-            (semester[0],),
-        )
-        assignments = cursor.fetchall()
-    cursor.close()
-    conn.close()
+    try:
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('''
+            SELECT MaNguoiDung AS "MaNguoiDung", TenNguoiDung AS "TenNguoiDung"
+            FROM NGUOI_DUNG
+            WHERE MaVaiTro = 0
+            ORDER BY TenNguoiDung, MaNguoiDung
+        ''')
+        staffs = cursor.fetchall()
+        cursor.execute('''
+            SELECT p.MaPhong AS "MaPhong", p.TenPhong AS "TenPhong",
+                   nd.MaNguoiDung AS "MaNguoiQuanLy",
+                   COUNT(mt.MaMayTinh) AS "SoLuongMay"
+            FROM PHONG p
+            LEFT JOIN NGUOI_DUNG nd
+              ON nd.MaNguoiDung = p.MaNguoiQuanLy AND nd.MaVaiTro = 0
+            LEFT JOIN MAY_TINH mt ON mt.MaPhong = p.MaPhong
+            GROUP BY p.MaPhong, p.TenPhong, nd.MaNguoiDung
+            ORDER BY p.TenPhong, p.MaPhong
+        ''')
+        rooms = cursor.fetchall()
+        cursor.close()
+    finally:
+        conn.close()
 
     return templates.TemplateResponse(
         request=request,
         name="admin/staff.html",
         context={
-            "user": user,
-            "semester_current": semester,
-            "all_room": all_room,
-            "weeks": weeks,
-            "all_scheduled": all_scheduled,
+            "user": get_user_by_id(request.session.get("accountId")),
+            "avt": request.session.get("avt"),
             "staffs": staffs,
-            "staff_assignments": assignments,
+            "rooms": rooms,
+            "can_assign": has_permission(request, "phan_cong_can_bo"),
         },
     )
 
 
 @router.post("/admin/staff/assign")
-def assign_staff_to_schedule(request: Request, payload: dict = Body(...)):
+def assign_staff_to_rooms(request: Request, payload: dict = Body(...)):
     if not has_permission(request, "phan_cong_can_bo"):
-        return JSONResponse(
-            status_code=403,
-            content={
-                "success": False,
-                "message": "Bạn không có quyền thực hiện thao tác này.",
-            },
-        )
+        return JSONResponse(status_code=403, content={
+            "success": False, "message": "Bạn không có quyền thực hiện thao tác này."
+        })
 
     try:
-        required_id = int(payload["requiredId"])
-        room_id = int(payload["roomId"])
-        week_id = int(payload["weekId"])
-        day = int(payload["day"])
-        session = int(payload["session"])
-        staff_id = (
-            int(payload["staffId"]) if payload.get("staffId") is not None else None
-        )
-        if (
-            min(required_id, room_id, week_id) <= 0
-            or (staff_id is not None and staff_id <= 0)
-            or not 0 <= day <= 6
-            or session not in (1, 2, 3)
-        ):
+        assignments = payload["assignments"]
+        if not isinstance(assignments, list):
             raise ValueError
+        room_ids = set()
+        staff_ids = set()
+        for item in assignments:
+            if not isinstance(item, dict):
+                raise ValueError
+            room_id = item["roomId"]
+            staff_id = item["staffId"]
+            if type(room_id) is not int or room_id <= 0 or room_id in room_ids:
+                raise ValueError
+            if staff_id is not None and (type(staff_id) is not int or staff_id <= 0):
+                raise ValueError
+            room_ids.add(room_id)
+            if staff_id is not None:
+                staff_ids.add(staff_id)
     except (KeyError, TypeError, ValueError):
-        return JSONResponse(
-            status_code=400,
-            content={"success": False, "message": "Thông tin phân công không hợp lệ."},
-        )
+        return JSONResponse(status_code=400, content={
+            "success": False, "message": "Thông tin phân công không hợp lệ."
+        })
+
+    if not assignments:
+        return {"success": True}
 
     conn = get_connection()
     cursor = conn.cursor()
     try:
         cursor.execute(
-            """
-                SELECT NgayBatDau, NgayKetThuc
-                FROM TUAN_HOC
-                WHERE MaTuanHoc = %s
-            """,
-            (week_id,),
+            "SELECT MaPhong FROM PHONG WHERE MaPhong = ANY(%s) ORDER BY MaPhong FOR UPDATE",
+            (sorted(room_ids),),
         )
-        week = cursor.fetchone()
-        if not week:
-            return JSONResponse(
-                status_code=400,
-                content={"success": False, "message": "Không tìm thấy tuần được chọn."},
-            )
-
-        target_date = week[0] + timedelta(days=day)
-        if target_date > week[1]:
-            return JSONResponse(
-                status_code=400,
-                content={
-                    "success": False,
-                    "message": "Ngày được chọn không thuộc tuần học.",
-                },
-            )
-        weekday = target_date.isoweekday() + 1
-
-        cursor.execute(
-            """
-                SELECT yct.MaCanBo, gv.MaTaiKhoan, old_cb.MaTaiKhoan
-                FROM YEU_CAU_XEP_LICH yc
-                JOIN YEU_CAU_THU yct ON yct.MaYeuCau = yc.MaYeuCau
-                JOIN GIANG_VIEN gv ON gv.MaGiangVien = yc.MaGiangVien
-                LEFT JOIN CAN_BO old_cb ON old_cb.MaCanBo = yct.MaCanBo
-                WHERE yc.MaYeuCau = %s
-                  AND yc.TrangThai = 2
-                  AND yc.BuoiThucHanh = %s
-                  AND (
-                        yc.NgayThucHanh = %s
-                        OR (
-                            yc.NgayThucHanh IS NULL
-                            AND yc.MaTuanBatDau <= %s
-                            AND yc.MaTuanKetThuc >= %s
-                        )
-                  )
-                  AND yct.MaPhong = %s
-                  AND yct.Thu = %s
-                  AND yct.MaTuanHoc = %s
-            """,
-            (
-                required_id,
-                session,
-                target_date,
-                week_id,
-                week_id,
-                room_id,
-                weekday,
-                week_id,
-            ),
-        )
-        assignment = cursor.fetchone()
-        if not assignment:
-            return JSONResponse(
-                status_code=400,
-                content={
-                    "success": False,
-                    "message": "Ô lịch này không có lịch thực hành hợp lệ.",
-                },
-            )
-
-        old_staff_id, teacher_account_id, old_staff_account_id = assignment
-        staff_name = None
-        new_staff_account_id = None
-        if staff_id is not None:
+        if {row[0] for row in cursor.fetchall()} != room_ids:
+            conn.rollback()
+            return JSONResponse(status_code=400, content={
+                "success": False, "message": "Có phòng không còn tồn tại. Vui lòng tải lại trang."
+            })
+        if staff_ids:
             cursor.execute(
-                "SELECT TenCanBo, MaTaiKhoan FROM CAN_BO WHERE MaCanBo = %s",
-                (staff_id,),
+                "SELECT MaNguoiDung FROM NGUOI_DUNG "
+                "WHERE MaNguoiDung = ANY(%s) AND MaVaiTro = 0 FOR SHARE",
+                (sorted(staff_ids),),
             )
-            staff = cursor.fetchone()
-            if not staff:
-                return JSONResponse(
-                    status_code=400,
-                    content={
-                        "success": False,
-                        "message": "Không tìm thấy cán bộ được chọn.",
-                    },
-                )
-            staff_name = staff[0]
-            new_staff_account_id = staff[1]
-
-        cursor.execute(
-            """
-                UPDATE YEU_CAU_THU
-                SET MaCanBo = %s
-                WHERE MaYeuCau = %s
-                  AND MaPhong = %s
-                  AND Thu = %s
-                  AND MaTuanHoc = %s
-            """,
-            (staff_id, required_id, room_id, weekday, week_id),
-        )
-        if cursor.rowcount == 0:
-            return JSONResponse(
-                status_code=409,
-                content={
-                    "success": False,
-                    "message": "Lịch tuần này không còn tồn tại.",
-                },
+            if {row[0] for row in cursor.fetchall()} != staff_ids:
+                conn.rollback()
+                return JSONResponse(status_code=400, content={
+                    "success": False, "message": "Người được phân công phải có vai trò cán bộ."
+                })
+        for item in assignments:
+            cursor.execute(
+                "UPDATE PHONG SET MaNguoiQuanLy = %s WHERE MaPhong = %s",
+                (item["staffId"], item["roomId"]),
             )
-
-        if old_staff_id != staff_id:
-            for account_id in {
-                teacher_account_id,
-                old_staff_account_id,
-                new_staff_account_id,
-            } - {None}:
-                insert_notification(
-                    cursor,
-                    account_id,
-                    NOTIFICATION_TYPE_SCHEDULE,
-                    required_id,
-                )
-
         conn.commit()
-        return {
-            "success": True,
-            "staffId": staff_id,
-            "staffName": staff_name,
-            "date": target_date.isoformat(),
-            "weekId": week_id,
-            "weekday": weekday,
-        }
+        return {"success": True}
     except Exception:
         conn.rollback()
         raise
