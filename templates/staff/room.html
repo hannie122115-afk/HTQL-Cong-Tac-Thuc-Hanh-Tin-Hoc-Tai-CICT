@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="vi">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -87,7 +87,7 @@
         </div>
 
         <div class="navbar-item">
-          <a href="staff/report">
+          <a href="/staff/report">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
                 <i class="fa-solid fa-display"></i>
@@ -133,17 +133,6 @@
         <a href="/staff/room">Phòng thực hành</a>
       </div>
 
-      <form method="get" action="/staff/room" class="staff-week-filter">
-        <label for="week-id">Tuần được phân công</label>
-        <select id="week-id" name="week_id" onchange="this.form.submit()">
-          {% for week in weeks %}
-          <option value="{{ week.id }}" {% if selected_week and week.id == selected_week.id %}selected{% endif %}>
-            Tuần {{ week.name }} ({{ week.start }} - {{ week.end }})
-          </option>
-          {% endfor %}
-        </select>
-      </form>
-
       <!-- room-list -->
       <div class="room-table">
         <table>
@@ -178,7 +167,7 @@
 
               <td>
                 <a
-                  href="/staff/room/{{ room[0] }}?week_id={{ selected_week.id }}"
+                  href="/staff/room/{{ room[0] }}"
                   class="see-detail-act"
                 >
                   <i class="fa-solid fa-eye"></i>
@@ -201,9 +190,7 @@
             <tr>
               <td colspan="7" class="empty-room-message">
                 <i class="fa-solid fa-door-open"></i>
-                {% if selected_week %} Bạn chưa được phân công phòng thực hành
-                trong tuần này. {% else %} Hiện chưa có tuần học để hiển thị
-                phân công. {% endif %}
+                Bạn chưa được phân công phòng thực hành nào.
               </td>
             </tr>
             {% endif %}
@@ -224,11 +211,17 @@
           novalidate
         >
           <input type="hidden" name="room_id" id="report-room-id" />
-          <input
-            type="hidden"
-            name="week_id"
-            value="{{ selected_week.id if selected_week else '' }}"
-          />
+          <input type="hidden" name="report_type" value="room" />
+          <!-- NOTE: Cập nhật trạng thái phòng ngay khi gửi báo cáo. -->
+          <div class="computer-report-item">
+            <label class="computer-report-item-title" for="new-room-status">Trạng thái phòng</label>
+            <select id="new-room-status" name="new_room_status">
+              <option value="">Giữ nguyên trạng thái</option>
+              <option value="-1">Ngừng hoạt động</option>
+              <option value="0">Bảo trì</option>
+              <option value="1">Đang hoạt động</option>
+            </select>
+          </div>
           <div class="computer-report-item">
             <span class="computer-report-item-title"> Tên phòng </span>
             <span
@@ -322,7 +315,7 @@
       document.getElementById("popup-success").classList.add("show");
       window.setTimeout(
         () => document.getElementById("popup-success").classList.remove("show"),
-        2500,
+        300,
       );
     </script>
     {% endif %}

@@ -1,4 +1,11 @@
 /* admin/room.css */
-.room-table table { min-width: 720px; }
-.room-table td:nth-child(2) { color: #1762B2; font-weight: 600; }
-.room-add-container > form { max-width: 540px; }
+.room-table table {
+  min-width: 720px;
+}
+.room-table td:nth-child(2) {
+  color: #1762b2;
+  font-weight: 600;
+}
+.room-add-container > form {
+  max-width: 540px;
+}

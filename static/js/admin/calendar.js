@@ -6,7 +6,7 @@ const scheduledRequests = JSON.parse(
 let temporarySchedules = [];
 let isEditing = false;
 
-// A request is complete only when every original week/day has a room.
+
 const calendarRequests = JSON.parse(
   document.getElementById("calendar-requests-data").textContent,
 );

@@ -1,6 +1,21 @@
 /* staff/room-detail.css */
 @import url("../shared/detail.css");
-.computer-room-table table { min-width: 680px; }
+/* NOTE: Dàn đều ba cột của bảng máy tính. */
+.computer-room-table table { width: 100%; min-width: 0; table-layout: fixed; }
+.computer-room-table th, .computer-room-table td { width: 33.333%; text-align: center; overflow-wrap: anywhere; }
 .room-detail-info-container { border-top: 3px solid #1762B2; }
 .computer-report-item-title span { color: var(--danger); }
 .submit-computer-report { background: var(--primary); color: #FFFFFF; }
+.staff-report-toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+.staff-report-toolbar button:disabled { opacity: .5; cursor: not-allowed; }
+.report-machine-picker { min-width: 0; margin: 16px 0; padding: 12px; border: 1px solid var(--border); border-radius: 8px; }
+.report-machine-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; max-height: 180px; overflow-y: auto; margin-top: 12px; }
+.report-machine-option { display: flex; align-items: center; gap: 8px; padding: 6px; overflow-wrap: anywhere; cursor: pointer; }
+.report-machine-option input[type="checkbox"] { width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--primary); }
+#report-selected-count { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+.report-mode-picker, .individual-machine-report { min-width: 0; border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin: 14px 0; }
+.report-mode-picker label { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+.report-mode-picker input[type="radio"] { width: 16px; height: 16px; accent-color: var(--primary); }
+.individual-machine-report label { display: block; margin: 10px 0 6px; }
+.individual-machine-report select, .individual-machine-report textarea, #new-status { width: 100%; }
+#common-report-fields[hidden], #individual-report-fields[hidden], .individual-machine-report[hidden] { display: none; }

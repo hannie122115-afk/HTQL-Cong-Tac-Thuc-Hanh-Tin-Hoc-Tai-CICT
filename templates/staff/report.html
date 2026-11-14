@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static/css/shared/base.css?v=e6c30cd4a4" />
+    <title>Cán Bộ</title>
+    <link rel="stylesheet" href="/static/css/auth/header.css?v=24e4f1185f" />
+    <link rel="stylesheet" href="/static/css/auth/navbar.css?v=e940af40ee" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/static/css/auth/popup.css?v=9cce345a79" />
+    <!-- NOTE: Dùng chung CSS báo cáo để hiển thị giống trang admin. -->
+    <link rel="stylesheet" href="/static/css/admin/report.css?v=report-detail-3" />
+    <link rel="stylesheet" href="/static/css/shared/date-picker.css?v=ae5bdbe927" />
+    <link rel="stylesheet" href="/static/css/shared/ui.css?v=3a6450f69d" />
+    <link rel="stylesheet" href="/static/css/shared/theme.css?v=d09f9b8cb7" />
+  </head>
+  <body>
+    <header>
+      <div class="header-left">
+        <a
+          class="header-left-logo"
+          href="/staff/index.html"
+          aria-label="Edu-LIMS — Trang chủ"
+        >
+          <div class="header-left-icon">
+            <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+          </div>
+          <div class="header-left-title">Edu-LIMS</div>
+        </a>
+        <div class="header-left-describe">
+          Hệ thống công tác thực hành tin học
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="header-user" id="headerUser">
+          <div class="header-avt">
+            <img src="{{ user[7] }}" alt="Ảnh đại diện" />
+          </div>
+          <div class="navbar-arrow">
+            <i class="fa-solid fa-caret-down"></i>
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- navbar -->
+    <div class="navbar-container" id="navbarContainer">
+      <div class="navbar-user-container">
+        <a href="/staff/calendar">
+          <div class="navbar-user-avt">
+            <img src="{{ user[7] }}" alt="Ảnh đại diện" />
+          </div>
+          <div class="navbar-user-name">
+            <p>{{ user[1] }}</p>
+            <p>{% include "partials/role-label.html" %}</p>
+          </div>
+        </a>
+      </div>
+      <div class="navbar-box">
+        <div class="navbar-item">
+          <a href="/staff/calendar">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user-gear"></i>
+              </div>
+              <div class="navbar-item-title">Lịch thực hành của tôi</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+            {% if has_unread_schedule %}
+            <span
+              class="notification-dot"
+              aria-label="Lịch vừa được cập nhật"
+            ></span>
+            {% endif %}
+          </a>
+        </div>
+
+        <div class="navbar-item">
+          <a href="/staff/room">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Phòng thực hành</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+
+        <div class="navbar-item">
+          <a href="/staff/report">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Xem báo cáo</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+
+        <div class="navbar-item">
+          <a href="staff/profile">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <div class="navbar-item-title">Hồ sơ cá nhân</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="navbar-logout">
+        <a href="/logout">
+          <div class="navbar-logout-icon">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </div>
+          <div class="navbar-logout-title">Đăng xuất</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- body -->
+
+    <div class="config-container container-web">
+      <div class="direction">
+        <a href="/staff">Trang chủ</a>
+        <i class="fa-solid fa-angle-right"></i>
+        <a href="/staff/report">Báo cáo của tôi</a>
+      </div>
+
+      <form method="get" action="/staff/report" class="date-search" id="date-search-report">
+        <label for="report-created-date">Lọc theo ngày gửi:</label>
+        <input
+          type="date"
+          id="report-created-date"
+          name="created_date"
+          value="{{ created_date.isoformat() }}"
+          onchange="this.form.submit()"
+          title="Lọc theo ngày gửi"
+        />
+      </form>
+
+      <!-- report-list -->
+      <div class="room-table">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Mã báo cáo</th>
+              <th>Mã phòng</th>
+              <th>Cán bộ báo cáo</th>
+              <th>Loại báo cáo</th>
+              <th>Ngày gửi</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% if reports %} {% for report in reports %}
+            <tr class="report-row">
+              <td>{{ loop.index }}</td>
+              <td>BC{{ report[0] }}</td>
+              <td>{{ report[1] }}</td>
+              <td>{{ report[3] }}</td>
+              <td>
+                {% if report[4] is none %}Tình trạng phòng{% else %}Tình trạng
+                máy tính{% endif %}
+              </td>
+              <td>{{ report[7] }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="see-detail-act report-detail-act"
+                  data-report-id="{{ report[0] }}"
+                  data-room-id="{{ report[1] }}"
+                  data-room-name="{{ report[2] }}"
+                  data-computer-id="{{ report[4] or '' }}"
+                  data-description="{{ report[5] }}"
+                  data-reporter="{{ report[3] }}"
+                >
+                  <i class="fa-solid fa-eye"></i>
+                  Xem chi tiết
+                </button>
+              </td>
+            </tr>
+            {% endfor %} {% else %}
+            <tr>
+              <td colspan="7" class="empty-room-message">
+                <i class="fa-solid fa-door-open"></i>
+                Không có báo cáo nào vào ngày {{
+                created_date.strftime("%d/%m/%Y") }}.
+              </td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="computer-report" id="computer-report" aria-hidden="true">
+      <div class="computer-report-panel modal-panel">
+        <div class="computer-report-title modal-heading" id="report-title">
+          Báo cáo tình trạng
+        </div>
+        <div class="modal-body">
+          <div class="computer-report-item">
+            <span class="computer-report-item-title">Loại báo cáo</span>
+            <span class="computer-report-item-value" id="report-type"></span>
+          </div>
+          <div class="computer-report-item">
+            <span class="computer-report-item-title">Mã báo cáo</span>
+            <span class="computer-report-item-value" id="report-code"></span>
+          </div>
+          <div class="computer-report-item">
+            <span class="computer-report-item-title">Mã phòng</span>
+            <span class="computer-report-item-value" id="report-room-id"></span>
+          </div>
+          <div class="computer-report-item" id="report-computer-item" hidden>
+            <span class="computer-report-item-title">Mã máy tính</span>
+            <span
+              class="computer-report-item-value"
+              id="report-computer-id"
+            ></span>
+          </div>
+          <div class="computer-report-item">
+            <span class="computer-report-item-title">Nội dung báo cáo</span>
+            <span
+              class="computer-report-item-value"
+              id="report-description"
+            ></span>
+          </div>
+          <div class="computer-report-item">
+            <span class="computer-report-item-title">Người gửi báo cáo</span>
+            <span
+              class="computer-report-item-value"
+              id="report-reporter"
+            ></span>
+          </div>
+          <div class="computer-report-actions">
+            <button
+              type="button"
+              class="close-computer-report"
+              id="close-report"
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/js/staff/report.js?v=own-reports-2"></script>
+    <script src="/static/js/auth/navbar.js"></script>
+    <script src="/static/js/auth/ui.js"></script>
+    <script src="/static/js/auth/date-picker.js?v=a511fb0b5f"></script>
+  </body>
+</html>

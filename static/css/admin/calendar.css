@@ -1,7 +1,21 @@
 /* admin/calendar.css */
 @import url("../shared/calendar.css");
-#accept-page { width: min(1680px, calc(100% - 48px)); }
-#accept-page .calendar-table table { min-width: 1050px; }
-#schedule-scope-all { background: var(--primary); color: #FFFFFF; }
-#schedule-scope-current { background: #E8F1FA; color: #1762B2; }
-@media (max-width: 768px) { #accept-page { width: calc(100% - 24px); } }
+#accept-page {
+  width: min(1680px, calc(100% - 48px));
+}
+#accept-page .calendar-table table {
+  min-width: 1050px;
+}
+#schedule-scope-all {
+  background: var(--primary);
+  color: #ffffff;
+}
+#schedule-scope-current {
+  background: #e8f1fa;
+  color: #1762b2;
+}
+@media (max-width: 768px) {
+  #accept-page {
+    width: calc(100% - 24px);
+  }
+}

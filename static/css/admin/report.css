@@ -1,8 +1,33 @@
 /* admin/report.css */
-.room-table table { min-width: 850px; }
-.report-row.is-unread td:first-child { border-left: 3px solid var(--primary); }
-.report-detail-act.is-viewed { color: #2F6B43; background: #EAF5EC; }
-.room-table tbody tr.is-selected { background: #EAF5EC; }
-#report-form .computer-report-item { padding-bottom: 14px; border-bottom: 1px solid var(--border); }
-#report-status { width: 100%; }
-.submit-computer-report { background: var(--primary); color: #FFFFFF; }
+.room-table table {
+  min-width: 850px;
+}
+.report-row.is-unread td:first-child {
+  border-left: 3px solid var(--primary);
+}
+.report-detail-act.is-viewed {
+  color: #2f6b43;
+  background: #eaf5ec;
+}
+.room-table tbody tr.is-selected {
+  background: #eaf5ec;
+}
+#report-form .computer-report-item {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+#report-description {
+  white-space: pre-wrap;
+}
+/* NOTE: Giữ ẩn mã máy của báo cáo phòng, kể cả khi CSS popup đặt display:flex. */
+#report-computer-item[hidden] {
+  display: none;
+}
+.submit-computer-report {
+  background: var(--primary);
+  color: #ffffff;
+}
+#date-search-report {
+  gap: 20px;
+  margin-bottom: 13px;
+}

@@ -3168,7 +3168,7 @@ def get_calendar_request_occurrences():
     conn = get_connection()
     try:
         cursor = conn.cursor(cursor_factory=RealDictCursor)
-        cursor.execute('''
+        cursor.execute("""
             SELECT lth.MaLichThucHanh AS "id", lth.MaLopHocPhan AS "classId",
                    lth.LoaiYeuCau AS "type", lth.MaBuoi AS "session",
                    lth.NgayYeuCau AS "created", lth.GhiChu AS "note",
@@ -3179,24 +3179,37 @@ def get_calendar_request_occurrences():
             LEFT JOIN TUAN_HOC th ON th.MaTuanHoc = lth.MaTuanHoc
             WHERE lth.MaTrangThai IN (1, 2)
             ORDER BY th.NgayBatDau, lth.MaThu, lth.MaLichThucHanh
-        ''')
+        """)
         rows = cursor.fetchall()
         cursor.close()
     finally:
         conn.close()
     groups = {}
     for row in rows:
-        key = (row["classId"], row["type"], row["session"], row["created"],
-               row["note"], row["date"] if row["type"] == "khac" else None)
+        key = (
+            row["classId"],
+            row["type"],
+            row["session"],
+            row["created"],
+            row["note"],
+            row["date"] if row["type"] == "khac" else None,
+        )
         group = groups.setdefault(key, {"id": row["id"], "occurrences": []})
         group["id"] = min(group["id"], row["id"])
-        day = row["weekday"] - 2 if row["weekday"] is not None else (
-            row["date"].weekday() if row["date"] else None
+        day = (
+            row["weekday"] - 2
+            if row["weekday"] is not None
+            else (row["date"].weekday() if row["date"] else None)
         )
-        group["occurrences"].append({
-            "requiredId": row["id"], "weekId": row["weekId"], "day": day,
-            "roomId": row["roomId"], "weekName": row["weekName"],
-        })
+        group["occurrences"].append(
+            {
+                "requiredId": row["id"],
+                "weekId": row["weekId"],
+                "day": day,
+                "roomId": row["roomId"],
+                "weekName": row["weekName"],
+            }
+        )
     return list(groups.values())
 
 
@@ -3668,14 +3681,14 @@ def show_staff_assignments(request: Request):
     conn = get_connection()
     try:
         cursor = conn.cursor(cursor_factory=RealDictCursor)
-        cursor.execute('''
+        cursor.execute("""
             SELECT MaNguoiDung AS "MaNguoiDung", TenNguoiDung AS "TenNguoiDung"
             FROM NGUOI_DUNG
             WHERE MaVaiTro = 0
             ORDER BY TenNguoiDung, MaNguoiDung
-        ''')
+        """)
         staffs = cursor.fetchall()
-        cursor.execute('''
+        cursor.execute("""
             SELECT p.MaPhong AS "MaPhong", p.TenPhong AS "TenPhong",
                    nd.MaNguoiDung AS "MaNguoiQuanLy",
                    COUNT(mt.MaMayTinh) AS "SoLuongMay"
@@ -3685,7 +3698,7 @@ def show_staff_assignments(request: Request):
             LEFT JOIN MAY_TINH mt ON mt.MaPhong = p.MaPhong
             GROUP BY p.MaPhong, p.TenPhong, nd.MaNguoiDung
             ORDER BY p.TenPhong, p.MaPhong
-        ''')
+        """)
         rooms = cursor.fetchall()
         cursor.close()
     finally:
@@ -3707,9 +3720,13 @@ def show_staff_assignments(request: Request):
 @router.post("/admin/staff/assign")
 def assign_staff_to_rooms(request: Request, payload: dict = Body(...)):
     if not has_permission(request, "phan_cong_can_bo"):
-        return JSONResponse(status_code=403, content={
-            "success": False, "message": "Bạn không có quyền thực hiện thao tác này."
-        })
+        return JSONResponse(
+            status_code=403,
+            content={
+                "success": False,
+                "message": "Bạn không có quyền thực hiện thao tác này.",
+            },
+        )
 
     try:
         assignments = payload["assignments"]
@@ -3730,9 +3747,10 @@ def assign_staff_to_rooms(request: Request, payload: dict = Body(...)):
             if staff_id is not None:
                 staff_ids.add(staff_id)
     except (KeyError, TypeError, ValueError):
-        return JSONResponse(status_code=400, content={
-            "success": False, "message": "Thông tin phân công không hợp lệ."
-        })
+        return JSONResponse(
+            status_code=400,
+            content={"success": False, "message": "Thông tin phân công không hợp lệ."},
+        )
 
     if not assignments:
         return {"success": True}
@@ -3746,9 +3764,13 @@ def assign_staff_to_rooms(request: Request, payload: dict = Body(...)):
         )
         if {row[0] for row in cursor.fetchall()} != room_ids:
             conn.rollback()
-            return JSONResponse(status_code=400, content={
-                "success": False, "message": "Có phòng không còn tồn tại. Vui lòng tải lại trang."
-            })
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "success": False,
+                    "message": "Có phòng không còn tồn tại. Vui lòng tải lại trang.",
+                },
+            )
         if staff_ids:
             cursor.execute(
                 "SELECT MaNguoiDung FROM NGUOI_DUNG "
@@ -3757,9 +3779,13 @@ def assign_staff_to_rooms(request: Request, payload: dict = Body(...)):
             )
             if {row[0] for row in cursor.fetchall()} != staff_ids:
                 conn.rollback()
-                return JSONResponse(status_code=400, content={
-                    "success": False, "message": "Người được phân công phải có vai trò cán bộ."
-                })
+                return JSONResponse(
+                    status_code=400,
+                    content={
+                        "success": False,
+                        "message": "Người được phân công phải có vai trò cán bộ.",
+                    },
+                )
         for item in assignments:
             cursor.execute(
                 "UPDATE PHONG SET MaNguoiQuanLy = %s WHERE MaPhong = %s",
@@ -3796,20 +3822,16 @@ def show_admin_reports(
                     bc.MaBaoCao,
                     p.MaPhong,
                     p.TenPhong,
-                    cb.TenCanBo,
-                    bc.MaMayTinh,
+                    nd.TenNguoiDung,
+                    (SELECT STRING_AGG(ttm.MaMayTinh, ', ' ORDER BY ttm.MaMayTinh)
+                     FROM TINH_TRANG_MAY_TINH ttm WHERE ttm.MaBaoCao = bc.MaBaoCao) AS DanhSachMay,
                     bc.TinhTrangCuThe,
-                    CASE
-                        WHEN bc.MaMayTinh IS NULL THEN p.TinhTrangPhong
-                        ELSE mt.TinhTrangMay
-                    END AS TinhTrangHienTai,
-                    COALESCE(tb.DaXem, TRUE) AS DaXem
+                    NULL AS TinhTrangHienTai,
+                    COALESCE(tb.DaXem, TRUE) AS DaXem,
+                    bc.NgayGui
                 FROM Bao_cao_tinh_trang bc
                 JOIN PHONG p ON p.MaPhong = bc.MaPhong
-                JOIN CAN_BO cb ON cb.MaCanBo = bc.MaCanBo
-                LEFT JOIN MAY_TINH mt
-                    ON mt.MaMayTinh = bc.MaMayTinh
-                   AND mt.MaPhong = bc.MaPhong
+                JOIN NGUOI_DUNG nd ON nd.MaNguoiDung = bc.MaNguoiDung
                 LEFT JOIN THONG_BAO tb
                     ON tb.MaDoiTuong = bc.MaBaoCao
                    AND tb.MaTaiKhoan = %s
@@ -3820,6 +3842,13 @@ def show_admin_reports(
             (request.session.get("accountId"), selected_date),
         )
         reports = cursor.fetchall()
+        reports = [list(report) for report in reports]
+        for report in reports:
+            header = re.match(r"^\[Máy tính ([^\r\n]*)\]\r?\n", report[5] or "")
+            if header:
+                if not report[4]:
+                    report[4] = header.group(1)
+                report[5] = report[5][header.end() :]
         cursor.close()
     finally:
         conn.close()
@@ -3852,84 +3881,3 @@ def mark_report_as_read(request: Request, report_id: int):
         report_id,
     )
     return {"success": True}
-
-
-@router.post("/admin/report/{report_id}/status")
-def update_reported_status(
-    request: Request,
-    report_id: int,
-    status: int = Form(...),
-    created_date: Optional[date] = Form(default=None),
-):
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-                SELECT MaPhong, MaMayTinh
-                FROM Bao_cao_tinh_trang
-                WHERE MaBaoCao = %s
-            """,
-            (report_id,),
-        )
-        report = cursor.fetchone()
-        if report is None:
-            raise HTTPException(status_code=404, detail="Không tìm thấy báo cáo.")
-
-        if not has_permission(
-            request,
-            "quan_ly_may_tinh" if report[1] is not None else "quan_ly_phong",
-        ):
-            raise HTTPException(
-                status_code=403,
-                detail="Bạn không có quyền thực hiện thao tác này.",
-            )
-
-        room_id, computer_id = report
-        if computer_id is not None:
-            if status not in (0, 1, 2, 3):
-                raise HTTPException(
-                    status_code=422,
-                    detail="Tình trạng máy tính không hợp lệ.",
-                )
-            cursor.execute(
-                """
-                    UPDATE MAY_TINH
-                    SET TinhTrangMay = %s
-                    WHERE MaMayTinh = %s AND MaPhong = %s
-                """,
-                (status, computer_id, room_id),
-            )
-        else:
-            if status not in (-1, 0, 1):
-                raise HTTPException(
-                    status_code=422,
-                    detail="Tình trạng phòng không hợp lệ.",
-                )
-            cursor.execute(
-                """
-                    UPDATE PHONG
-                    SET TinhTrangPhong = %s
-                    WHERE MaPhong = %s
-                """,
-                (status, room_id),
-            )
-
-        if cursor.rowcount == 0:
-            raise HTTPException(
-                status_code=404,
-                detail="Không tìm thấy máy tính hoặc phòng cần cập nhật.",
-            )
-
-        conn.commit()
-        request.session["success"] = "Cập nhật tình trạng thành công."
-    except Exception:
-        conn.rollback()
-        raise
-    finally:
-        conn.close()
-
-    redirect_url = "/admin/report"
-    if created_date:
-        redirect_url += f"?created_date={created_date.isoformat()}"
-    return RedirectResponse(url=redirect_url, status_code=303)
