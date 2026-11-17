@@ -7,7 +7,7 @@ from datetime import date
 from datetime import datetime, timedelta
 from psycopg2.extras import RealDictCursor
 from psycopg2.errors import ForeignKeyViolation
-import re, secrets, string, hashlib, os
+import re, secrets, string, hashlib, os, hmac
 from datetime import datetime, date, timedelta
 
 from email_service import send_account_email
@@ -3881,3 +3881,312 @@ def mark_report_as_read(request: Request, report_id: int):
         report_id,
     )
     return {"success": True}
+
+
+# ============ HO SO CA NHAN ===============
+
+
+def get_admin_account_id(request):
+    if request.session.get("role") != 2 or not has_permission(
+        request, "xem_trang_chu_quan_tri"
+    ):
+        return None
+    return request.session.get("accountId")
+
+
+def get_admin_profile(account_id):
+    conn = get_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute(
+            """
+                SELECT nd.MaNguoiDung AS "MaNguoiDung"
+                    , nd.TenNguoiDung AS "TenNguoiDung"
+                    , nd.SoDienThoai AS "SoDienThoai"
+                    , nd.Email AS "Email"
+                    , nd.GioiTinh AS "GioiTinh"
+                    , nd.NgaySinh AS "NgaySinh"
+                    , tk.AnhDaiDien AS "AnhDaiDien"
+                FROM NGUOI_DUNG nd
+                JOIN TAI_KHOAN_DANG_NHAP tk ON tk.MaTaiKhoan = nd.MaTaiKhoan
+                WHERE nd.MaTaiKhoan = %s
+                    AND nd.MaVaiTro = 2
+            """,
+            (account_id,),
+        )
+        return cursor.fetchone()
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def admin_user_notice(request, scope, message, success=False, values=None, field=None):
+    request.session["admin_user_notice"] = {
+        "scope": scope,
+        "message": message,
+        "success": success,
+        "values": values,
+        "field": field,
+    }
+    anchor = "profile-information" if scope == "profile" else "password-section"
+    return RedirectResponse(url=f"/admin/profile#{anchor}", status_code=303)
+
+
+def get_admin_form_values(profile):
+    return {
+        "name": profile["TenNguoiDung"] or "",
+        "phone": profile["SoDienThoai"] or "",
+        "email": profile["Email"] or "",
+        "gender": profile["GioiTinh"],
+        "birthday": profile["NgaySinh"].isoformat() if profile["NgaySinh"] else "",
+    }
+
+
+# kiem tra yc gui form co token hop le k
+def check_admin_user_csrf(request, token):
+    expected = request.session.get("admin_user_csrf", "")
+    if not expected or not hmac.compare_digest(expected.encode(), token.encode()):
+        raise HTTPException(
+            status_code=403,
+            detail="Phiên biểu mẫu không hợp lệ. Vui lòng tải lại trang.",
+        )
+
+
+@router.get("/admin/profile")
+def show_user_admin(request: Request):
+    account_id = get_admin_account_id(request)
+    profile = get_admin_profile(account_id) if account_id else None
+    if not profile:
+        return RedirectResponse(url="/login", status_code=303)
+
+    notice = request.session.pop("admin_user_notice", None)
+    values = get_admin_form_values(profile)
+    # Nếu báo lỗi thì trường đang nhập đúng vẫn giữ nguyên.
+    if notice and not notice.get("success") and notice.get("values"):
+        for key in ("name", "phone", "gender", "birthday"):
+            if key in notice["values"]:
+                values[key] = notice["values"][key]
+
+    csrf_token = request.session.setdefault(
+        "admin_user_csrf", secrets.token_urlsafe(32)
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/profile.html",
+        context={
+            "profile": profile,
+            "values": values,
+            "notice": notice,
+            "csrf_token": csrf_token,
+            "today": date.today().isoformat(),
+            "avt": profile["AnhDaiDien"],
+            "success": notice["message"] if notice and notice["success"] else "",
+            "error": notice["message"] if notice and not notice["success"] else "",
+        },
+    )
+
+
+# ============ CAP NHAT THONG TIN CA NHAN ===============
+
+
+@router.post("/admin/profile/information")
+def update_admin_information(
+    request: Request,
+    name: str = Form(""),
+    phone: str = Form(""),
+    gender: str = Form(""),
+    birthday: str = Form(""),
+    csrf_token: str = Form(""),
+):
+    account_id = get_admin_account_id(request)
+    if not account_id:
+        return RedirectResponse(url="/login", status_code=303)
+    check_admin_user_csrf(request, csrf_token)
+
+    profile = get_admin_profile(account_id)
+    if not profile:
+        return RedirectResponse(url="/login", status_code=303)
+    values = {
+        "name": name.strip(),
+        "phone": phone.strip(),
+        "gender": gender.strip(),
+        "birthday": birthday.strip(),
+    }
+    if any(value is None or value == "" for value in values.values()):
+        return admin_user_notice(
+            request,
+            "profile",
+            "Vui lòng điền đầy đủ thông tin, không được bỏ trống.",
+            values=values,
+            field=next(
+                key for key, value in values.items() if value is None or value == ""
+            ),
+        )
+    name, phone = values["name"], values["phone"]
+    gender = str(values["gender"]) if values["gender"] is not None else ""
+    birthday = values["birthday"]
+    if len(name) > 100:
+        return admin_user_notice(
+            request,
+            "profile",
+            "Vui lòng nhập họ tên hợp lệ.",
+            values=values,
+            field="name",
+        )
+    if (
+        not re.fullmatch(r"[0-9+().\s-]{8,20}", phone)
+        or not 8 <= len(re.sub(r"\D", "", phone)) <= 15
+    ):
+        return admin_user_notice(
+            request,
+            "profile",
+            "Vui lòng nhập số điện thoại hợp lệ.",
+            values=values,
+            field="phone",
+        )
+    if gender not in ("", "0", "1"):
+        return admin_user_notice(
+            request,
+            "profile",
+            "Giới tính không hợp lệ.",
+            values=values,
+            field="gender",
+        )
+    try:
+        birth_date = date.fromisoformat(birthday) if birthday else None
+        if birth_date and birth_date > date.today():
+            raise ValueError
+    except ValueError:
+        return admin_user_notice(
+            request,
+            "profile",
+            "Ngày sinh không hợp lệ.",
+            values=values,
+            field="birthday",
+        )
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+                UPDATE NGUOI_DUNG
+                SET TenNguoiDung=%s
+                    ,SoDienThoai=%s
+                    ,GioiTinh=%s
+                    ,NgaySinh=%s
+                WHERE MaTaiKhoan=%s AND MaVaiTro=2
+            """,
+            (
+                name,
+                phone,
+                int(gender) if gender else None,
+                birth_date,
+                account_id,
+            ),
+        )
+        if cursor.rowcount != 1:
+            raise HTTPException(status_code=404, detail="Không tìm thấy hồ sơ cán bộ.")
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        cursor.close()
+        conn.close()
+
+    return admin_user_notice(
+        request, "profile", "Đã lưu thông tin cá nhân.", success=True
+    )
+
+
+# ============ DOI MAT KHAU ===============
+
+
+@router.post("/admin/profile/password")
+def change_admin_password(
+    request: Request,
+    current_password: str = Form(""),
+    new_password: str = Form(""),
+    confirm_password: str = Form(""),
+    csrf_token: str = Form(""),
+):
+    account_id = get_admin_account_id(request)
+    if not account_id:
+        return RedirectResponse(url="/login", status_code=303)
+    check_admin_user_csrf(request, csrf_token)
+    if not all((current_password, new_password, confirm_password)):
+        return admin_user_notice(
+            request,
+            "password",
+            "Vui lòng điền đầy đủ thông tin, không được bỏ trống.",
+            field=next(
+                key
+                for key, value in (
+                    ("current_password", current_password),
+                    ("new_password", new_password),
+                    ("confirm_password", confirm_password),
+                )
+                if not value
+            ),
+        )
+    if new_password != confirm_password:
+        return admin_user_notice(
+            request,
+            "password",
+            "Mật khẩu xác nhận không khớp.",
+            field="confirm_password",
+        )
+    if not valid_new_password(new_password):
+        return admin_user_notice(
+            request,
+            "password",
+            "Mật khẩu mới cần 8–128 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt.",
+            field="new_password",
+        )
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+                SELECT tk.MatKhau
+                FROM TAI_KHOAN_DANG_NHAP tk
+                JOIN NGUOI_DUNG nd ON nd.MaTaiKhoan=tk.MaTaiKhoan
+                WHERE tk.MaTaiKhoan=%s AND nd.MaVaiTro=2
+                FOR UPDATE OF tk
+            """,
+            (account_id,),
+        )
+        account = cursor.fetchone()
+        if not account or not verify_password(current_password, account[0]):
+            return admin_user_notice(
+                request,
+                "password",
+                "Mật khẩu hiện tại không chính xác.",
+                field="current_password",
+            )
+        if new_password == current_password:
+            return admin_user_notice(
+                request,
+                "password",
+                "Mật khẩu mới phải khác mật khẩu hiện tại.",
+                field="new_password",
+            )
+
+        cursor.execute(
+            "UPDATE TAI_KHOAN_DANG_NHAP SET MatKhau=%s WHERE MaTaiKhoan=%s",
+            (password_hash.hash(new_password), account_id),
+        )
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        cursor.close()
+        conn.close()
+
+    return admin_user_notice(
+        request, "password", "Đã đổi mật khẩu thành công.", success=True
+    )

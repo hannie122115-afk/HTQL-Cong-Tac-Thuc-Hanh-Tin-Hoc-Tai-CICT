@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 from database import get_connection
+from password_service import verify_password
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -51,7 +52,8 @@ def login(request: Request, username: str = Form(""), password: str = Form("")):
             name="login.html",
             context={"message": "Tên đăng nhập không tồn tại!"},
         )
-    if account[2] != password:
+    # NOTE: Hỗ trợ mật khẩu đã băm sau khi giảng viên đổi mật khẩu.
+    if not verify_password(password, account[2]):
         return templates.TemplateResponse(
             request=request,
             name="login.html",

@@ -101,7 +101,7 @@
         </div>
 
         <div class="navbar-item">
-          <a href="/teacher/profile">
+          <a href="/teacher/user">
             <div class="navbar-item-name">
               <div class="navbar-item-icon">
                 <i class="fa-solid fa-user"></i>
@@ -207,24 +207,16 @@
               name="required_semester_id"
               id="required-semester"
               required
-              {%
-              if
-              not
-              semesters
-              %}disabled{%
-              endif
-              %}
+              {% if not semesters %}
+              disabled
+              {% endif %}
             >
               {% for item in semesters %}
               <option
                 value="{{ item[0] }}"
-                {%
-                if
-                item[0]=""
-                ="selected_semester_id"
-                %}selected{%
-                endif
-                %}
+                {% if item[0] == selected_semester_id %}
+                selected
+                {% endif %}
               >
                 {{ item[1] }} - {{ item[2] }}
               </option>
@@ -242,13 +234,7 @@
               id="required_course_name"
               placeholder="Chọn học kỳ trước..."
               autocomplete="off"
-              {%
-              if
-              not
-              semesters
-              %}disabled{%
-              endif
-              %}
+              {% if not semesters %} disabled {% endif %}
             />
             <input
               type="hidden"
@@ -265,7 +251,6 @@
             <select
               name="required_group_id"
               id="required_group_id"
-              required
               disabled
             >
               <option value="">Chọn học phần trước</option>

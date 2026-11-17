@@ -4,13 +4,17 @@ from fastapi.responses import RedirectResponse
 from psycopg2.extras import RealDictCursor
 from database import get_connection
 from routers.authorization import has_permission
+from password_service import password_hash, verify_password, valid_new_password
 from notification_service import (
     NOTIFICATION_TYPE_SCHEDULE,
     get_unread_notification_types,
     mark_notifications_read,
 )
 from datetime import date, timedelta
-from typing import List, Optional
+from typing import Annotated, List, Optional
+import hmac
+import re
+import secrets
 
 templates = Jinja2Templates(directory="templates")
 router = APIRouter()
@@ -21,7 +25,8 @@ def get_user_by_id(accountId):
     cursor = conn.cursor()
     cursor.execute(
         """
-            SELECT nd.*
+            SELECT nd.MaNguoiDung, nd.TenNguoiDung, nd.SoDienThoai,
+                   nd.Email, nd.GioiTinh, nd.NgaySinh, nd.MaTaiKhoan
                 , tk.AnhDaiDien
                 , vt.TenVaiTro
             FROM NGUOI_DUNG nd
@@ -45,7 +50,7 @@ def show_admin(request: Request):
         return RedirectResponse(url="/login", status_code=303)
 
     user = get_user_by_id(request.session.get("accountId"))
-    avt = request.session.get("avt")
+    avt = request.session.get("anhdaidien")
     unread_notifications = get_unread_notification_types(
         request.session.get("accountId")
     )
@@ -792,81 +797,40 @@ def delete_program(
 def get_scheduled_requests_for_teacher(teacher_id, semester_id):
     conn = get_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
-    cursor.execute(
-        """
-            SELECT
-                yc.MaYeuCau AS "MaYeuCau",
-                yct.MaPhong AS "MaPhong",
-                yct.MaTuanHoc AS "MaTuanHoc",
-                yc.BuoiThucHanh AS "BuoiThucHanh",
-                (yc.NgayThucHanh IS NULL) AS "LaLichDinhKy",
-                yc.MaTuanBatDau AS "MaTuanBatDau",
-                yc.MaTuanKetThuc AS "MaTuanKetThuc",
-                yc.SoLuongMay AS "SoLuongMay",
-                yc.MaPhanMem AS "MaPhanMem",
-                hp.TenHocPhan AS "TenHocPhan",
-                yc.NhomHocPhan AS "NhomHocPhan",
-                STRING_AGG(
-                    DISTINCT yct.thu::text,
-                    ',' ORDER BY yct.thu::text
-                ) FILTER (
-                    WHERE yct.NgayThucHanh IS NULL
-                      AND yct.MaPhong IS NOT NULL
-                ) AS "DanhSachThu",
-                STRING_AGG(
-                    DISTINCT TO_CHAR(yct.NgayThucHanh, 'YYYY-MM-DD'),
-                    ',' ORDER BY TO_CHAR(yct.NgayThucHanh, 'YYYY-MM-DD')
-                ) FILTER (
-                    WHERE yct.NgayThucHanh BETWEEN hk.NgayBatDau AND hk.NgayKetThuc
-                      AND yct.MaPhong IS NOT NULL
-                ) AS "DanhSachNgay"
-            FROM YEU_CAU_XEP_LICH yc
-            JOIN HOC_PHAN hp ON hp.MaHocPhan = yc.MaHocPhan
-            JOIN YEU_CAU_THU yct ON yct.MaYeuCau = yc.MaYeuCau
-            LEFT JOIN TUAN_HOC tbd ON tbd.MaTuanHoc = yc.MaTuanBatDau
-            LEFT JOIN TUAN_HOC tkt ON tkt.MaTuanHoc = yc.MaTuanKetThuc
-            JOIN HOC_KY hk ON hk.MaHocKy = %s
-            WHERE yc.MaGiangVien = %s
-              AND yc.TrangThai = 2
-              AND yct.MaPhong IS NOT NULL
-              AND (
-                    (
-                        yc.NgayThucHanh IS NULL
-                        AND tbd.NgayBatDau <= hk.NgayKetThuc
-                        AND tkt.NgayKetThuc >= hk.NgayBatDau
-                    )
-                    OR (
-                        yc.NgayThucHanh BETWEEN hk.NgayBatDau AND hk.NgayKetThuc
-                    )
-                    OR EXISTS (
-                        SELECT 1
-                        FROM YEU_CAU_THU yct_date
-                        WHERE yct_date.MaYeuCau = yc.MaYeuCau
-                          AND yct_date.MaPhong IS NOT NULL
-                          AND yct_date.NgayThucHanh
-                              BETWEEN hk.NgayBatDau AND hk.NgayKetThuc
-                    )
-              )
-            GROUP BY
-                yc.MaYeuCau,
-                yct.MaPhong,
-                yct.MaTuanHoc,
-                yc.BuoiThucHanh,
-                (yc.NgayThucHanh IS NULL),
-                yc.MaTuanBatDau,
-                yc.MaTuanKetThuc,
-                yc.SoLuongMay,
-                yc.MaPhanMem,
-                yc.NhomHocPhan,
-                hp.TenHocPhan
-            ORDER BY yc.MaYeuCau
-        """,
-        (semester_id, teacher_id),
-    )
-    schedules = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return schedules
+    try:
+        cursor.execute(
+            """
+                SELECT
+                    lth.MaLichThucHanh AS "MaYeuCau",
+                    lth.MaPhong AS "MaPhong",
+                    lth.MaTuanHoc AS "MaTuanHoc",
+                    lth.MaThu AS "Thu",
+                    lth.MaBuoi AS "BuoiThucHanh",
+                    lth.NgayThucHanh AS "NgayThucHanh",
+                    hp.TenHocPhan AS "TenHocPhan",
+                    n.TenNhom AS "NhomHocPhan"
+                FROM LICH_THUC_HANH lth
+                JOIN LOP_HOC_PHAN lhp ON lhp.MaLopHocPhan = lth.MaLopHocPhan
+                JOIN HOC_PHAN hp ON hp.MaHocPhan = lhp.MaHocPhan
+                JOIN NHOM n ON n.MaNhom = lhp.MaNhom
+                JOIN TUAN_HOC th ON th.MaTuanHoc = lth.MaTuanHoc
+                WHERE lhp.MaGiangVien = %s
+                  AND lhp.MaHocKy = %s
+                  AND th.MaHocKy = lhp.MaHocKy
+                  AND lth.MaTrangThai = 2
+                  AND lth.MaPhong IS NOT NULL
+                ORDER BY th.NgayBatDau, lth.MaThu, lth.MaBuoi, lth.MaLichThucHanh
+            """,
+            (teacher_id, semester_id),
+        )
+        schedules = cursor.fetchall()
+        for schedule in schedules:
+            if schedule["NgayThucHanh"]:
+                schedule["NgayThucHanh"] = schedule["NgayThucHanh"].isoformat()
+        return schedules
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def get_rooms_by_ids(room_ids=None):
@@ -940,4 +904,326 @@ def show_teacher_calendar(request: Request):
             "all_room": all_room,
             "success": success,
         },
+    )
+
+
+# ============ HO SO CA NHAN ===============
+
+
+def get_teacher_account_id(request):
+    if request.session.get("role") != 1 or not has_permission(
+        request, "xem_trang_chu_giang_vien"
+    ):
+        return None
+    return request.session.get("accountId")
+
+
+def get_teacher_profile(account_id):
+    conn = get_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cursor.execute(
+            """
+                SELECT nd.MaNguoiDung AS "MaNguoiDung"
+                    , nd.TenNguoiDung AS "TenNguoiDung"
+                    , nd.SoDienThoai AS "SoDienThoai"
+                    , nd.Email AS "Email"
+                    , nd.GioiTinh AS "GioiTinh"
+                    , nd.NgaySinh AS "NgaySinh"
+                    , nd.MaHocVi AS "MaHocVi"
+                    , nd.MaHocHam AS "MaHocHam"
+                    , hv.TenHocVi AS "TenHocVi"
+                    , hh.TenHocHam AS "TenHocHam"
+                    , hv.TenVietTat AS "VietTatHocVi"
+                    , hh.TenVietTat AS "VietTatHocHam"
+                    , tk.AnhDaiDien AS "AnhDaiDien"
+                FROM NGUOI_DUNG nd
+                JOIN TAI_KHOAN_DANG_NHAP tk ON tk.MaTaiKhoan = nd.MaTaiKhoan
+                LEFT JOIN HOC_VI hv ON hv.MaHocVi = nd.MaHocVi
+                LEFT JOIN HOC_HAM hh ON hh.MaHocHam = nd.MaHocHam
+                WHERE nd.MaTaiKhoan = %s
+                    AND nd.MaVaiTro = 1
+            """,
+            (account_id,),
+        )
+        # NOTE: Alias có dấu ngoặc kép giữ đúng tên khóa mà HTML đang dùng.
+        profile = cursor.fetchone()
+        if profile:
+            profile["HocHamHocVi"] = " ".join(
+                value.strip().rstrip(".") + "."
+                for value in (profile["VietTatHocHam"], profile["VietTatHocVi"])
+                if value and value.strip()
+            )
+        return profile
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def teacher_user_notice(
+    request, scope, message, success=False, values=None, field=None
+):
+    request.session["teacher_user_notice"] = {
+        "scope": scope,
+        "message": message,
+        "success": success,
+        "values": values,
+        "field": field,
+    }
+    anchor = "profile-information" if scope == "profile" else "password-section"
+    return RedirectResponse(url=f"/teacher/profile#{anchor}", status_code=303)
+
+
+def get_teacher_form_values(profile):
+    return {
+        "name": profile["TenNguoiDung"] or "",
+        "phone": profile["SoDienThoai"] or "",
+        "email": profile["Email"] or "",
+        "degree_id": profile["MaHocVi"],
+        "title_id": profile["MaHocHam"],
+        "gender": profile["GioiTinh"],
+        "birthday": profile["NgaySinh"].isoformat() if profile["NgaySinh"] else "",
+    }
+
+
+# kiem tra yc gui form co token hop le k
+def check_teacher_user_csrf(request, token):
+    expected = request.session.get("teacher_user_csrf", "")
+    if not expected or not hmac.compare_digest(expected.encode(), token.encode()):
+        raise HTTPException(
+            status_code=403,
+            detail="Phiên biểu mẫu không hợp lệ. Vui lòng tải lại trang.",
+        )
+
+
+@router.get("/teacher/profile")
+def show_user_teacher(request: Request):
+    account_id = get_teacher_account_id(request)
+    profile = get_teacher_profile(account_id) if account_id else None
+    if not profile:
+        return RedirectResponse(url="/login", status_code=303)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT MaHocVi, TenHocVi FROM HOC_VI ORDER BY MaHocVi")
+        degrees = cursor.fetchall()
+        cursor.execute("SELECT MaHocHam, TenHocHam FROM HOC_HAM ORDER BY MaHocHam")
+        titles = cursor.fetchall()
+    finally:
+        cursor.close()
+        conn.close()
+
+    notice = request.session.pop("teacher_user_notice", None)
+    values = get_teacher_form_values(profile)
+    # Nếu báo lỗi thì trường đang nhập đúng vẫn giữ nguyên.
+    if notice and not notice.get("success") and notice.get("values"):
+        for key in ("name", "phone", "degree_id", "title_id", "gender", "birthday"):
+            if key in notice["values"]:
+                values[key] = notice["values"][key]
+
+    csrf_token = request.session.setdefault(
+        "teacher_user_csrf", secrets.token_urlsafe(32)
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="teacher/profile.html",
+        context={
+            "profile": profile,
+            "values": values,
+            "degrees": degrees,
+            "titles": titles,
+            "notice": notice,
+            "csrf_token": csrf_token,
+            "today": date.today().isoformat(),
+            "avt": profile["AnhDaiDien"],
+            "success": notice["message"] if notice and notice["success"] else "",
+            "error": notice["message"] if notice and not notice["success"] else "",
+        },
+    )
+
+
+# ============ CAP NHAT THONG TIN CA NHAN ===============
+
+
+@router.post("/teacher/profile/information")
+def update_teacher_information(
+    request: Request,
+    name: str = Form(""),
+    phone: str = Form(""),
+    degree_id: Optional[int] = Form(None),
+    title_id: Optional[int] = Form(None),
+    gender: str = Form(""),
+    birthday: str = Form(""),
+    csrf_token: str = Form(""),
+):
+    account_id = get_teacher_account_id(request)
+    if not account_id:
+        return RedirectResponse(url="/login", status_code=303)
+    check_teacher_user_csrf(request, csrf_token)
+
+    profile = get_teacher_profile(account_id)
+    if not profile:
+        return RedirectResponse(url="/login", status_code=303)
+    values = {
+        "name": name.strip(),
+        "phone": phone.strip(),
+        "degree_id": degree_id,
+        "title_id": title_id,
+        "gender": gender.strip(),
+        "birthday": birthday.strip(),
+    }
+    if any(value is None or value == "" for value in values.values()):
+        return teacher_user_notice(
+            request,
+            "profile",
+            "Vui lòng điền đầy đủ thông tin, không được bỏ trống.",
+            values=values,
+        )
+    name, phone = values["name"], values["phone"]
+    degree_id, title_id = values["degree_id"], values["title_id"]
+    gender = str(values["gender"]) if values["gender"] is not None else ""
+    birthday = values["birthday"]
+    if len(name) > 100:
+        return teacher_user_notice(
+            request,
+            "profile",
+            "Vui lòng nhập họ tên hợp lệ.",
+            values=values,
+            field="name",
+        )
+    if (
+        not re.fullmatch(r"[0-9+().\s-]{8,20}", phone)
+        or not 8 <= len(re.sub(r"\D", "", phone)) <= 15
+    ):
+        return teacher_user_notice(
+            request,
+            "profile",
+            "Vui lòng nhập số điện thoại hợp lệ.",
+            values=values,
+            field="phone",
+        )
+    if gender not in ("", "0", "1"):
+        return teacher_user_notice(
+            request, "profile", "Giới tính không hợp lệ.", values=values
+        )
+    try:
+        birth_date = date.fromisoformat(birthday) if birthday else None
+        if birth_date and birth_date > date.today():
+            raise ValueError
+    except ValueError:
+        return teacher_user_notice(
+            request, "profile", "Ngày sinh không hợp lệ.", values=values
+        )
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT 1 FROM HOC_VI WHERE MaHocVi=%s", (degree_id,))
+        valid_degree = cursor.fetchone()
+        cursor.execute("SELECT 1 FROM HOC_HAM WHERE MaHocHam=%s", (title_id,))
+        if not valid_degree or not cursor.fetchone():
+            return teacher_user_notice(
+                request, "profile", "Học hàm hoặc học vị không hợp lệ.", values=values
+            )
+        cursor.execute(
+            """
+                UPDATE NGUOI_DUNG
+                SET TenNguoiDung=%s, SoDienThoai=%s,
+                    MaHocVi=%s, MaHocHam=%s, GioiTinh=%s, NgaySinh=%s
+                WHERE MaTaiKhoan=%s AND MaVaiTro=1
+            """,
+            (
+                name,
+                phone,
+                degree_id,
+                title_id,
+                int(gender) if gender else None,
+                birth_date,
+                account_id,
+            ),
+        )
+        if cursor.rowcount != 1:
+            raise HTTPException(
+                status_code=404, detail="Không tìm thấy hồ sơ giảng viên."
+            )
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        cursor.close()
+        conn.close()
+
+    return teacher_user_notice(
+        request, "profile", "Đã lưu thông tin cá nhân.", success=True
+    )
+
+
+# ============ DOI MAT KHAU ===============
+
+
+@router.post("/teacher/profile/password")
+def change_teacher_password(
+    request: Request,
+    current_password: str = Form(...),
+    new_password: str = Form(...),
+    confirm_password: str = Form(...),
+    csrf_token: str = Form(""),
+):
+    account_id = get_teacher_account_id(request)
+    if not account_id:
+        return RedirectResponse(url="/login", status_code=303)
+    check_teacher_user_csrf(request, csrf_token)
+    if new_password != confirm_password:
+        return teacher_user_notice(
+            request,
+            "password",
+            "Mật khẩu xác nhận không khớp.",
+        )
+    if not valid_new_password(new_password):
+        return teacher_user_notice(
+            request,
+            "password",
+            "Mật khẩu mới cần 8–128 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt.",
+        )
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+                SELECT tk.MatKhau
+                FROM TAI_KHOAN_DANG_NHAP tk
+                JOIN NGUOI_DUNG nd ON nd.MaTaiKhoan=tk.MaTaiKhoan
+                WHERE tk.MaTaiKhoan=%s AND nd.MaVaiTro=1
+                FOR UPDATE OF tk
+            """,
+            (account_id,),
+        )
+        account = cursor.fetchone()
+        if not account or not verify_password(current_password, account[0]):
+            return teacher_user_notice(
+                request, "password", "Mật khẩu hiện tại không chính xác."
+            )
+        if new_password == current_password:
+            return teacher_user_notice(
+                request, "password", "Mật khẩu mới phải khác mật khẩu hiện tại."
+            )
+
+        cursor.execute(
+            "UPDATE TAI_KHOAN_DANG_NHAP SET MatKhau=%s WHERE MaTaiKhoan=%s",
+            (password_hash.hash(new_password), account_id),
+        )
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        cursor.close()
+        conn.close()
+
+    return teacher_user_notice(
+        request, "password", "Đã đổi mật khẩu thành công.", success=True
     )

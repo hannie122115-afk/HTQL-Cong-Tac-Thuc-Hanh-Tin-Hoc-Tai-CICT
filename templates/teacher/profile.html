@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static/css/shared/base.css?v=e6c30cd4a4" />
+    <title>Giảng viên</title>
+    <link rel="stylesheet" href="/static/css/auth/header.css?v=24e4f1185f" />
+    <link rel="stylesheet" href="/static/css/auth/navbar.css?v=e940af40ee" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/static/css/auth/popup.css?v=9cce345a79" />
+    <link rel="stylesheet" href="/static/css/shared/ui.css?v=3a6450f69d" />
+    <link
+      rel="stylesheet"
+      href="/static/css/shared/date-picker.css?v=ae5bdbe927"
+    />
+    <link rel="stylesheet" href="/static/css/shared/theme.css?v=d09f9b8cb7" />
+    <link rel="stylesheet" href="/static/css/teacher/profile.css?v=prefill-3" />
+  </head>
+  <body>
+    <header>
+      <div class="header-left">
+        <a
+          class="header-left-logo"
+          href="/teacher/index.html"
+          aria-label="Edu-LIMS — Trang chủ"
+        >
+          <div class="header-left-icon">
+            <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+          </div>
+          <div class="header-left-title">Edu-LIMS</div>
+        </a>
+        <div class="header-left-describe">
+          Hệ thống công tác thực hành tin học
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="header-user" id="headerUser">
+          <div class="header-avt">
+            {% if profile.AnhDaiDien %}<img
+              src="{{ profile.AnhDaiDien }}"
+              alt="Ảnh đại diện"
+            />{% else %}<i class="fa-solid fa-user" aria-hidden="true"></i>{%
+            endif %}
+          </div>
+          <div class="navbar-arrow">
+            <i class="fa-solid fa-caret-down"></i>
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- navbar -->
+    <div class="navbar-container" id="navbarContainer">
+      <div class="navbar-user-container">
+        <a href="/teacher/profile">
+          <div class="navbar-user-avt">
+            {% if profile.AnhDaiDien %}<img
+              src="{{ profile.AnhDaiDien }}"
+              alt="Ảnh đại diện"
+            />{% else %}<i class="fa-solid fa-user" aria-hidden="true"></i>
+            {% endif %}
+          </div>
+          <div class="navbar-user-name">
+            <p>{{ profile.TenNguoiDung }}</p>
+            <p>{% include "partials/role-label.html" %}</p>
+          </div>
+        </a>
+      </div>
+      <div class="navbar-box">
+        <div class="navbar-item">
+          <a href="/teacher/calendar">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user-gear"></i>
+              </div>
+              <div class="navbar-item-title">Lịch thực hành của tôi</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+            {% if has_unread_schedule %}
+            <span
+              class="notification-dot"
+              aria-label="Lịch vừa được cập nhật"
+            ></span>
+            {% endif %}
+          </a>
+        </div>
+
+        <div class="navbar-item">
+          <a href="/teacher/required">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-display"></i>
+              </div>
+              <div class="navbar-item-title">Yêu cầu xếp lịch</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+
+        <div class="navbar-item">
+          <a href="/teacher/profile">
+            <div class="navbar-item-name">
+              <div class="navbar-item-icon">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <div class="navbar-item-title">Hồ sơ cá nhân</div>
+            </div>
+            <div class="navbar-item-arrow">
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="navbar-logout">
+        <a href="/logout">
+          <div class="navbar-logout-icon">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </div>
+          <div class="navbar-logout-title">Đăng xuất</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- body -->
+
+    <div class="teacher-user-page container-web" id="teacher-user-page"
+      data-success="{{ success or '' }}" data-error="{{ error or '' }}"
+      data-error-scope="{{ notice.scope if notice else '' }}"
+      data-error-field="{{ notice.field or '' if notice else '' }}">
+      <div class="direction">
+        <a href="/teacher">Trang chủ</a>
+        <i class="fa-solid fa-angle-right"></i>
+        <a href="/teacher/profile">Hồ sơ cá nhân</a>
+      </div>
+
+      <section class="profile-shell" aria-labelledby="profile-heading">
+        <h1 id="profile-heading">
+          <i class="fa-solid fa-user" aria-hidden="true"></i> Hồ sơ cá nhân
+        </h1>
+        <div class="profile-layout">
+          <aside class="profile-summary" aria-label="Thông tin giảng viên">
+            <div class="portrait">
+              {% if profile.AnhDaiDien %}<img
+                src="{{ profile.AnhDaiDien }}"
+                alt="Ảnh đại diện của {{ profile.TenNguoiDung }}"
+              />{% else %}<i class="fa-solid fa-user" aria-hidden="true"></i>{%
+              endif %}
+            </div>
+            <p>Giảng viên</p>
+            <h2>{{ profile.TenNguoiDung }}</h2>
+            <div class="summary-contact">
+              <p>
+                <i class="fa-solid fa-phone" aria-hidden="true"></i
+                ><span>{{ profile.SoDienThoai or 'Chưa có số điện thoại' }}</span>
+              </p>
+              <p>
+                <i class="fa-solid fa-envelope" aria-hidden="true"></i
+                ><span>{{ profile.Email or 'Chưa có email' }}</span>
+              </p>
+              <p>
+                <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i
+                ><span
+                  >{{ profile.TenHocHam or '' }}, {{ profile.TenHocVi or 'Chưa cập nhật học vị' }}</span
+                >
+              </p>
+            </div>
+          </aside>
+
+          <div class="profile-forms">
+            <form
+              id="information-form"
+              class="profile-card"
+              action="/teacher/profile/information"
+              method="post"
+            >
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+              <h2 id="profile-information">
+                <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                Thông tin cá nhân
+              </h2>
+              <div class="field-grid">
+                <label class="field" for="full-name">
+                  Họ và tên 
+                  <span class="required">*</span>
+                  <input
+                    id="full-name"
+                    name="name" required
+                    value="{{ values.name }}"
+                    maxlength="100"
+                    autocomplete="name"/>
+                </label>
+                <label class="field" for="phone">
+                  Số điện thoại 
+                  <span class="required">*</span>
+                  <input
+                    id="phone"
+                    type="tel"
+                    name="phone" required
+                    value="{{ values.phone or '' }}"
+                    maxlength="10"
+                    autocomplete="tel"/>
+                </label>
+                <label class="field" for="academic-title">
+                  Học hàm 
+                  <span class="required">*</span>
+                  <select id="academic-title" name="title_id" required>
+                    {% for id, name in titles %}
+                    <option
+                      value="{{ id }}"
+                      {% if id == values.title_id %}
+                      selected
+                      {% endif %}
+                    >
+                      {{ name }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                </label>
+                <label class="field" for="academic-degree">
+                  Học vị 
+                  <span class="required">*</span>
+                  <select id="academic-degree" name="degree_id" required>
+                    {% for id, name in degrees %}
+                    <option
+                      value="{{ id }}"
+                      {% if id == values.degree_id %}
+                      selected
+                      {% endif %}
+                    >
+                      {{ name }}
+                    </option>
+                    {% endfor %}
+                  </select></label
+                >
+                <label class="field full-width" for="email">
+                  Email 
+                  <span class="required">*</span>
+                  <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    value="{{ values.email or '' }}"
+                    readonly
+                    aria-readonly="true"
+                    title="Email được quản lý bởi quản trị viên"
+                    maxlength="100"
+                    autocomplete="email"/>
+                </label>
+                <label class="field" for="birthday">
+                  Ngày sinh <span class="required">*</span>
+                  <input
+                    id="birthday"
+                    type="date"
+                    name="birthday" required
+                    value="{{ values.birthday or '' }}"
+                    max="{{ today }}"
+                    autocomplete="bday"/>
+                </label>
+                <label class="field" for="gender">
+                  Giới tính <span class="required">*</span>
+                  <select id="gender" name="gender" required>
+                    <option value="">Chưa cập nhật</option>
+                    <option
+                      value="1"
+                      {% if values.gender in [1, '1'] %}
+                      selected
+                      {% endif %}
+                    >
+                      Nam
+                    </option>
+                    <option
+                      value="0"
+                      {% if values.gender in [0, '0'] %}
+                      selected
+                      {% endif %}
+                    >
+                      Nữ
+                    </option>
+                  </select>
+                </label>
+              </div>
+              <div class="form-actions">
+                <button class="secondary-button" type="reset">
+                  <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+                  Đặt lại
+                </button>
+                <button class="primary-button" type="submit">
+                  <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> 
+                  Lưu thông tin
+                </button>
+              </div>
+            </form>
+
+            <!-- password -->
+            <form
+              id="password-form"
+              class="profile-card password-card"
+              action="/teacher/profile/password"
+              method="post"
+            >
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+              <h2 id="password-section">
+                <i class="fa-solid fa-lock" aria-hidden="true"></i> Đổi mật khẩu
+              </h2>
+              <div class="password-fields">
+                {% for id, name, label, placeholder in
+                [('current-password',
+                  'current_password',
+                  'Mật khẩu hiện tại',
+                  'Nhập mật khẩu hiện tại'),
+                  ('new-password',
+                  'new_password',
+                  'Mật khẩu mới',
+                  'Nhập mật khẩu mới'),
+                  ('confirm-password',
+                  'confirm_password',
+                  'Xác nhận mật khẩu',
+                  'Nhập lại mật khẩu mới')] %}
+                <div class="field">
+                  <label for="{{ id }}">
+                    {{ label }} 
+                    <span class="required">*</span>
+                  </label>
+                  <div class="password-input">
+                    <input
+                      id="{{ id }}"
+                      name="{{ name }}"
+                      type="password"
+                      maxlength="128"
+                      placeholder="{{ placeholder }}"
+                      autocomplete="{{ 'current-password' if name == 'current_password' else 'new-password' }}"
+                      {% if name !="current_password" %}
+                      minlength="8"
+                      {% endif %}/>
+                    <button
+                      type="button"
+                      class="toggle-password"
+                      data-target="{{ id }}"
+                      aria-label="Hiện {{ label | lower }}"
+                      aria-pressed="false"
+                    >
+                      <i class="fa-solid fa-eye-slash" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              <p class="password-hint">
+                8–128 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.
+              </p>
+              <div class="form-actions">
+                <button class="secondary-button" type="reset">
+                  <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+                  Đặt lại
+                </button>
+                <button class="primary-button" type="submit">
+                  <i class="fa-solid fa-lock" aria-hidden="true"></i> Đổi mật
+                  khẩu
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- popup -->
+    <div class="popup-error" id="popup-error" aria-hidden="true">
+      <div class="popup" role="alertdialog" aria-modal="true" aria-label="Thông báo lỗi" aria-describedby="popup-error-message">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="popup-error-message" id="popup-error-message">
+          {{ error or '' }}
+        </div>
+        <button type="button" id="popup-error-close">Đóng</button>
+      </div>
+    </div>
+
+    <div class="popup-success" id="popup-success" aria-hidden="true">
+      <div class="popup" role="status" aria-live="polite">
+        <div class="popup-icon">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="popup-success-message" id="popup-success-message">
+          {{ success }}
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/js/teacher/profile.js?v=popup-5"></script>
+    <script src="/static/js/auth/navbar.js"></script>
+    <script src="/static/js/auth/ui.js"></script>
+    <script src="/static/js/auth/date-picker.js?v=a511fb0b5f"></script>
+  </body>
+</html>

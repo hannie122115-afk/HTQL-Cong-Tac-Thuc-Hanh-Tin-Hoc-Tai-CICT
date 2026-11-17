@@ -25,39 +25,16 @@ function isWithinWeek(dateString, week) {
 
 function getOccurrences(schedule, week) {
   const occurrences = new Map();
-  if (
-    schedule.MaTuanHoc &&
-    Number(schedule.MaTuanHoc) !== Number(week.id)
-  ) {
-    return occurrences;
-  }
-  const addOccurrence = (date) => {
-    if (date && isWithinWeek(date, week)) {
-      occurrences.set(date, getDayIndex(date));
+  if (Number(schedule.MaTuanHoc) !== Number(week.id)) return occurrences;
+
+  if (schedule.NgayThucHanh) {
+    if (isWithinWeek(schedule.NgayThucHanh, week)) {
+      occurrences.set(schedule.NgayThucHanh, getDayIndex(schedule.NgayThucHanh));
     }
-  };
-
-  (schedule.DanhSachNgay || "")
-    .split(",")
-    .filter(Boolean)
-    .forEach(addOccurrence);
-
-  if (
-    schedule.LaLichDinhKy &&
-    Number(schedule.MaTuanBatDau) <= Number(week.id) &&
-    Number(schedule.MaTuanKetThuc) >= Number(week.id)
-  ) {
-    (schedule.DanhSachThu || "")
-      .split(",")
-      .filter(Boolean)
-      .forEach((weekday) => {
-        const day = Number(weekday.trim()) - 2;
-        if (day >= 0 && day <= 6) {
-          occurrences.set(`recurring-${day}`, day);
-        }
-      });
+  } else {
+    const day = Number(schedule.Thu) - 2;
+    if (day >= 0 && day <= 6) occurrences.set(`weekday-${day}`, day);
   }
-
   return occurrences;
 }
 
